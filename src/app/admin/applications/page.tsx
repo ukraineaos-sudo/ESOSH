@@ -1,15 +1,53 @@
 import { AdminShell } from "@/components/admin/AdminShell";
+import { ApplicationsAdminClient } from "@/components/admin/ApplicationsAdminClient";
 import { getDb } from "@/db";
-import { applications } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { applications, members } from "@/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
 
-/** RU: Заглушка заявок (этап E). EN: Applications stub room. */
+/** RU: Реєстр заявок на вступ. EN: Enrollment applications registry. */
 export default async function AdminApplicationsPage() {
-  let items: (typeof applications.$inferSelect)[] = [];
+  let items: {
+    id: number;
+    publicId: string;
+    status: string;
+    autoLevel: string | null;
+    approvedLevel: string | null;
+    requiresManualReview: boolean;
+    createdAt: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+    organization: string | null;
+    industry: string | null;
+  }[] = [];
+
   const db = getDb();
   if (db) {
     try {
-      items = await db.select().from(applications).orderBy(desc(applications.createdAt)).limit(100);
+      const rows = await db
+        .select({
+          id: applications.id,
+          publicId: applications.publicId,
+          status: applications.status,
+          autoLevel: applications.autoLevel,
+          approvedLevel: applications.approvedLevel,
+          requiresManualReview: applications.requiresManualReview,
+          createdAt: applications.createdAt,
+          firstName: members.firstName,
+          lastName: members.lastName,
+          email: members.primaryEmail,
+          organization: sql<string>`${applications.payload}->>'organization'`,
+          industry: sql<string>`${applications.payload}->>'industry'`,
+        })
+        .from(applications)
+        .leftJoin(members, eq(applications.memberId, members.id))
+        .orderBy(desc(applications.createdAt))
+        .limit(200);
+      items = rows.map((r) => ({
+        ...r,
+        createdAt: r.createdAt?.toISOString?.() || "",
+        requiresManualReview: Boolean(r.requiresManualReview),
+      }));
     } catch {
       items = [];
     }
@@ -17,37 +55,8 @@ export default async function AdminApplicationsPage() {
 
   return (
     <AdminShell title="Заявки" pathname="/admin/applications">
-      <div className="admin-panel admin-stack">
-        <p className="admin-muted">
-          Реєстр заявок на вступ підготовлено в схемі БД. Публічна форма вступу за ТЗ — наступний етап після
-          працюючого пульта.
-        </p>
-        {items.length === 0 ? (
-          <p className="admin-muted">Поки немає заявок.</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Public ID</th>
-                <th>Status</th>
-                <th>Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.id}</td>
-                  <td>{item.publicId}</td>
-                  <td>
-                    <span className="admin-badge">{item.status}</span>
-                  </td>
-                  <td>{item.createdAt?.toISOString?.() || ""}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="admin-panel">
+        <ApplicationsAdminClient initialItems={items} />
       </div>
     </AdminShell>
   );

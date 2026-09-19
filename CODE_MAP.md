@@ -15,8 +15,9 @@
 2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`) + `BinotelWidgets`
 3. Chrome: `Header` / `Footer` → footer читает `site_settings` (fallback на `SITE`)
 4. Контакты: `ContactForm` → `POST /api/contact` → zod → `deliverContact` (webhook)
-5. Admin: `/admin` shell → session cookie → `/api/admin/*` → Neon/Blob
-6. Binotel: GetCall + chat widgets с `widgets.binotel.com`
+5. Форма вступу: `/join/apply` → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
+6. Admin: `/admin` shell → session cookie → `/api/admin/*` → Neon/Blob
+7. Binotel: GetCall + chat widgets с `widgets.binotel.com`
 
 ## Точки входа
 | Вход | Путь |
@@ -25,6 +26,8 @@
 | Page loader (dual-read) | `src/content/get-page.ts` |
 | Route registry (legacy) | `src/content/page-loaders.ts` |
 | Contact API | `src/app/api/contact/route.ts` |
+| Enrollment API | `src/app/api/enrollment/**` |
+| Enrollment classify / quiz | `src/lib/enrollment/**` |
 | Admin UI | `src/app/admin/**` |
 | Admin API | `src/app/api/admin/**` |
 | DB schema | `src/db/schema.ts` |
@@ -47,6 +50,9 @@
 | Admin UI CSS | `src/app/admin/admin.css` |
 | Contact validation | `src/lib/contact.ts` |
 | Contact delivery | `src/lib/contact/deliver-contact.ts` |
+| Enrollment form | `src/components/EnrollmentForm.tsx` + `src/styles/enrollment.css` |
+| Enrollment schema / classify / files / notify | `src/lib/enrollment/**` |
+| Applications / members | Neon `applications`, `members`, `application_files`, `application_events` |
 | Binotel widget URLs | `src/lib/binotel.ts` |
 | Phones / social fallback | `src/lib/site.ts` |
 | PDF docs | `public/docs/*-{uk\|en}.pdf` |
@@ -58,8 +64,9 @@
 - Contact API body: `{ name, email, message, locale?, company? }`
   - honeypot `company` → `{ ok: true }` без доставки
   - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
+- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files); `POST /api/enrollment/preview`; success = запис у Neon (листи — best-effort webhook)
 - Admin: `/admin/login`, session cookie `esosh_admin_session`, roles `admin` | `editor`
-- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
+- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц., fallback на contact), `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`
 
 ## Проверки
@@ -77,5 +84,7 @@
 - Sitemap покрывает все записи `page-metadata.json` (+ опционально CMS news)
 
 ## Известные пробелы (продукт)
-1. Доставка формы не настроена в окружении без `CONTACT_WEBHOOK_URL`
-2. Публична форма вступу (ТЗ) — после пульта; таблицы `applications` / `members` уже в схеме
+1. Доставка контактної форми не налаштована без `CONTACT_WEBHOOK_URL`
+2. EN-копія UI форми вступу (реліз 1 — українською; маршрут `/en/join/apply` уже є)
+3. Текст питань тесту Кодексу — v1-заглушка; замінити офіційним банком ESOSH
+4. Кастомний домен через Wix — окремо

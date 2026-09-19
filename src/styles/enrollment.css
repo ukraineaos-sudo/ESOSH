@@ -1,0 +1,48 @@
+.enrollment-form-wrap { max-width: 720px; }
+.enrollment-progress { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.enrollment-progress__step {
+  width: 32px; height: 32px; border-radius: 999px;
+  display: grid; place-items: center;
+  border: 1px solid var(--light-blue, #c5d4e8);
+  color: var(--dark, #1a2b4a); font-size: 14px; font-weight: 600;
+}
+.enrollment-progress__step.is-active { background: var(--accent, #1e4f91); color: #fff; border-color: transparent; }
+.enrollment-progress__step.is-done { background: color-mix(in srgb, var(--accent, #1e4f91) 18%, white); }
+.enrollment-step-label { margin-bottom: 20px; opacity: .8; }
+.enrollment-level-box {
+  padding: 16px 20px; margin-bottom: 24px; border-radius: 6px;
+  background: color-mix(in srgb, var(--accent, #1e4f91) 8%, white);
+  border: 1px solid var(--light-blue, #c5d4e8);
+}
+.enrollment-warn { color: #8a5a00; margin-top: 8px; }
+.enrollment-fieldset { border: 0; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 16px; }
+.enrollment-fieldset legend { margin-bottom: 8px; }
+.enrollment-field { display: flex; flex-direction: column; gap: 6px; }
+.enrollment-hint { opacity: .7; }
+.enrollment-radios, .enrollment-checks { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.enrollment-radios--stack, .enrollment-checks--stack { flex-direction: column; }
+.enrollment-check-line { display: flex; gap: 10px; align-items: flex-start; }
+.enrollment-course {
+  padding: 16px; border: 1px solid var(--light-blue, #c5d4e8); border-radius: 6px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.enrollment-course__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.enrollment-actions { display: flex; justify-content: space-between; gap: 16px; margin-top: 8px; }
+.enrollment-summary {
+  padding: 16px; border-radius: 6px; background: #fff;
+  border: 1px solid var(--light-blue, #c5d4e8); margin-bottom: 8px;
+}
+.enrollment-criteria { margin: 12px 0 0; padding-left: 0; list-style: none; }
+.enrollment-criteria li { margin-bottom: 6px; }
+.enrollment-criteria li[data-state="met"] { color: #1a7a45; }
+.enrollment-criteria li[data-state="pending_docs"] { color: #8a5a00; }
+.enrollment-criteria li[data-state="missing"] { opacity: .75; }
+.enrollment-success {
+  padding: 28px; border-radius: 6px;
+  background: color-mix(in srgb, var(--accent, #1e4f91) 8%, white);
+  border: 1px solid var(--light-blue, #c5d4e8);
+}
+@media (max-width: 640px) {
+  .enrollment-actions { flex-direction: column-reverse; }
+  .enrollment-actions .btn { width: 100%; }
+}

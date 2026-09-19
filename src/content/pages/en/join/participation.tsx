@@ -1,7 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { MailtoActionLink } from "@/components/MailtoActionLink";
+import { Link } from "@/i18n/navigation";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -96,52 +96,15 @@ export default function PageContent() {
       </section>
       <section className={"section is--margin-top-144--t-128--m-104 is--section-spacing is--accent-light-bg"}>
         <div className={"w-layout-blockcontainer container w-container"}>
-          <h2 className={"h2 is--margin-bottom-40 is--max-width-537"}>
-            <strong>
-              {"Three steps to join ESOSH professional association"}
-            </strong>
+          <h2 className={"h2 is--margin-bottom-24 is--max-width-537"}>
+            {"How to join the ESOSH professional association"}
           </h2>
-          <div className={"w-layout-grid is--grid-3-columns--t-1--m-1"}>
-            <a href={"https://forms.gle/zFapWaBHbhbwcSbf9"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
-              <img src={"/images/join-enrollment/Document-36b7fb28.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
-              <div className={"wrapper is--max-width-480"}>
-                <h3 className={"h3 is--margin-bottom-12"}>
-                  <strong>
-                    {"Take the test"}
-                  </strong>
-                </h3>
-                <p className={"regular-l"}>
-                  {"Read the ESOSH Code of Conduct and take the test."}
-                </p>
-              </div>
-            </a>
-            <MailtoActionLink subject={"Resume for ESOSH membership"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"}>
-              <img src={"/images/join-participation/Document-New-4a3b172b.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
-              <div className={"wrapper is--max-width-480"}>
-                <h3 className={"h3 is--margin-bottom-12"}>
-                  <strong>
-                    {"Submit your resume"}
-                  </strong>
-                </h3>
-                <p className={"regular-l"}>
-                  {"Send us your resume by email. (office@esosh.net)"}
-                </p>
-              </div>
-            </MailtoActionLink>
-            <a href={"#"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
-              <img src={"/images/join-participation/Tasks-00dc6d32.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
-              <div className={"wrapper is--max-width-480"}>
-                <h3 className={"h3 is--margin-bottom-12"}>
-                  <strong>
-                    {"Get your certificate"}
-                  </strong>
-                </h3>
-                <p className={"regular-l"}>
-                  {"Get a certificate of participation and grow further! Participation in ESOSH is free of charge."}
-                </p>
-              </div>
-            </a>
-          </div>
+          <p className={"regular-l is--margin-bottom-32 is--max-width-640"}>
+            {"Complete the online application: profile, experience, education, courses, Code of Conduct test, and a preliminary professional level."}
+          </p>
+          <Link href={"/join/apply"} className={"btn is--primary w-button"}>
+            {"Start membership application"}
+          </Link>
         </div>
       </section>
       <section className={"section is--margin-top-144--t-128--m-104"}>

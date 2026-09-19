@@ -19,8 +19,7 @@ export default async function AdminMembersPage() {
     <AdminShell title="Члени" pathname="/admin/members">
       <div className="admin-panel admin-stack">
         <p className="admin-muted">
-          Картки учасників (public ID + primary/secondary email) закладені в схему. UI форми вступу з’явиться
-          після ТЗ етапу E.
+          Картки учасників (public ID + primary/secondary email). Створюються автоматично з форми вступу.
         </p>
         {items.length === 0 ? (
           <p className="admin-muted">Поки немає записів.</p>

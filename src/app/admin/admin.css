@@ -330,6 +330,43 @@
   background: var(--admin-panel-2);
 }
 
+.admin-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.admin-ok {
+  color: var(--admin-ok);
+}
+
+.admin-pre {
+  overflow: auto;
+  max-height: 420px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #0b1020;
+  border: 1px solid var(--admin-border);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.admin-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 @media (max-width: 900px) {
   .admin-shell {
     grid-template-columns: 1fr;

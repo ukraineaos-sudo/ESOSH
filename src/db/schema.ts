@@ -91,11 +91,46 @@ export const applications = pgTable("applications", {
   id: serial("id").primaryKey(),
   publicId: varchar("public_id", { length: 32 }).notNull(),
   memberId: integer("member_id").references(() => members.id, { onDelete: "set null" }),
+  locale: varchar("locale", { length: 8 }).notNull().default("uk"),
   status: varchar("status", { length: 32 }).notNull().default("new"),
   autoLevel: varchar("auto_level", { length: 64 }),
   approvedLevel: varchar("approved_level", { length: 64 }),
+  requiresManualReview: boolean("requires_manual_review").notNull().default(false),
+  autoLevelRules: jsonb("auto_level_rules").notNull().default([]),
   payload: jsonb("payload").notNull().default({}),
+  consentVersion: varchar("consent_version", { length: 32 }).notNull().default("1.0"),
+  testScore: integer("test_score"),
+  testPassedAt: timestamp("test_passed_at", { withTimezone: true }),
+  idempotencyKey: varchar("idempotency_key", { length: 64 }),
   adminComment: text("admin_comment"),
+  decidedBy: integer("decided_by").references(() => adminUsers.id, { onDelete: "set null" }),
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [uniqueIndex("applications_public_id_uidx").on(table.publicId)]);
+}, (table) => [
+  uniqueIndex("applications_public_id_uidx").on(table.publicId),
+  uniqueIndex("applications_idempotency_uidx").on(table.idempotencyKey),
+]);
+
+export const applicationFiles = pgTable("application_files", {
+  id: serial("id").primaryKey(),
+  applicationId: integer("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }),
+  fieldKey: varchar("field_key", { length: 64 }).notNull(),
+  originalName: text("original_name").notNull(),
+  pathname: text("pathname").notNull(),
+  contentType: varchar("content_type", { length: 128 }),
+  sizeBytes: integer("size_bytes"),
+  reviewStatus: varchar("review_status", { length: 32 }).notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const applicationEvents = pgTable("application_events", {
+  id: serial("id").primaryKey(),
+  applicationId: integer("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }),
+  actorType: varchar("actor_type", { length: 32 }).notNull(),
+  actorId: integer("actor_id"),
+  eventType: varchar("event_type", { length: 64 }).notNull(),
+  message: text("message"),
+  meta: jsonb("meta").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

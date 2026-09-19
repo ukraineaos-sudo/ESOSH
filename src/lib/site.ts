@@ -27,6 +27,7 @@ export const ROUTES = {
   projects: "/education/projects",
   joinEnrollment: "/join/enrollment",
   joinParticipation: "/join/participation",
+  joinApply: "/join/apply",
   joinCodex: "/join/codex",
   joinTerms: "/join/terms",
   joinPractices: "/join/safety-league-best-practices",

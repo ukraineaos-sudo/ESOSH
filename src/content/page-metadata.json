@@ -139,6 +139,26 @@
     },
     "image": null
   },
+  "/en/join/apply": {
+    "title": "ESOSH — Membership application",
+    "description": "Multi-step ESOSH membership application with preliminary professional level.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/join/apply",
+      "en": "/en/join/apply"
+    },
+    "image": null
+  },
+  "/join/apply": {
+    "title": "ESOSH — Заявка на вступ",
+    "description": "Багатокрокова форма вступу до ESOSH із попереднім визначенням професійного рівня.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/join/apply",
+      "en": "/en/join/apply"
+    },
+    "image": null
+  },
   "/en/join/codex": {
     "title": "ESOSH — ESOSH Code of Conduct",
     "description": "Code of Conduct of the Members of the European Community for Safety and Health at Work of the European Union of the European Union.",
