@@ -10,6 +10,18 @@ body { -webkit-font-smoothing: antialiased; }
   display: block;
 }
 
+/* Staff entry: discreet link under copyright, not a primary CTA. */
+.footer-logo-copyright .footer-admin-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 12px;
+  opacity: 0.65;
+}
+.footer-logo-copyright .footer-admin-link:hover,
+.footer-logo-copyright .footer-admin-link:focus-visible {
+  opacity: 1;
+}
+
 /* Footer social icons: keep 24×24 and stop flex crush from oversized assets. */
 .site-footer-social {
   align-items: center;

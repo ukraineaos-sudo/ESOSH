@@ -21,6 +21,9 @@ export default function FooterContent({
               <div className={"medium-xs is--grey-20"}>
                 {"© 2022 ESOSH. All Rights Reserved"}
               </div>
+              <a href={"/admin"} className={"footer-menu-link footer-admin-link"}>
+                {"Адмін"}
+              </a>
             </div>
             <div className={"w-layout-grid is--footer-grid"}>
               <div id={"w-node-_9bcc6dd1-016b-8498-c6ca-2e36aa9eba9d-aa9eba94"} className={"wrapper"}>
@@ -63,6 +66,9 @@ export default function FooterContent({
                   {"Доєднатися"}
                 </div>
                 <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
+                  <a href={"/join/apply"} className={"footer-menu-link"}>
+                    {"Заповнити форму"}
+                  </a>
                   <a href={"/join/enrollment"} className={"footer-menu-link"}>
                     {"Участь в ЄСОП підприємств"}
                   </a>

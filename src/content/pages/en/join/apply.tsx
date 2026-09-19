@@ -15,8 +15,10 @@ export default function PageContent() {
               <div className="w-layout-blockcontainer container is--w-100p w-container">
                 <div className="wrapper is--hero-internal-text-wrapper">
                   <div className="wrapper is--max-width-600">
-                    <h1 className="h1">
-                      <span className="is--accent">Application</span>
+                    <h1 className={"h1"}>
+                      <span className={"is--accent"}>
+                        {"Application"}
+                      </span>
                       {" to join ESOSH"}
                     </h1>
                   </div>

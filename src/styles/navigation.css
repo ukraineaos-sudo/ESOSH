@@ -1,7 +1,7 @@
 .nav-menu-dropdown[open] { z-index: 20; }
 .nav-menu-dropdown:not([open]) > .nav-menu-dropdown-list { display: none; }
 .nav-menu-dropdown-list { position: absolute; top: 100%; left: 0; }
-.nav-menu-dropdown[open] > .nav-menu-dropdown-list { width: 216px; }
+.nav-menu-dropdown[open] > .nav-menu-dropdown-list { width: min(280px, calc(100vw - 32px)); }
 .site-icon-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .site-mobile-dialog { border: 0; margin: 0; max-width: none; max-height: none; width: 100%; height: 100dvh; padding-block: 0; color: var(--black); }
 .site-mobile-dialog[open] { display: flex; }
