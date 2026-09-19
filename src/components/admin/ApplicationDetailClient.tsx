@@ -116,6 +116,52 @@ export function ApplicationDetailClient(props: Props) {
   }
 
   const payload = props.application.payload || {};
+  const rules =
+    props.application.autoLevelRules &&
+    typeof props.application.autoLevelRules === "object"
+      ? (props.application.autoLevelRules as {
+          criteria?: { id: string; state: string; labelUk: string }[];
+          matchedRules?: string[];
+          nextLevelHintUk?: string | null;
+        })
+      : {};
+
+  const answerRows: { label: string; value: string }[] = [
+    { label: "Прізвище", value: str(payload.lastName) },
+    { label: "Ім’я", value: str(payload.firstName) },
+    { label: "По батькові", value: str(payload.middleName) },
+    { label: "Дата народження", value: str(payload.birthDate) },
+    { label: "Країна", value: str(payload.country) },
+    { label: "Місто", value: str(payload.city) },
+    { label: "Телефон", value: str(payload.phone) },
+    { label: "Електронна скринька", value: str(payload.email) },
+    { label: "Додаткова скринька", value: str(payload.secondaryEmail) },
+    { label: "Профіль", value: str(payload.profileUrl) },
+    { label: "Посада", value: str(payload.jobTitle) },
+    { label: "Організація", value: str(payload.organization) },
+    { label: "Галузь", value: str(payload.industry) },
+    { label: "Розмір організації", value: companySizeUk(payload.companySize) },
+    { label: "Функції з БЗР", value: boolUk(payload.oshFunctions) },
+    { label: "Загальний стаж (роки)", value: str(payload.totalYears) },
+    { label: "Стаж БЗР (роки)", value: str(payload.oshYears) },
+    { label: "Обов’язки", value: str(payload.responsibilities) },
+    { label: "Освіта", value: educationUk(payload.educationLevel) },
+    { label: "Профільна освіта", value: boolUk(payload.profileEducation) },
+    { label: "Заклад", value: str(payload.institution) },
+    { label: "Спеціальність", value: str(payload.speciality) },
+    { label: "Рік закінчення", value: str(payload.graduationYear) },
+    { label: "БПР", value: cpdUk(payload.cpdStatus) },
+    {
+      label: "Активності БПР",
+      value: Array.isArray(payload.cpdActivities)
+        ? payload.cpdActivities.map(String).join(", ")
+        : "—",
+    },
+    { label: "Опис БПР", value: str(payload.cpdDescription) },
+    { label: "Маркетингові повідомлення", value: boolUk(payload.marketingConsent) },
+  ].filter((row) => row.value && row.value !== "—");
+
+  const courses = Array.isArray(payload.courses) ? payload.courses : [];
 
   return (
     <div className="admin-stack">
@@ -129,7 +175,7 @@ export function ApplicationDetailClient(props: Props) {
           {props.member?.phone ? ` · ${props.member.phone}` : ""}
         </p>
         <p>
-          Авто-рівень:{" "}
+          Попередній рівень:{" "}
           <strong>
             {props.application.autoLevel
               ? LEVEL_LABELS_UK[props.application.autoLevel as LevelCode]
@@ -169,7 +215,7 @@ export function ApplicationDetailClient(props: Props) {
         </label>
         <label className="admin-check">
           <input type="checkbox" checked={notifyCandidate} onChange={(e) => setNotifyCandidate(e.target.checked)} />
-          Надіслати повідомлення кандидату (webhook)
+          Надіслати повідомлення кандидату (через канал сповіщень)
         </label>
         {error ? <p className="admin-error">{error}</p> : null}
         {ok ? <p className="admin-ok">Збережено</p> : null}
@@ -178,11 +224,62 @@ export function ApplicationDetailClient(props: Props) {
         </button>
       </div>
 
-      <div className="admin-panel">
-        <h3>Відповіді</h3>
-        <pre className="admin-pre">{JSON.stringify(payload, null, 2)}</pre>
-        <h4>Правила автокласифікації</h4>
-        <pre className="admin-pre">{JSON.stringify(props.application.autoLevelRules, null, 2)}</pre>
+      <div className="admin-panel admin-stack">
+        <h3>Анкетні відповіді</h3>
+        <p className="admin-muted">Дані, які кандидат вказав у формі вступу.</p>
+        <dl className="admin-dl">
+          {answerRows.map((row) => (
+            <div key={row.label} className="admin-dl__row">
+              <dt>{row.label}</dt>
+              <dd>{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+        {courses.length > 0 ? (
+          <>
+            <h4>Курси та кваліфікації</h4>
+            <ul className="admin-list">
+              {courses.map((raw, index) => {
+                const course = raw as Record<string, unknown>;
+                return (
+                  <li key={index}>
+                    <strong>{str(course.courseName) || `Курс ${index + 1}`}</strong>
+                    <div className="admin-muted">
+                      {courseTypeUk(course.courseType)} · {str(course.provider)} · {str(course.courseYear)}
+                      {course.hours != null && course.hours !== "" ? ` · ${str(course.hours)} год` : ""}
+                      {course.certificateNo ? ` · № ${str(course.certificateNo)}` : ""}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        ) : null}
+      </div>
+
+      <div className="admin-panel admin-stack">
+        <h3>Попередня класифікація</h3>
+        <p className="admin-muted">
+          Автоматична перевірка критеріїв рівнів ESOSH. Це підказка для адміністратора, не фінальне рішення.
+        </p>
+        {rules.criteria && rules.criteria.length > 0 ? (
+          <ul className="admin-criteria">
+            {rules.criteria.map((c) => (
+              <li key={c.id} data-state={c.state}>
+                <span className="admin-criteria__mark">
+                  {c.state === "met" ? "✓" : c.state === "pending_docs" ? "!" : "–"}
+                </span>
+                <span>
+                  {c.labelUk}
+                  <span className="admin-muted"> · {criterionStateUk(c.state)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="admin-muted">Немає збережених критеріїв.</p>
+        )}
+        {rules.nextLevelHintUk ? <p className="admin-muted">{rules.nextLevelHintUk}</p> : null}
       </div>
 
       <div className="admin-panel admin-stack">
@@ -193,19 +290,18 @@ export function ApplicationDetailClient(props: Props) {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Поле</th>
+                <th>Тип</th>
                 <th>Файл</th>
-                <th>Статус</th>
-                <th />
+                <th>Статус перевірки</th>
               </tr>
             </thead>
             <tbody>
               {files.map((f) => (
                 <tr key={f.id}>
-                  <td>{f.fieldKey}</td>
+                  <td>{fileFieldUk(f.fieldKey)}</td>
                   <td>
                     <a href={`/api/admin/applications/${props.id}/files/${f.id}`}>{f.originalName}</a>
-                    <div className="admin-muted">{f.sizeBytes ? `${Math.round(f.sizeBytes / 1024)} KB` : ""}</div>
+                    <div className="admin-muted">{f.sizeBytes ? `${Math.round(f.sizeBytes / 1024)} КБ` : ""}</div>
                   </td>
                   <td>
                     <select
@@ -219,7 +315,6 @@ export function ApplicationDetailClient(props: Props) {
                       <option value="needs_info">уточнення</option>
                     </select>
                   </td>
-                  <td />
                 </tr>
               ))}
             </tbody>
@@ -232,7 +327,9 @@ export function ApplicationDetailClient(props: Props) {
         <ul className="admin-list">
           {events.map((e) => (
             <li key={e.id}>
-              <span className="admin-muted">{new Date(e.createdAt).toLocaleString("uk-UA")} · {e.actorType}</span>
+              <span className="admin-muted">
+                {new Date(e.createdAt).toLocaleString("uk-UA")} · {actorUk(e.actorType)}
+              </span>
               <div>{e.message || e.eventType}</div>
             </li>
           ))}
@@ -240,4 +337,82 @@ export function ApplicationDetailClient(props: Props) {
       </div>
     </div>
   );
+}
+
+function str(value: unknown): string {
+  if (value == null || value === "") return "—";
+  return String(value);
+}
+
+function boolUk(value: unknown): string {
+  if (value === true) return "Так";
+  if (value === false) return "Ні";
+  return "—";
+}
+
+function companySizeUk(value: unknown): string {
+  if (value === "le20") return "до 20";
+  if (value === "21_50") return "21–50";
+  if (value === "gt50") return "понад 50";
+  return str(value);
+}
+
+function educationUk(value: unknown): string {
+  const map: Record<string, string> = {
+    vocational: "профтех",
+    junior_bachelor: "молодший бакалавр",
+    bachelor: "бакалавр",
+    master: "магістр",
+    phd: "PhD",
+    doctor: "доктор наук",
+    other: "інше",
+  };
+  return map[String(value)] || str(value);
+}
+
+function cpdUk(value: unknown): string {
+  const map: Record<string, string> = {
+    participating: "беру участь",
+    ready: "готовий(-а) долучитися",
+    want_info: "хочу інформацію",
+    not_ready: "поки не готовий(-а)",
+  };
+  return map[String(value)] || str(value);
+}
+
+function courseTypeUk(value: unknown): string {
+  const map: Record<string, string> = {
+    esosh_21: "ESOSH 21 год",
+    iosh_ms: "IOSH Managing Safely",
+    nebosh_award: "NEBOSH Award",
+    esosh_130: "ESOSH 130 год",
+    nebosh_igc: "NEBOSH IGC",
+    esosh_15y: "ESOSH ≥1,5 року",
+    nebosh_diploma: "NEBOSH Diploma",
+    nvq5: "NVQ5",
+    other: "інше / еквівалент",
+  };
+  return map[String(value)] || str(value);
+}
+
+function criterionStateUk(state: string): string {
+  if (state === "met") return "виконано";
+  if (state === "pending_docs") return "потребує документів";
+  if (state === "missing") return "не виконано";
+  return state;
+}
+
+function fileFieldUk(fieldKey: string): string {
+  if (fieldKey === "photo") return "Фото";
+  if (fieldKey.startsWith("experience_")) return "Підтвердження стажу";
+  if (fieldKey.startsWith("diploma_")) return "Диплом";
+  if (fieldKey.startsWith("certificate_")) return "Сертифікат";
+  return fieldKey;
+}
+
+function actorUk(actorType: string): string {
+  if (actorType === "admin") return "адміністратор";
+  if (actorType === "system") return "система";
+  if (actorType === "candidate") return "кандидат";
+  return actorType;
 }

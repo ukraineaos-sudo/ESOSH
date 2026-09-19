@@ -23,7 +23,7 @@ export function AdminLoginForm() {
     setPending(false);
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}));
-      setError(payload.error === "unavailable" ? "База даних не налаштована (DATABASE_URL)." : "Невірний email або пароль.");
+      setError(payload.error === "unavailable" ? "База даних не налаштована (DATABASE_URL)." : "Невірні скринька або пароль.");
       return;
     }
     router.replace(search.get("next") || "/admin");
@@ -32,7 +32,7 @@ export function AdminLoginForm() {
 
   return (
     <form className="admin-form" onSubmit={onSubmit}>
-      <label>Email<input name="email" type="email" autoComplete="username" required /></label>
+      <label>Електронна скринька<input name="email" type="email" autoComplete="username" required /></label>
       <label>Пароль<input name="password" type="password" autoComplete="current-password" required /></label>
       {error ? <p className="admin-error">{error}</p> : null}
       <button className="admin-btn" type="submit" disabled={pending}>{pending ? "Вхід…" : "Увійти"}</button>

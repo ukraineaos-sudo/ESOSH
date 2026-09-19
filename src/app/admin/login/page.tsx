@@ -11,7 +11,7 @@ export default async function AdminLoginPage() {
   return (
     <div className="admin-login-wrap">
       <div className="admin-login-card">
-        <h1>ESOSH Admin</h1>
+        <h1>Кабінет ESOSH</h1>
         <p className="admin-muted">Кабінет управління сайтом</p>
         {!dbReady ? <p className="admin-error">Додайте DATABASE_URL у .env для роботи адмінки.</p> : null}
         <Suspense fallback={<p className="admin-muted">Завантаження…</p>}>

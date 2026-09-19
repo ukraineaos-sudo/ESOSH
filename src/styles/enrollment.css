@@ -3,6 +3,17 @@
   width: 100%;
   box-sizing: border-box;
 }
+
+/* Clean apply page: title under header, no hero photo */
+.enrollment-apply-heading {
+  padding: 48px 0 40px;
+  max-width: 720px;
+}
+.enrollment-apply-body {
+  margin-top: 0;
+  padding-top: 40px;
+}
+
 .enrollment-progress {
   display: flex;
   gap: 8px;
@@ -30,28 +41,101 @@
 }
 .enrollment-step-label { margin-bottom: 20px; opacity: .8; }
 .enrollment-level-box {
-  padding: 16px 20px;
+  padding: 18px 20px;
   margin-bottom: 24px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--accent, #1e4f91) 8%, white);
-  border: 1px solid var(--light-blue, #c5d4e8);
+  border-radius: 10px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent, #1e4f91) 10%, white), #f7fafc);
+  border: 1px solid color-mix(in srgb, var(--accent, #1e4f91) 22%, #c5d4e8);
 }
-.enrollment-warn { color: #8a5a00; margin-top: 8px; }
-.enrollment-fieldset {
+.enrollment-level-box__eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent, #1e4f91);
+  font-weight: 700;
+}
+.enrollment-level-box__title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.enrollment-level-box__text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.45;
+  opacity: 0.9;
+}
+.enrollment-warn {
+  color: #8a5a00;
+  margin: 10px 0 0;
+  font-weight: 400;
+}
+
+.enrollment-issues {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #f0b4b4;
+  background: #fff5f5;
+}
+.enrollment-issues__title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #a52020;
+}
+.enrollment-issues__list {
+  margin: 0;
+  padding-left: 18px;
+}
+.enrollment-issues__list li {
+  margin-bottom: 6px;
+}
+.enrollment-issues__link {
   border: 0;
+  background: none;
   padding: 0;
-  margin: 0 0 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
+  color: #a52020;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
 }
+.enrollment-issues__msg {
+  color: #6b3030;
+  font-weight: 400;
+}
+
+.enrollment-fieldset { border: 0; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .enrollment-fieldset legend { margin-bottom: 8px; }
+
 .enrollment-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
+}
+.enrollment-question {
+  display: block;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--dark, #1a2b4a);
+}
+.enrollment-req {
+  color: #a52020;
+  font-weight: 700;
+  white-space: pre;
+}
+.enrollment-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  opacity: 0.7;
 }
 .enrollment-field .form-input,
 .enrollment-field .text-field,
@@ -62,20 +146,63 @@
   max-width: 100%;
   box-sizing: border-box;
 }
-.enrollment-hint { opacity: .7; }
+
 .enrollment-radios,
 .enrollment-checks {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 20px;
+  gap: 10px 18px;
 }
 .enrollment-radios--stack,
 .enrollment-checks--stack { flex-direction: column; }
+.enrollment-radios label,
+.enrollment-checks label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 400 !important;
+  line-height: 1.4;
+}
 .enrollment-check-line {
   display: flex;
   gap: 10px;
   align-items: flex-start;
+  font-weight: 400;
 }
+
+.enrollment-consents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.enrollment-consent-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--light-blue, #c5d4e8);
+  background: #fff;
+  font-size: 0.95rem;
+  font-weight: 400 !important;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.enrollment-consent-card input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.enrollment-consent-card--optional {
+  background: #f8fafc;
+  border-style: dashed;
+}
+.enrollment-consent-card em {
+  font-style: normal;
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+
 .enrollment-course {
   padding: 16px;
   border: 1px solid var(--light-blue, #c5d4e8);
@@ -123,6 +250,12 @@
 }
 
 @media (max-width: 767px) {
+  .enrollment-apply-heading {
+    padding: 28px 0 24px;
+  }
+  .enrollment-apply-body {
+    padding-top: 24px;
+  }
   .enrollment-form-wrap { max-width: 100%; }
   .enrollment-progress { gap: 6px; }
   .enrollment-progress__step {

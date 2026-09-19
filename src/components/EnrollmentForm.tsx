@@ -17,6 +17,13 @@ type CourseDraft = EnrollmentCourseInput & {
   certFiles: File[];
 };
 
+type FormIssue = {
+  fieldId: string;
+  step: number;
+  label: string;
+  message: string;
+};
+
 type Draft = {
   lastName: string;
   firstName: string;
@@ -177,6 +184,7 @@ export function EnrollmentForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [blockingIssues, setBlockingIssues] = useState<FormIssue[]>([]);
   const [result, setResult] = useState<{
     applicationPublicId: string;
     autoLevelLabelUk: string;
@@ -258,63 +266,94 @@ export function EnrollmentForm() {
     setDraft((prev) => ({ ...prev, [key]: value }));
   }
 
-  function validateStep(current: number): boolean {
-    const next: Record<string, string> = {};
+  function collectStepIssues(current: number): FormIssue[] {
+    const issues: FormIssue[] = [];
+    const add = (fieldId: string, message: string, label: string) => {
+      issues.push({ fieldId, step: current, message, label });
+    };
     if (current === 1) {
-      if (draft.lastName.trim().length < 2) next.lastName = "Вкажіть прізвище (2–80)";
-      if (draft.firstName.trim().length < 2) next.firstName = "Вкажіть ім’я (2–80)";
-      if (!draft.country.trim()) next.country = "Вкажіть країну";
-      if (!draft.city.trim()) next.city = "Вкажіть місто";
-      if (!/^\+?[0-9()\-\s]{8,32}$/.test(draft.phone.trim())) next.phone = "Міжнародний формат телефону";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) next.email = "Некоректний email";
+      if (draft.lastName.trim().length < 2) add("lastName", "Вкажіть прізвище (2–80)", "Прізвище");
+      if (draft.firstName.trim().length < 2) add("firstName", "Вкажіть ім’я (2–80)", "Ім’я");
+      if (!draft.country.trim()) add("country", "Вкажіть країну", "Країна");
+      if (!draft.city.trim()) add("city", "Вкажіть місто", "Місто");
+      if (!/^\+?[0-9()\-\s]{8,32}$/.test(draft.phone.trim())) add("phone", "Міжнародний формат телефону", "Телефон");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) add("email", "Некоректний email", "Email");
     }
     if (current === 2) {
-      if (!draft.jobTitle.trim()) next.jobTitle = "Вкажіть посаду";
-      if (!draft.industry.trim()) next.industry = "Вкажіть галузь";
-      if (!draft.companySize) next.companySize = "Оберіть розмір організації";
-      if (draft.oshFunctions === null) next.oshFunctions = "Оберіть Так або Ні";
-      if (draft.oshYears === "" || Number.isNaN(Number(draft.oshYears))) next.oshYears = "Вкажіть стаж БЗР";
-      if (!draft.responsibilities.trim()) next.responsibilities = "Опишіть обов’язки";
-      if (draft.responsibilities.length > 1500) next.responsibilities = "Максимум 1500 символів";
+      if (!draft.jobTitle.trim()) add("jobTitle", "Вкажіть посаду", "Посада");
+      if (!draft.industry.trim()) add("industry", "Вкажіть галузь", "Галузь");
+      if (!draft.companySize) add("companySize", "Оберіть розмір організації", "Розмір організації");
+      if (draft.oshFunctions === null) add("oshFunctions", "Оберіть Так або Ні", "Функції з БЗР");
+      if (draft.oshYears === "" || Number.isNaN(Number(draft.oshYears))) add("oshYears", "Вкажіть стаж БЗР", "Стаж у сфері БЗР");
+      if (!draft.responsibilities.trim()) add("responsibilities", "Опишіть обов’язки", "Обов’язки");
+      if (draft.responsibilities.length > 1500) add("responsibilities", "Максимум 1500 символів", "Обов’язки");
     }
     if (current === 3) {
-      if (!draft.educationLevel) next.educationLevel = "Оберіть рівень освіти";
-      if (draft.profileEducation === null) next.profileEducation = "Оберіть Так або Ні";
+      if (!draft.educationLevel) add("educationLevel", "Оберіть рівень освіти", "Рівень освіти");
+      if (draft.profileEducation === null) add("profileEducation", "Оберіть Так або Ні", "Профільна освіта");
       if (draft.educationLevel && draft.educationLevel !== "other") {
-        if (!draft.institution.trim()) next.institution = "Вкажіть заклад";
-        if (!draft.speciality.trim()) next.speciality = "Вкажіть спеціальність";
-        if (!draft.graduationYear.trim()) next.graduationYear = "Вкажіть рік";
+        if (!draft.institution.trim()) add("institution", "Вкажіть заклад", "Навчальний заклад");
+        if (!draft.speciality.trim()) add("speciality", "Вкажіть спеціальність", "Спеціальність");
+        if (!draft.graduationYear.trim()) add("graduationYear", "Вкажіть рік", "Рік закінчення");
       }
     }
     if (current === 4) {
       draft.courses.forEach((c, i) => {
-        if (!c.courseName.trim()) next[`courseName_${i}`] = "Назва курсу";
-        if (!c.provider.trim()) next[`provider_${i}`] = "Організація";
+        if (!c.courseName.trim()) add(`courseName_${i}`, "Назва курсу", `Курс ${i + 1}: назва`);
+        if (!c.provider.trim()) add(`provider_${i}`, "Організація", `Курс ${i + 1}: організація`);
         if (c.courseType !== "other" && c.certFiles.length === 0) {
-          next[`certificate_${i}`] = "Додайте сертифікат";
+          add(`certificate_${i}`, "Додайте сертифікат (файли не зберігаються між сесіями — завантажте знову)", `Курс ${i + 1}: сертифікат`);
         }
       });
     }
     if (current === 5) {
-      if (!draft.cpdStatus) next.cpdStatus = "Оберіть варіант";
+      if (!draft.cpdStatus) add("cpdStatus", "Оберіть варіант", "Участь у БПР");
     }
     if (current === 6) {
-      if (!draft.codeRead) next.codeRead = "Підтвердіть ознайомлення";
+      if (!draft.codeRead) add("codeRead", "Підтвердіть ознайомлення", "Згода з Кодексом");
       for (const q of CODEX_QUESTIONS_PUBLIC) {
-        if (!draft.testAnswers[q.id]) next[`test_${q.id}`] = "Оберіть відповідь";
+        if (!draft.testAnswers[q.id]) add(`test_${q.id}`, "Оберіть відповідь", `Тест: ${q.promptUk.slice(0, 48)}…`);
       }
     }
     if (current === 7) {
-      if (!draft.truthConfirm || !draft.codeAccept || !draft.privacyConsent || !draft.serviceMessages) {
-        next.consents = "Потрібні всі обов’язкові згоди";
-      }
+      if (!draft.truthConfirm) add("truthConfirm", "Потрібне підтвердження", "Достовірність даних");
+      if (!draft.codeAccept) add("codeAccept", "Потрібна згода", "Кодекс поведінки");
+      if (!draft.privacyConsent) add("privacyConsent", "Потрібна згода", "Обробка персональних даних");
+      if (!draft.serviceMessages) add("serviceMessages", "Потрібна згода", "Службові повідомлення");
     }
+    return issues;
+  }
+
+  function applyIssues(issues: FormIssue[]): boolean {
+    const next: Record<string, string> = {};
+    for (const issue of issues) next[issue.fieldId] = issue.message;
     setErrors(next);
-    return Object.keys(next).length === 0;
+    setBlockingIssues(issues);
+    return issues.length === 0;
+  }
+
+  function validateStep(current: number): boolean {
+    return applyIssues(collectStepIssues(current));
+  }
+
+  function validateAllSteps(): FormIssue[] {
+    const all: FormIssue[] = [];
+    for (let s = 1; s <= STEPS; s++) all.push(...collectStepIssues(s));
+    applyIssues(all);
+    return all;
+  }
+
+  function jumpToIssue(issue: FormIssue) {
+    setStep(issue.step);
+    setTimeout(() => {
+      const el = document.getElementById(`enrollment-field-${issue.fieldId}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
   }
 
   function goNext() {
     if (!validateStep(step)) return;
+    setBlockingIssues([]);
     setStep((s) => Math.min(STEPS, s + 1));
   }
 
@@ -324,9 +363,16 @@ export function EnrollmentForm() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!validateStep(7) || submitting) return;
+    if (submitting) return;
+    const issues = validateAllSteps();
+    if (issues.length > 0) {
+      setSubmitError(null);
+      jumpToIssue(issues[0]);
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
+    setBlockingIssues([]);
     try {
       const payload = {
         lastName: draft.lastName.trim(),
@@ -385,13 +431,36 @@ export function EnrollmentForm() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (data.error === "unavailable" || data.error === "blob_unavailable") {
-          setSubmitError("Форма тимчасово недоступна. Напишіть на office@esosh.net");
+          setSubmitError("Форма тимчасово недоступна (немає DATABASE_URL або Blob). Напишіть на office@esosh.net");
         } else if (data.error === "email_conflict") {
           setSubmitError("Ці email вже пов’язані з різними картками. Зверніться до адміністратора.");
         } else if (data.error === "certificate_required") {
-          setSubmitError("Для заявленого курсу потрібен сертифікат.");
+          const idx = typeof data.courseIndex === "number" ? data.courseIndex : 0;
+          const issue: FormIssue = {
+            fieldId: `certificate_${idx}`,
+            step: 4,
+            message: "Додайте сертифікат",
+            label: `Курс ${idx + 1}: сертифікат`,
+          };
+          setBlockingIssues([issue]);
+          setSubmitError("Для заявленого курсу потрібен файл сертифіката.");
+          jumpToIssue(issue);
+        } else if (data.error === "invalid_fields" && Array.isArray(data.issues)) {
+          const mapped: FormIssue[] = data.issues.map((issue: { path?: (string | number)[]; message?: string }) => {
+            const key = String(issue.path?.[0] || "payload");
+            return {
+              fieldId: key,
+              step: 1,
+              message: issue.message || "Перевірте поле",
+              label: key,
+            };
+          });
+          setBlockingIssues(mapped);
+          setSubmitError("Сервер відхилив частину полів. Відкрийте пункт зі списку нижче.");
         } else {
-          setSubmitError("Не вдалося надіслати заявку. Перевірте поля та спробуйте ще раз.");
+          setSubmitError(
+            `Не вдалося надіслати заявку${data.error ? ` (${data.error})` : ""}. Перевірте поля та спробуйте ще раз.`,
+          );
         }
         return;
       }
@@ -443,16 +512,33 @@ export function EnrollmentForm() {
 
       {liveClassify && step >= 2 ? (
         <div className="enrollment-level-box" role="status">
-          <p className="bold-l">
-            Ваш попередній професійний рівень ESOSH: {liveClassify.labelUk}
+          <p className="enrollment-level-box__eyebrow">Автоматична попередня оцінка</p>
+          <p className="enrollment-level-box__title">
+            Попередньо: {liveClassify.labelUk}
           </p>
-          <p className="regular-s">
-            За наданою інформацією ви попередньо відповідаєте критеріям цього рівня. Остаточний рівень буде
-            підтверджено після перевірки документів.
+          <p className="enrollment-level-box__text">
+            Це не фінальне рішення. Система лише підказує рівень за вашими відповідями за критеріями ESOSH.
+            Адміністратор перевірить документи і підтвердить або змінить рівень.
           </p>
           {liveClassify.requiresManualReview ? (
-            <p className="regular-s enrollment-warn">Є курси «інше/еквівалент» — потрібна ручна перевірка.</p>
+            <p className="enrollment-warn">Є курси «інше/еквівалент» — потрібна ручна перевірка адміністратором.</p>
           ) : null}
+        </div>
+      ) : null}
+
+      {blockingIssues.length > 0 ? (
+        <div className="enrollment-issues" role="alert">
+          <p className="enrollment-issues__title">Щоб продовжити, виправте:</p>
+          <ul className="enrollment-issues__list">
+            {blockingIssues.map((issue) => (
+              <li key={`${issue.step}-${issue.fieldId}`}>
+                <button type="button" className="enrollment-issues__link" onClick={() => jumpToIssue(issue)}>
+                  Крок {issue.step}: {issue.label}
+                </button>
+                <span className="enrollment-issues__msg"> — {issue.message}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
 
@@ -465,37 +551,37 @@ export function EnrollmentForm() {
         {step === 1 ? (
           <fieldset className="enrollment-fieldset">
             <legend className="h3">Особисті та контактні дані</legend>
-            <Field label="Прізвище *" error={errors.lastName}>
+            <Field id="lastName" label="Прізвище" required error={errors.lastName}>
               <input className="form-input text-field w-input" value={draft.lastName} onChange={(e) => update("lastName", e.target.value)} required />
             </Field>
-            <Field label="Ім’я *" error={errors.firstName}>
+            <Field id="firstName" label="Ім’я" required error={errors.firstName}>
               <input className="form-input text-field w-input" value={draft.firstName} onChange={(e) => update("firstName", e.target.value)} required />
             </Field>
-            <Field label="По батькові">
+            <Field id="middleName" label="По батькові">
               <input className="form-input text-field w-input" value={draft.middleName} onChange={(e) => update("middleName", e.target.value)} />
             </Field>
-            <Field label="Дата народження">
+            <Field id="birthDate" label="Дата народження">
               <input className="form-input text-field w-input" type="date" value={draft.birthDate} onChange={(e) => update("birthDate", e.target.value)} />
             </Field>
-            <Field label="Країна *" error={errors.country}>
+            <Field id="country" label="Країна" required error={errors.country}>
               <input className="form-input text-field w-input" value={draft.country} onChange={(e) => update("country", e.target.value)} />
             </Field>
-            <Field label="Місто *" error={errors.city}>
+            <Field id="city" label="Місто" required error={errors.city}>
               <input className="form-input text-field w-input" value={draft.city} onChange={(e) => update("city", e.target.value)} />
             </Field>
-            <Field label="Телефон *" error={errors.phone} hint="Міжнародний формат, наприклад +380...">
+            <Field id="phone" label="Телефон" required error={errors.phone} hint="Міжнародний формат, наприклад +380…">
               <input className="form-input text-field w-input" value={draft.phone} onChange={(e) => update("phone", e.target.value)} />
             </Field>
-            <Field label="Email *" error={errors.email}>
+            <Field id="email" label="Email" required error={errors.email}>
               <input className="form-input text-field w-input" type="email" value={draft.email} onChange={(e) => update("email", e.target.value)} />
             </Field>
-            <Field label="Додатковий email">
+            <Field id="secondaryEmail" label="Додатковий email">
               <input className="form-input text-field w-input" type="email" value={draft.secondaryEmail} onChange={(e) => update("secondaryEmail", e.target.value)} />
             </Field>
-            <Field label="LinkedIn / профіль">
+            <Field id="profileUrl" label="LinkedIn / профіль">
               <input className="form-input text-field w-input" type="url" value={draft.profileUrl} onChange={(e) => update("profileUrl", e.target.value)} />
             </Field>
-            <Field label="Фото (JPG/PNG, до 5 МБ)">
+            <Field id="photo" label="Фото (JPG/PNG, до 5 МБ)">
               <input type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={(e) => update("photo", e.target.files?.[0] || null)} />
             </Field>
           </fieldset>
@@ -504,16 +590,16 @@ export function EnrollmentForm() {
         {step === 2 ? (
           <fieldset className="enrollment-fieldset">
             <legend className="h3">Професійна діяльність</legend>
-            <Field label="Посада *" error={errors.jobTitle}>
+            <Field id="jobTitle" label="Посада" required error={errors.jobTitle}>
               <input className="form-input text-field w-input" value={draft.jobTitle} onChange={(e) => update("jobTitle", e.target.value)} />
             </Field>
-            <Field label="Організація">
+            <Field id="organization" label="Організація">
               <input className="form-input text-field w-input" value={draft.organization} onChange={(e) => update("organization", e.target.value)} />
             </Field>
-            <Field label="Галузь *" error={errors.industry}>
+            <Field id="industry" label="Галузь" required error={errors.industry}>
               <input className="form-input text-field w-input" value={draft.industry} onChange={(e) => update("industry", e.target.value)} />
             </Field>
-            <Field label="Розмір організації (де набуто досвід) *" error={errors.companySize}>
+            <Field id="companySize" label="Розмір організації (де набуто досвід)" required error={errors.companySize}>
               <select className="form-input text-field w-select" value={draft.companySize} onChange={(e) => update("companySize", e.target.value as CompanySize | "")}>
                 <option value="">Оберіть…</option>
                 <option value="le20">до 20</option>
@@ -521,22 +607,22 @@ export function EnrollmentForm() {
                 <option value="gt50">понад 50</option>
               </select>
             </Field>
-            <Field label="Чи виконуєте/виконували функції з БЗР? *" error={errors.oshFunctions}>
+            <Field id="oshFunctions" label="Чи виконуєте або виконували функції з БЗР?" required error={errors.oshFunctions}>
               <div className="enrollment-radios">
                 <label><input type="radio" checked={draft.oshFunctions === true} onChange={() => update("oshFunctions", true)} /> Так</label>
                 <label><input type="radio" checked={draft.oshFunctions === false} onChange={() => update("oshFunctions", false)} /> Ні</label>
               </div>
             </Field>
-            <Field label="Загальний стаж (роки)">
+            <Field id="totalYears" label="Загальний стаж (роки)">
               <input className="form-input text-field w-input" type="number" min={0} max={60} step={0.5} value={draft.totalYears} onChange={(e) => update("totalYears", e.target.value)} />
             </Field>
-            <Field label="Стаж у сфері БЗР (роки) *" error={errors.oshYears}>
+            <Field id="oshYears" label="Стаж у сфері БЗР (роки)" required error={errors.oshYears}>
               <input className="form-input text-field w-input" type="number" min={0} max={60} step={0.5} value={draft.oshYears} onChange={(e) => update("oshYears", e.target.value)} />
             </Field>
-            <Field label="Основні обов’язки *" error={errors.responsibilities} hint={`${draft.responsibilities.length}/1500`}>
+            <Field id="responsibilities" label="Основні обов’язки" required error={errors.responsibilities} hint={`${draft.responsibilities.length}/1500`}>
               <textarea className="form-input text-field w-input" rows={5} maxLength={1500} value={draft.responsibilities} onChange={(e) => update("responsibilities", e.target.value)} />
             </Field>
-            <Field label="Підтвердження стажу (PDF/JPG/PNG, до 10 МБ)">
+            <Field id="experienceFiles" label="Підтвердження стажу (PDF/JPG/PNG, до 10 МБ)">
               <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => update("experienceFiles", Array.from(e.target.files || []))} />
             </Field>
           </fieldset>
@@ -545,7 +631,7 @@ export function EnrollmentForm() {
         {step === 3 ? (
           <fieldset className="enrollment-fieldset">
             <legend className="h3">Освіта</legend>
-            <Field label="Найвищий рівень освіти *" error={errors.educationLevel}>
+            <Field id="educationLevel" label="Найвищий рівень освіти" required error={errors.educationLevel}>
               <select className="form-input text-field w-select" value={draft.educationLevel} onChange={(e) => update("educationLevel", e.target.value as EducationLevel | "")}>
                 <option value="">Оберіть…</option>
                 <option value="vocational">профтех</option>
@@ -557,22 +643,22 @@ export function EnrollmentForm() {
                 <option value="other">інше</option>
               </select>
             </Field>
-            <Field label="Профільна освіта для БЗР? *" error={errors.profileEducation}>
+            <Field id="profileEducation" label="Чи є освіта профільною для БЗР?" required error={errors.profileEducation}>
               <div className="enrollment-radios">
                 <label><input type="radio" checked={draft.profileEducation === true} onChange={() => update("profileEducation", true)} /> Так</label>
                 <label><input type="radio" checked={draft.profileEducation === false} onChange={() => update("profileEducation", false)} /> Ні</label>
               </div>
             </Field>
-            <Field label="Навчальний заклад" error={errors.institution}>
+            <Field id="institution" label="Навчальний заклад" error={errors.institution}>
               <input className="form-input text-field w-input" value={draft.institution} onChange={(e) => update("institution", e.target.value)} />
             </Field>
-            <Field label="Спеціальність" error={errors.speciality}>
+            <Field id="speciality" label="Спеціальність" error={errors.speciality}>
               <input className="form-input text-field w-input" value={draft.speciality} onChange={(e) => update("speciality", e.target.value)} />
             </Field>
-            <Field label="Рік закінчення" error={errors.graduationYear}>
+            <Field id="graduationYear" label="Рік закінчення" error={errors.graduationYear}>
               <input className="form-input text-field w-input" type="number" min={1950} max={new Date().getFullYear()} value={draft.graduationYear} onChange={(e) => update("graduationYear", e.target.value)} />
             </Field>
-            <Field label="Диплом (файли)">
+            <Field id="diplomaFiles" label="Диплом (файли)">
               <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => update("diplomaFiles", Array.from(e.target.files || []))} />
             </Field>
           </fieldset>
@@ -589,7 +675,7 @@ export function EnrollmentForm() {
                     Видалити
                   </button>
                 </div>
-                <Field label="Тип програми">
+                <Field id={`courseType_${index}`} label="Тип програми">
                   <select
                     className="form-input text-field w-select"
                     value={course.courseType}
@@ -604,42 +690,42 @@ export function EnrollmentForm() {
                     ))}
                   </select>
                 </Field>
-                <Field label="Назва *" error={errors[`courseName_${index}`]}>
+                <Field id={`courseName_${index}`} label="Назва" required error={errors[`courseName_${index}`]}>
                   <input className="form-input text-field w-input" value={course.courseName} onChange={(e) => {
                     const courses = [...draft.courses];
                     courses[index] = { ...course, courseName: e.target.value };
                     update("courses", courses);
                   }} />
                 </Field>
-                <Field label="Організація *" error={errors[`provider_${index}`]}>
+                <Field id={`provider_${index}`} label="Організація" required error={errors[`provider_${index}`]}>
                   <input className="form-input text-field w-input" value={course.provider} onChange={(e) => {
                     const courses = [...draft.courses];
                     courses[index] = { ...course, provider: e.target.value };
                     update("courses", courses);
                   }} />
                 </Field>
-                <Field label="Рік">
+                <Field id={`courseYear_${index}`} label="Рік">
                   <input className="form-input text-field w-input" type="number" value={course.courseYear} onChange={(e) => {
                     const courses = [...draft.courses];
                     courses[index] = { ...course, courseYear: Number(e.target.value) };
                     update("courses", courses);
                   }} />
                 </Field>
-                <Field label="Години">
+                <Field id={`hours_${index}`} label="Години">
                   <input className="form-input text-field w-input" type="number" value={course.hours ?? ""} onChange={(e) => {
                     const courses = [...draft.courses];
                     courses[index] = { ...course, hours: e.target.value === "" ? null : Number(e.target.value) };
                     update("courses", courses);
                   }} />
                 </Field>
-                <Field label="Номер сертифіката">
+                <Field id={`certificateNo_${index}`} label="Номер сертифіката">
                   <input className="form-input text-field w-input" value={course.certificateNo || ""} onChange={(e) => {
                     const courses = [...draft.courses];
                     courses[index] = { ...course, certificateNo: e.target.value };
                     update("courses", courses);
                   }} />
                 </Field>
-                <Field label="Сертифікат *" error={errors[`certificate_${index}`]}>
+                <Field id={`certificate_${index}`} label="Сертифікат" required error={errors[`certificate_${index}`]}>
                   <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => {
                     const courses = [...draft.courses];
                     courses[index] = { ...course, certFiles: Array.from(e.target.files || []) };
@@ -657,7 +743,7 @@ export function EnrollmentForm() {
         {step === 5 ? (
           <fieldset className="enrollment-fieldset">
             <legend className="h3">Безперервний професійний розвиток</legend>
-            <Field label="Участь у БПР ESOSH *" error={errors.cpdStatus}>
+            <Field id="cpdStatus" label="Участь у БПР ESOSH" required error={errors.cpdStatus}>
               <select className="form-input text-field w-select" value={draft.cpdStatus} onChange={(e) => update("cpdStatus", e.target.value as CpdStatus | "")}>
                 <option value="">Оберіть…</option>
                 <option value="participating">беру участь</option>
@@ -666,7 +752,7 @@ export function EnrollmentForm() {
                 <option value="not_ready">поки не готовий(-а)</option>
               </select>
             </Field>
-            <Field label="Активності за останні 2 роки">
+            <Field id="cpdActivities" label="Активності за останні 2 роки">
               <div className="enrollment-checks">
                 {CPD_ACTIVITY_OPTIONS.map((item) => (
                   <label key={item}>
@@ -687,7 +773,7 @@ export function EnrollmentForm() {
                 ))}
               </div>
             </Field>
-            <Field label="Опис / плани" hint={`${draft.cpdDescription.length}/1500`}>
+            <Field id="cpdDescription" label="Опис / плани" hint={`${draft.cpdDescription.length}/1500`}>
               <textarea className="form-input text-field w-input" rows={4} maxLength={1500} value={draft.cpdDescription} onChange={(e) => update("cpdDescription", e.target.value)} />
             </Field>
           </fieldset>
@@ -703,14 +789,17 @@ export function EnrollmentForm() {
               </Link>
               .
             </p>
-            <Field label="" error={errors.codeRead}>
-              <label className="enrollment-check-line">
+            <Field id="codeRead" label="" error={errors.codeRead}>
+              <label className="enrollment-consent-card">
                 <input type="checkbox" checked={draft.codeRead} onChange={(e) => update("codeRead", e.target.checked)} />
-                Ознайомився(-лася) та погоджуюся з Кодексом поведінки ESOSH *
+                <span>
+                  Ознайомився(-лася) та погоджуюся з Кодексом поведінки ESOSH
+                  <span className="enrollment-req"> *</span>
+                </span>
               </label>
             </Field>
             {CODEX_QUESTIONS_PUBLIC.map((q) => (
-              <Field key={q.id} label={q.promptUk} error={errors[`test_${q.id}`]}>
+              <Field key={q.id} id={`test_${q.id}`} label={q.promptUk} error={errors[`test_${q.id}`]}>
                 <div className="enrollment-radios enrollment-radios--stack">
                   {q.options.map((opt) => (
                     <label key={opt.id}>
@@ -753,15 +842,32 @@ export function EnrollmentForm() {
                 ) : null}
               </div>
             ) : null}
-            <Field label="" error={errors.consents}>
-              <div className="enrollment-checks enrollment-checks--stack">
-                <label><input type="checkbox" checked={draft.truthConfirm} onChange={(e) => update("truthConfirm", e.target.checked)} /> Підтверджую достовірність наданої інформації *</label>
-                <label><input type="checkbox" checked={draft.codeAccept} onChange={(e) => update("codeAccept", e.target.checked)} /> Погоджуюся з Кодексом поведінки ESOSH *</label>
-                <label><input type="checkbox" checked={draft.privacyConsent} onChange={(e) => update("privacyConsent", e.target.checked)} /> Надаю згоду на обробку персональних даних для розгляду заявки та ведення реєстру *</label>
-                <label><input type="checkbox" checked={draft.serviceMessages} onChange={(e) => update("serviceMessages", e.target.checked)} /> Погоджуюся отримувати повідомлення щодо заявки та участі в ESOSH *</label>
-                <label><input type="checkbox" checked={draft.marketingConsent} onChange={(e) => update("marketingConsent", e.target.checked)} /> Хочу отримувати новини, запрошення та інформацію про навчання</label>
-              </div>
-            </Field>
+            <div className="enrollment-consents">
+              <p className="enrollment-question">Підтвердження</p>
+              <label id="enrollment-field-truthConfirm" className="enrollment-consent-card">
+                <input type="checkbox" checked={draft.truthConfirm} onChange={(e) => update("truthConfirm", e.target.checked)} />
+                <span>Підтверджую достовірність наданої інформації<span className="enrollment-req"> *</span></span>
+              </label>
+              <label id="enrollment-field-codeAccept" className="enrollment-consent-card">
+                <input type="checkbox" checked={draft.codeAccept} onChange={(e) => update("codeAccept", e.target.checked)} />
+                <span>Погоджуюся з Кодексом поведінки ESOSH<span className="enrollment-req"> *</span></span>
+              </label>
+              <label id="enrollment-field-privacyConsent" className="enrollment-consent-card">
+                <input type="checkbox" checked={draft.privacyConsent} onChange={(e) => update("privacyConsent", e.target.checked)} />
+                <span>Надаю згоду на обробку персональних даних для розгляду заявки та ведення реєстру<span className="enrollment-req"> *</span></span>
+              </label>
+              <label id="enrollment-field-serviceMessages" className="enrollment-consent-card">
+                <input type="checkbox" checked={draft.serviceMessages} onChange={(e) => update("serviceMessages", e.target.checked)} />
+                <span>Погоджуюся отримувати повідомлення щодо заявки та участі в ESOSH<span className="enrollment-req"> *</span></span>
+              </label>
+              <label className="enrollment-consent-card enrollment-consent-card--optional">
+                <input type="checkbox" checked={draft.marketingConsent} onChange={(e) => update("marketingConsent", e.target.checked)} />
+                <span>Хочу отримувати новини, запрошення та інформацію про навчання <em>(необов’язково)</em></span>
+              </label>
+              {errors.truthConfirm || errors.codeAccept || errors.privacyConsent || errors.serviceMessages ? (
+                <p className="site-form-error" role="alert">Потрібні всі обов’язкові згоди</p>
+              ) : null}
+            </div>
             {submitError ? <p className="site-form-error" role="alert">{submitError}</p> : null}
           </fieldset>
         ) : null}
@@ -790,21 +896,30 @@ export function EnrollmentForm() {
 }
 
 function Field({
+  id,
   label,
+  required,
   error,
   hint,
   children,
 }: {
+  id?: string;
   label: string;
+  required?: boolean;
   error?: string;
   hint?: string;
   children: ReactNode;
 }) {
   return (
-    <div className="enrollment-field">
-      {label ? <label className="regular-s is--label">{label}</label> : null}
+    <div className="enrollment-field" id={id ? `enrollment-field-${id}` : undefined}>
+      {label ? (
+        <label className="enrollment-question">
+          {label}
+          {required ? <span className="enrollment-req" aria-hidden="true"> *</span> : null}
+        </label>
+      ) : null}
       {children}
-      {hint ? <p className="regular-s enrollment-hint">{hint}</p> : null}
+      {hint ? <p className="enrollment-hint">{hint}</p> : null}
       {error ? <p className="site-form-error" role="alert">{error}</p> : null}
     </div>
   );

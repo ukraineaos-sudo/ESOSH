@@ -56,7 +56,7 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
       <div className="admin-toolbar">
         <input
           className="admin-input"
-          placeholder="Пошук: ПІБ, email, org, ID…"
+          placeholder="Пошук: ПІБ, скринька, організація, код…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -85,12 +85,12 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "esosh-applications.csv";
+            a.download = "esosh-zayavky.csv";
             a.click();
             URL.revokeObjectURL(url);
           }}
         >
-          CSV
+          Експорт таблиці
         </button>
       </div>
       <p className="admin-muted">{filteredHint}</p>
@@ -100,11 +100,11 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
         <table className="admin-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Код заявки</th>
               <th>ПІБ</th>
-              <th>Org</th>
+              <th>Організація</th>
               <th>Статус</th>
-              <th>Авто-рівень</th>
+              <th>Попередній рівень</th>
               <th>Дата</th>
             </tr>
           </thead>
@@ -113,7 +113,9 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
               <tr key={item.id}>
                 <td>
                   <Link href={`/admin/applications/${item.id}`}>{item.publicId}</Link>
-                  {item.requiresManualReview ? <span className="admin-badge">review</span> : null}
+                  {item.requiresManualReview ? (
+                    <span className="admin-badge">потрібна перевірка</span>
+                  ) : null}
                 </td>
                 <td>
                   {item.lastName} {item.firstName}

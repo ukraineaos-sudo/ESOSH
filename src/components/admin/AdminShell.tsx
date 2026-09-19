@@ -21,8 +21,8 @@ export async function AdminShell({ children, title, pathname }: { children: Reac
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <div className="admin-brand">ESOSH <span>Admin</span></div>
-        <nav className="admin-nav" aria-label="Admin">
+        <div className="admin-brand">ESOSH <span>кабінет</span></div>
+        <nav className="admin-nav" aria-label="Навігація кабінету">
           <div className="admin-nav-label">Пульт</div>
           {rooms.filter((r) => r.group === "main").map((room) => (
             <Link key={room.href} href={room.href} aria-current={pathname === room.href ? "page" : undefined}>{room.label}</Link>

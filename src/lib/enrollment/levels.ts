@@ -37,5 +37,27 @@ export const STATUS_LABELS_UK: Record<ApplicationStatus, string> = {
   rejected: "Відхилено",
 };
 
+export const MEMBER_STATUSES = [
+  "candidate",
+  "active",
+  "active_no_level",
+] as const;
+
+export type MemberStatus = (typeof MEMBER_STATUSES)[number];
+
+export const MEMBER_STATUS_LABELS_UK: Record<MemberStatus, string> = {
+  candidate: "Кандидат",
+  active: "Активний",
+  active_no_level: "Активний без рівня",
+};
+
+/** RU: Підпис статусу члена (невідомий код — як є). EN: Member status label fallback. */
+export function memberStatusLabelUk(status: string): string {
+  if ((MEMBER_STATUSES as readonly string[]).includes(status)) {
+    return MEMBER_STATUS_LABELS_UK[status as MemberStatus];
+  }
+  return status;
+}
+
 export const CONSENT_VERSION = "1.0";
 export const REVIEW_BUSINESS_DAYS = "5–10";
