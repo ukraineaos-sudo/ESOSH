@@ -1,0 +1,63 @@
+---
+description: "Архитектурные границы, контракты и инварианты ESOSH."
+alwaysApply: true
+---
+
+# ESOSH: архитектура и контракты
+
+Сверяй с `CODE_MAP.md` и фактическими файлами.
+
+## Потоки
+
+- Публичная страница: `src/app/[locale]/.../page.tsx` → `getPage(locale, route)` dual-read → CMS document **или** `src/content/pages/{uk|en}/**`.
+- Оболочка: `src/app/[locale]/layout.tsx` (reference CSS + next-intl) → `Header` / content / `Footer`.
+- Навигация: `src/components/Header.tsx` + `navigation/*` + строки `messages.*.nav`.
+- Футер: `src/components/Footer.tsx` → `src/content/chrome/footer-{uk|en}.tsx` + `getContactSettings()`.
+- Контакты: `ContactForm` → `POST /api/contact` → `contactSchema` → `deliverContact` (webhook).
+- Admin CMS: `src/app/admin/**` + `src/app/api/admin/**` + Neon (`src/db`) + Blob; middleware защищает `/admin` и `/api/admin`.
+- Binotel: `BinotelWidgets` в locale layout (`widgets.binotel.com` GetCall + chat).
+- Медиа: локальные пути в `public/` (манифест) **и** загруженные в Blob (`media_assets`).
+- Документы: `public/docs/{codex,terms,offer}-{uk|en}.pdf`.
+
+## Роли
+
+- App Router pages — тонкие обёртки маршрутов; не содержат копирайт секций.
+- Content pages — разметка и тексты конкретной локали.
+- Components — chrome, форма, навигация; принимают намерения пользователя.
+- `src/lib/*` — валидация, доставка, константы сайта; без JSX страниц.
+- i18n routing — `src/i18n/routing.ts` (`uk` default, `localePrefix: as-needed`).
+
+## Разрешённые направления
+
+- UI → lib / i18n helpers.
+- app pages → getPage + components.
+- content pages → локальные ассеты / публичные URL.
+- api route → schema + deliverContact.
+
+## Запрещённые направления
+
+- UI не импортирует server-only секреты (`CONTACT_WEBHOOK_*`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, bootstrap passwords).
+- Не создавай второй публичный роутер или второй i18n-механизм вне `src/i18n`.
+- Не тащи архитектуру других проектов (Astro pages, Wix, `/admin` из чужих репо) без явной задачи — **исключение**: staff `/admin` этого репозитория как замена Webflow.
+- Не оставляй прод-зависимости от CDN Webflow / внешних PDF без явного временного решения.
+- Не ослабляй honeypot / contact API ради CMS.
+
+## Публичные контракты
+
+- канонические пути страниц (uk без префикса, en с `/en`);
+- ключи `nav` / `contact` в `messages/{uk,en}.json`;
+- `POST /api/contact` тело: `{ name, email, message, locale?, company? }` (honeypot);
+- env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD`;
+- публичные файлы в `public/images/**`, `public/docs/**`;
+- sitemap / robots;
+- admin: `/admin/*` (session cookie), `/api/admin/*`.
+
+Перед изменением контракта найди producers/consumers и внешние ссылки (SEO, PDF, закладки). Не меняй контракт скрытно внутри другой задачи.
+
+## Инварианты
+
+- Паритет смысла и URL с esosh.net, пока заказчик не утвердил иное.
+- Каждая пользовательская страница — в обеих локалях `uk` и `en` (кроме осознанно отсутствующего контента с явной пометкой).
+- Без delivery env форма не должна сообщать ложный успех (`unavailable` → 503).
+- Honeypot `company` не доставляется получателю.
+- В HTML нет Webflow runtime-скриптов; Binotel GetCall/chat — разрешённый паритет (см. `tests/site.test.mjs`).

@@ -1,0 +1,11 @@
+---
+description: "DEPRECATED — заменено на esosh-design-system.mdc. Не применять."
+globs: ""
+alwaysApply: false
+---
+
+# DEPRECATED
+
+Это правило перенесено из другого проекта и **не действует** для ESOSH.
+
+Используй `.cursor/rules/esosh-design-system.mdc`.

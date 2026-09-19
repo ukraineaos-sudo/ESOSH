@@ -1,0 +1,42 @@
+---
+description: "Использовать при формах, PII, env, файлах, сети, внешнем вводе и интеграциях ESOSH."
+alwaysApply: false
+---
+
+# ESOSH: безопасность
+
+## Границы доверия
+
+- Query, hash, user input и внешние HTTP-ответы — недоверенные.
+- Клиентская проверка ≠ защита.
+- Отправка PII — только через `POST /api/contact` → `deliverContact`.
+
+## Контактная форма
+
+- Валидация: zod (`src/lib/contact.ts`) на сервере; клиент — UX.
+- Honeypot `company`: ответ `ok: true`, доставки нет.
+- Origin check: чужой `Origin` → 403.
+- Без `CONTACT_WEBHOOK_URL` → `unavailable` / 503 (не имитировать успех).
+- Ошибка получателя → 502; не логируй тело обращения с PII без нужды.
+- Лимит размера тела запроса соблюдай.
+
+## Секреты и окружение
+
+- `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN` — только server-side.
+- `NEXT_PUBLIC_SITE_URL` — публичный канонический origin.
+- Не коммить `.env*`, ключи, токены (кроме `.env.example` без секретов).
+- Не печатай секреты и production-конфиг в терминал, лог или ответ пользователю.
+- Production credentials — только с прямым разрешением.
+
+## Контент и XSS
+
+- Не вставляй сырой HTML из внешних источников без санитизации.
+- Внешние ссылки (Drive, соцсети, партнёры) проверяй на ожидаемый хост при переносе.
+- Разрешённый third-party runtime: Binotel (`widgets.binotel.com` GetCall + chat) через `BinotelWidgets`.
+- Не подключай Webflow runtime и прочие произвольные скрипты без задачи и оценки PII/tracking.
+
+## Проверки по применимости
+
+Валидация ввода, XSS, path traversal для файлов, Origin/CSRF-подобные ограничения API, timeout доставки, утечка стека ошибок.
+
+Не ослабляй защиту ради «чтобы работало».

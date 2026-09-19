@@ -1,0 +1,49 @@
+---
+description: "Применять при UI/CSS, layout, типографике, анимациях, responsive и a11y ESOSH."
+globs: "**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# ESOSH Design System
+
+Источник истины по визуалу (в порядке приоритета):
+
+1. Указания заказчика.
+2. Живой референс [esosh.net](https://www.esosh.net/).
+3. Захваченные стили и компоненты в этом репозитории (`src/styles/reference.css`, content pages).
+
+Не используй дизайн-системы других проектов (Ramose, UAOS и т.п.).
+
+Перед UI-правкой:
+
+1. Найди ближайший готовый блок в `src/content/pages/**` или chrome.
+2. Воспроизводи композицию и классы референса; не «улучшай» layout самовольно.
+3. Новую палитру/шрифты/UI-kit не вводи без прямого запроса.
+
+## Токены и стили
+
+- База паритета: `src/styles/reference.css` (Webflow-derived классы: `w-container`, `is--*`, и т.д.).
+- Навигация/форма/точечные правки: `navigation.css`, `contact.css`, `refinements.css`.
+- Доступность и reduced-motion: `src/app/globals.css`.
+- Не заменяй reference-классы на произвольный Tailwind-layout без задачи на редизайн.
+
+## Принципы паритета
+
+- Сохрани структуру секций и иерархию заголовков страниц референса.
+- Навигация и футер должны совпадать по смыслу ссылок с живым сайтом.
+- Локальные изображения вместо CDN; размеры/fit — как в захваченной разметке.
+- Документы (codex/terms/offer) — локализованные PDF из `public/docs/`.
+
+## Responsive и a11y
+
+- Desktop и mobile.
+- Клавиатура, `:focus-visible`, доступные имена контролов меню/формы.
+- Семантика: header/nav/main/footer, корректные heading levels.
+- `prefers-reduced-motion` — в `globals.css`; не ломай при анимациях.
+
+## Запреты
+
+- Не копируй чужой AI-default look (purple gradients, glassmorphism и т.п.).
+- Не добавляй карточки/оверлеи/стат-стрипы «для красоты», если их нет в референсе.
+- Не подключай внешние Webflow CSS/JS ради визуала.
+- Binotel GetCall/chat — через `BinotelWidgets`, не копируй произвольные embed-коды.

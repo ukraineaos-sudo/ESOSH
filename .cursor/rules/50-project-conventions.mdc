@@ -1,0 +1,56 @@
+---
+description: "Технологические и кодовые соглашения ESOSH (без детального дизайна/безопасности)."
+alwaysApply: true
+---
+
+# ESOSH: соглашения проекта
+
+## Стек
+
+- Next.js 16 App Router + React 19 + TypeScript.
+- Tailwind CSS v4, next-intl, zod.
+- Package manager: npm; версии — по `package.json` / `package-lock.json`.
+- Деплой: Vercel.
+- Версии библиотек не обновляй без отдельной задачи.
+- Без CMS/админки на старте → **сейчас**: staff `/admin` (Neon + Blob) разрешён как замена Webflow; публичный сайт без `DATABASE_URL` остаётся на legacy TSX.
+
+## Структура
+
+- Маршруты: `src/app/[locale]/**` (тонкие page wrappers); staff: `src/app/admin/**`.
+- Контент страниц: `src/content/pages/{uk,en}/**` + CMS dual-read (`src/lib/cms/**`).
+- Загрузка страниц: `src/content/get-page.ts`, `page-loaders.ts`, `render-localized-page.tsx`.
+- Компоненты: `src/components/` (Header, Footer, ContactForm, navigation, admin, cms).
+- Chrome футера: `src/content/chrome/`.
+- i18n: `src/i18n/`, `messages/{uk,en}.json`.
+- Стили: `src/styles/reference.css` (+ navigation/contact/refinements), `src/app/globals.css`, `src/app/admin/admin.css`.
+- Lib: `src/lib/site.ts`, `src/lib/site-settings.ts`, `src/lib/contact.ts`, `src/lib/admin/**`, `src/lib/cms/**`.
+- DB: `src/db/`, `drizzle/`.
+- API: `src/app/api/contact/route.ts`, `src/app/api/admin/**`.
+- Медиа/docs: `public/images/**`, `public/docs/**`.
+- Тесты: `tests/site.test.mjs`.
+- Generated: `.next/` — не редактировать вручную.
+
+Узкие helpers без предметного состояния — ок; не сваливай туда бизнес-логику и копирайт страниц.
+
+## Код
+
+- Стиль — как у ближайшего аналогичного файла в репо.
+- Components: `PascalCase`; hooks: `use*`; остальное — принятый в проекте стиль имён.
+- Strict TypeScript: без `any` и «замазывающих» cast без нужды.
+- Nullable/optional обрабатывай явно.
+- Не форматируй и не рефактори несвязанные файлы.
+- Комментарии — только для неочевидных инвариантов, побочных эффектов, ограничений совместимости (в проекте приняты краткие RU/EN summary на экспортируемых функциях).
+
+## Локализация
+
+- Default: `uk` без префикса. `en` — `/en/...`.
+- Новый UI-текст навигации/формы — сразу в `messages/uk.json` и `messages/en.json`.
+- Новая страница — оба файла в `pages/uk` и `pages/en` + запись в `page-loaders` / metadata.
+- Не меняй ключи i18n скрытно; не подставляй случайный язык как тихий fallback.
+- PDF по локали: `*-uk.pdf` / `*-en.pdf`.
+
+## Связанные правила
+
+- Дизайн: `esosh-design-system.mdc`.
+- Список изменённых путей: `changed-files-sync.mdc`.
+- Структура/контракты: `20-code-map.mdc`.

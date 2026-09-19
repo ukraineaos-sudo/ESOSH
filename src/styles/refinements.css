@@ -1,0 +1,76 @@
+/* RU: Умеренное обновление фирменного интерфейса. EN: Restrained refinements of the existing brand. */
+body { -webkit-font-smoothing: antialiased; }
+
+/* Footer logo: Webflow width-only rule + HTML height attrs stretched the mark. */
+.footer-logo {
+  width: 104px;
+  height: auto;
+  aspect-ratio: 416 / 160;
+  object-fit: contain;
+  display: block;
+}
+
+/* Footer social icons: keep 24×24 and stop flex crush from oversized assets. */
+.site-footer-social {
+  align-items: center;
+  flex-wrap: wrap;
+  color: #fff;
+}
+.site-footer-social .footer-icon-wrapper {
+  flex-shrink: 0;
+  line-height: 0;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+}
+.site-footer-social .footer-icon-wrapper svg {
+  width: 24px !important;
+  height: 24px !important;
+  display: block;
+  color: #fff;
+}
+.site-footer-social .is--icon-size-24,
+.site-footer-content .is--icon-size-24 {
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  object-fit: contain;
+  display: block;
+}
+
+/* Contact page social row — same Instagram PNG bug as footer had. */
+.wrapper.is--socials-wrapper a {
+  flex-shrink: 0;
+  line-height: 0;
+}
+.wrapper.is--socials-wrapper img {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  object-fit: contain;
+  display: block;
+}
+header.is--nav { position: relative; z-index: 30; flex-shrink: 0; }
+.wrapper.is--hero-internal-layout { padding-bottom: 0; min-height: 560px; }
+.wrapper.is--hero-internal-text { margin-top: 0; padding-block: 88px; justify-content: center; }
+.locales-list { display: flex; align-items: center; gap: 10px; }
+.locale-link { padding: 6px 2px; }
+.btn { min-height: 44px; transition: background-color .18s ease, box-shadow .18s ease; }
+.btn.is--primary:hover { box-shadow: 0 4px 14px rgb(0 48 154 / 16%); }
+.nav-menu-dropdown-list.w--open { box-shadow: 0 12px 32px rgb(26 33 49 / 10%); }
+.site-contact-form .text-field { min-height: 48px; border-radius: 6px; }
+.site-contact-form .text-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(0 48 154 / 10%); }
+@media (max-width: 767px) {
+  .regular-l { line-height: 1.5; }
+  .site-mobile-dialog .menu-adaptation-link-small { min-height: 44px; display: flex; align-items: center; }
+  .nav-adaptation-menu-wrapper { margin-top: 24px; }
+}
+@media (max-width: 991px) {
+  .wrapper.is--hero-internal-layout { min-height: 0; height: auto; }
+  .wrapper.is--hero-internal-text { height: auto; padding-block: 64px; }
+  .hero-internal-image { height: clamp(260px, 65vw, 520px); }
+  .is--courses-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .wrapper.is--course { width: 100%; min-width: 0; }
+}

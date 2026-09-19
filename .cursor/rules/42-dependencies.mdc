@@ -1,0 +1,24 @@
+---
+description: "Использовать при добавлении/удалении/обновлении зависимостей и lock-файлов ESOSH."
+alwaysApply: false
+---
+
+# ESOSH: зависимости
+
+- Корневой package manager: npm; lock — `package-lock.json`.
+- Стек: Next.js 16 + React 19 + TypeScript + Tailwind v4 + next-intl + zod. Версии — по manifest/lock.
+
+Перед добавлением пакета:
+
+1. Проверь, достаточно ли стандартных средств Next/React и уже установленного аналога.
+2. Назови конкретную проблему, которую решает зависимость.
+3. Проверь совместимость со стеком и Node.
+4. Оцени лицензию, поддержку, security-риски, влияние на bundle.
+5. Раздели runtime vs devDependency.
+6. Обнови lock штатной командой npm.
+7. Прогони относящиеся lint/build/test.
+8. Не смешивай несвязанный upgrade с функциональной задачей.
+
+Не добавляй библиотеку для одной тривиальной функции.
+
+Без отдельного запроса не вводи параллельный UI-kit, CMS SDK, state-management или animation-lib. Визуал ESOSH наследует reference CSS / живой сайт, не чужой design system.

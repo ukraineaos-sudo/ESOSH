@@ -1,0 +1,13 @@
+/* RU: Доступность без изменения визуальной системы. EN: Accessible native interactions. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+html { scroll-behavior: smooth; }
+summary { list-style: none; cursor: pointer; }
+summary::-webkit-details-marker { display: none; }
+.section.site-footer-content { background: var(--black); padding-block: 80px; }
+.collection-link-wrapper:hover .collection-image { transform: scale(1.02); }
+.collection-image { transition: transform .2s ease; }
+.site-not-found { min-height: 60vh; padding-block: 100px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

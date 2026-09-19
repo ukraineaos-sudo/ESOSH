@@ -1,0 +1,13 @@
+.nav-menu-dropdown[open] { z-index: 20; }
+.nav-menu-dropdown:not([open]) > .nav-menu-dropdown-list { display: none; }
+.nav-menu-dropdown-list { position: absolute; top: 100%; left: 0; }
+.nav-menu-dropdown[open] > .nav-menu-dropdown-list { width: 216px; }
+.site-icon-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.site-mobile-dialog { border: 0; margin: 0; max-width: none; max-height: none; width: 100%; height: 100dvh; padding-block: 0; color: var(--black); }
+.site-mobile-dialog[open] { display: flex; }
+.site-mobile-dialog::backdrop { background: white; }
+.site-mobile-dialog .nav-adaptation-menu-content { overflow-y: auto; overflow-x: hidden; width: 100%; }
+.site-mobile-submenu { display: flex; flex-direction: column; gap: 12px; padding-block: 16px; }
+.site-mobile-submenu a { margin: 0; }
+.site-mobile-social { display: flex; flex-wrap: wrap; gap: 20px; margin-block: 20px 40px; }
+.nav-menu-link[aria-current="page"] { color: var(--accent); }

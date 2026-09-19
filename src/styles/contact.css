@@ -1,0 +1,9 @@
+.site-contact-form { display: flex; flex-direction: column; gap: 24px; }
+.site-contact-form label { display: block; margin-bottom: 8px; }
+.site-contact-form .text-field { margin-bottom: 0; }
+.site-contact-form button { align-self: flex-start; }
+.site-contact-form button:disabled { opacity: .6; cursor: wait; }
+.site-honeypot { display: none; }
+.site-form-error { color: #a52020; font-size: 14px; margin-top: 8px; }
+.site-form-error a { text-decoration: underline; }
+.site-form-success { padding: 24px; background: var(--white); color: var(--accent); border-radius: 6px; }

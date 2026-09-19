@@ -1,0 +1,752 @@
+{
+  "/en": {
+    "title": "ESOSH — Building a European level of occupational safety in Ukraine",
+    "description": "The Association of Occupational Safety Professionals ESOSH creates values, raises the level of knowledge, influences legislative changes, maintains links with leading international organizations to ensure that work in Ukraine is safe. Participation is free, join and grow.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/",
+      "en": "/en"
+    },
+    "image": null
+  },
+  "/": {
+    "title": "ESOSH — Будуємо європейський рівеньбезпеки праці в Україні",
+    "description": "Асоціація фахівців з безпеки праці ESOSH формує цінності, підвищує рівень знань, впливає на законодавчі зміни, тримає зв’язки з міжнародними провідними організаціями, аби праця в Україні була безпечною. Участь безоплатна, доєднуйтеся і зростайте.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/",
+      "en": "/en"
+    },
+    "image": null
+  },
+  "/en/about-esosh": {
+    "title": "ESOSH — The United Union of Occupational Safety Specialists of Ukraine",
+    "description": "Our vision is that life is the highest value, and our mission is to lead in the field of occupational safety in order to become a source of safety development.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/about-esosh",
+      "en": "/en/about-esosh"
+    },
+    "image": null
+  },
+  "/about-esosh": {
+    "title": "ESOSH — Єдина спілка фахівців з безпеки праці України",
+    "description": "Наше бачення полягає в тому, що життя є найвищою цінністю, а наша місія - лідерство у сфері безпеки праці з метою стати джерелом розвитку безпеки.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/about-esosh",
+      "en": "/en/about-esosh"
+    },
+    "image": null
+  },
+  "/en/businesses": {
+    "title": "ESOSH — At your service in the field of safety and health at work",
+    "description": "Our experience is unique for Ukraine, use it to benefit the security of your enterprise.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/businesses",
+      "en": "/en/businesses"
+    },
+    "image": null
+  },
+  "/businesses": {
+    "title": "ESOSH — До ваших послуг у сфері безпеки та здоров’я на роботі",
+    "description": "Наш досвід – унікальний для України, використайте його на користь безпеки свого підприємства.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/businesses",
+      "en": "/en/businesses"
+    },
+    "image": null
+  },
+  "/en/news": {
+    "title": "ESOSH — News And Events",
+    "description": "Current events and news in the field of labor protection.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news",
+      "en": "/en/news"
+    },
+    "image": null
+  },
+  "/news": {
+    "title": "ESOSH — Новини Та Події",
+    "description": "Актуальні події та новини в сфері охорони праці.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news",
+      "en": "/en/news"
+    },
+    "image": null
+  },
+  "/en/contact-us": {
+    "title": "ESOSH — Contact Us",
+    "description": "Contact us or leave a request for a free consultation.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/contact-us",
+      "en": "/en/contact-us"
+    },
+    "image": null
+  },
+  "/contact-us": {
+    "title": "ESOSH — Контакти",
+    "description": "Зв’яжіться з нами або залиште заявку на безкоштовну консультацію.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/contact-us",
+      "en": "/en/contact-us"
+    },
+    "image": null
+  },
+  "/en/join/enrollment": {
+    "title": "ESOSH — Introduction of organizations to ESOSH",
+    "description": "Proclaim yourself as a company that cares about the safety of its employees, customers, customers, and we will be happy to confirm it.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/join/enrollment",
+      "en": "/en/join/enrollment"
+    },
+    "image": null
+  },
+  "/join/enrollment": {
+    "title": "ESOSH — Вступ організацій у спілку ESOSH",
+    "description": "Заявіть про себе, як про компанію, що дбає про безпеку своїх працівників, клієнтів, замовників, і ми раді будемо підтвердити це.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/join/enrollment",
+      "en": "/en/join/enrollment"
+    },
+    "image": null
+  },
+  "/en/join/participation": {
+    "title": "ESOSH — Join ESOSH",
+    "description": "Get a participant certificate and grow further! Participation in the ECOP is free of charge.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/join/participation",
+      "en": "/en/join/participation"
+    },
+    "image": null
+  },
+  "/join/participation": {
+    "title": "ESOSH — Станьте учасником спілки ESOSH",
+    "description": "Отримайте сертифікат учасника та зростайте далі! Участь у ЄСОП безоплатна.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/join/participation",
+      "en": "/en/join/participation"
+    },
+    "image": null
+  },
+  "/en/join/codex": {
+    "title": "ESOSH — ESOSH Code of Conduct",
+    "description": "Code of Conduct of the Members of the European Community for Safety and Health at Work of the European Union of the European Union.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/join/codex",
+      "en": "/en/join/codex"
+    },
+    "image": null
+  },
+  "/join/codex": {
+    "title": "ESOSH — Кодекс поведінки учасників спілки ESOSH",
+    "description": "Кодекс поведінки учасників Європейського співтовариства з охорони праці ЄСОП.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/join/codex",
+      "en": "/en/join/codex"
+    },
+    "image": null
+  },
+  "/en/join/terms": {
+    "title": "ESOSH — Union Regulations",
+    "description": "Regulations on the activities of the public union “European Community for Occupational Safety and Health”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/join/terms",
+      "en": "/en/join/terms"
+    },
+    "image": null
+  },
+  "/join/terms": {
+    "title": "ESOSH — Положення про спілку ЄСОП",
+    "description": "Положення про діяльність громадської спілки «Європейське Співтовариство з Охорони Праці»",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/join/terms",
+      "en": "/en/join/terms"
+    },
+    "image": null
+  },
+  "/en/join/safety-league-best-practices": {
+    "title": "ESOSH — Professional Groups and Best Practices",
+    "description": "Professional groups on occupational safety in the agro-industrial complex, the oil and gas industry, in the field of psychological safety, information technology, scientific research and legislative initiatives have been established by ESOSH for structured work in the areas.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/join/safety-league-best-practices",
+      "en": "/en/join/safety-league-best-practices"
+    },
+    "image": null
+  },
+  "/join/safety-league-best-practices": {
+    "title": "ESOSH — Фахові групи та передові практики",
+    "description": "Фахові групи з безпеки праці у агропромисловому комплексі, нафтогазовій галузі, у сфері психологічної безпеки, інформаційних технологій, наукових досліджень та законодавчих ініціатив створені ESOSH для структурованої роботи за напрямками.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/join/safety-league-best-practices",
+      "en": "/en/join/safety-league-best-practices"
+    },
+    "image": null
+  },
+  "/en/education/courses": {
+    "title": "ESOSH — Courses",
+    "description": "Develop your knowledge and skills in occupational safety.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/courses",
+      "en": "/en/education/courses"
+    },
+    "image": null
+  },
+  "/education/courses": {
+    "title": "ESOSH — Курси",
+    "description": "Розвивайте свої знання та навички з безпеки праці.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/courses",
+      "en": "/en/education/courses"
+    },
+    "image": null
+  },
+  "/en/education/projects": {
+    "title": "ESOSH — Projects",
+    "description": "Socially important ESOSH projects for society",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/projects",
+      "en": "/en/education/projects"
+    },
+    "image": null
+  },
+  "/education/projects": {
+    "title": "ESOSH — Проекти",
+    "description": "Соціально важливі проекти ESOSH для суспільства",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/projects",
+      "en": "/en/education/projects"
+    },
+    "image": null
+  },
+  "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu": {
+    "title": "ESOSH — 26 квітня день пам'яті про чорнобильську катастрофу",
+    "description": "Дізнайтесь більше про \"26 квітня день пам'яті про чорнобильську катастрофу\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu",
+      "en": "/en/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu"
+    },
+    "image": "/images/news/2026-04-26-121904238-11997dfd.webp"
+  },
+  "/en/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu": {
+    "title": "ESOSH — April 26, Day of Remembrance of the Chernobyl Disaster",
+    "description": "Learn more about \"April 26, Day of Remembrance of the Chernobyl Disaster”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu",
+      "en": "/en/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu"
+    },
+    "image": "/images/news/2026-04-26-121904238-11997dfd.webp"
+  },
+  "/news/27-bereznya-lekciya-angliyskoyu-movoyu-z-perekladom-ukrayinskoyu-na-temu-pidsumki-2025-roku-volonterska-dopomoga-z-bezpeki-plani-2026": {
+    "title": "ESOSH — 27 березня лекція англійською мовою з перекладом українською на тему «Підсумки 2025 року: волонтерська допомога з безпеки. Плани 2026»",
+    "description": "Дізнайтесь більше про \"27 березня лекція англійською мовою з перекладом українською на тему «Підсумки 2025 року: волонтерська допомога з безпеки. Плани 2026» \"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/27-bereznya-lekciya-angliyskoyu-movoyu-z-perekladom-ukrayinskoyu-na-temu-pidsumki-2025-roku-volonterska-dopomoga-z-bezpeki-plani-2026",
+      "en": "/en/news/27-bereznya-lekciya-angliyskoyu-movoyu-z-perekladom-ukrayinskoyu-na-temu-pidsumki-2025-roku-volonterska-dopomoga-z-bezpeki-plani-2026"
+    },
+    "image": "/images/news/2026-03-24-104857514-1-38af44f1.webp"
+  },
+  "/en/news/27-bereznya-lekciya-angliyskoyu-movoyu-z-perekladom-ukrayinskoyu-na-temu-pidsumki-2025-roku-volonterska-dopomoga-z-bezpeki-plani-2026": {
+    "title": "ESOSH — On March 27, a lecture in English with translation into Ukrainian on the topic “Outcomes of 2025: Voluntary Security Assistance. Plans 2026”",
+    "description": "Learn more about \"On March 27, a lecture in English with translation into Ukrainian on the topic “Outcomes of 2025: Voluntary Security Assistance. Plans 2026” ”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/27-bereznya-lekciya-angliyskoyu-movoyu-z-perekladom-ukrayinskoyu-na-temu-pidsumki-2025-roku-volonterska-dopomoga-z-bezpeki-plani-2026",
+      "en": "/en/news/27-bereznya-lekciya-angliyskoyu-movoyu-z-perekladom-ukrayinskoyu-na-temu-pidsumki-2025-roku-volonterska-dopomoga-z-bezpeki-plani-2026"
+    },
+    "image": "/images/news/2026-03-24-104857514-1-38af44f1.webp"
+  },
+  "/news/7-travnya-2026---spravzhniy-den-nauki-v-bezpeci-praci-ukrayini": {
+    "title": "ESOSH — 7 травня 2026 - справжній день науки в безпеці праці України!",
+    "description": "Дізнайтесь більше про \"7 травня 2026 - справжній день науки в безпеці праці України! \"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/7-travnya-2026---spravzhniy-den-nauki-v-bezpeci-praci-ukrayini",
+      "en": "/en/news/7-travnya-2026---spravzhniy-den-nauki-v-bezpeci-praci-ukrayini"
+    },
+    "image": "/images/news/2026-04-29-132558502-7bc52d9f.png"
+  },
+  "/en/news/7-travnya-2026---spravzhniy-den-nauki-v-bezpeci-praci-ukrayini": {
+    "title": "ESOSH — May 7, 2026 - the real day of science in labor safety of Ukraine!",
+    "description": "Learn more about \"May 7, 2026 - the real day of science in labor safety of Ukraine! ”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/7-travnya-2026---spravzhniy-den-nauki-v-bezpeci-praci-ukrayini",
+      "en": "/en/news/7-travnya-2026---spravzhniy-den-nauki-v-bezpeci-praci-ukrayini"
+    },
+    "image": "/images/news/2026-04-29-132558502-7bc52d9f.png"
+  },
+  "/en/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas": {
+    "title": "ESOSH — Energy worker safety: we want to hear from you",
+    "description": "Learn more about \"Energy worker safety: we want to hear from you”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas",
+      "en": "/en/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas"
+    },
+    "image": "/images/home/2026-08-14-093325595-2bc23ed4.webp"
+  },
+  "/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas": {
+    "title": "ESOSH — Безпека працівників енергетики: нам важливо почути вас",
+    "description": "Дізнайтесь більше про \"Безпека працівників енергетики: нам важливо почути вас\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas",
+      "en": "/en/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas"
+    },
+    "image": "/images/home/2026-08-14-093325595-2bc23ed4.webp"
+  },
+  "/news/eriskcontrol----persha-ukrayinska-shi-platforma-dlya-ocinki-profesiynih-rizikiv-ta-navchannya": {
+    "title": "ESOSH — eRisk-Control — перша українська ШІ-платформа для оцінки професійних ризиків та навчання!",
+    "description": "Дізнайтесь більше про \"eRisk-Control — перша українська ШІ-платформа для оцінки професійних ризиків та навчання!\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/eriskcontrol----persha-ukrayinska-shi-platforma-dlya-ocinki-profesiynih-rizikiv-ta-navchannya",
+      "en": "/en/news/eriskcontrol----persha-ukrayinska-shi-platforma-dlya-ocinki-profesiynih-rizikiv-ta-navchannya"
+    },
+    "image": "/images/news/IMG-0017-3-c2fd3ce0.webp"
+  },
+  "/en/news/eriskcontrol----persha-ukrayinska-shi-platforma-dlya-ocinki-profesiynih-rizikiv-ta-navchannya": {
+    "title": "ESOSH — eRisk-Control is the first Ukrainian AI platform for occupational risk assessment and training!",
+    "description": "Learn more about \"eRisk-Control is the first Ukrainian AI platform for occupational risk assessment and training!”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/eriskcontrol----persha-ukrayinska-shi-platforma-dlya-ocinki-profesiynih-rizikiv-ta-navchannya",
+      "en": "/en/news/eriskcontrol----persha-ukrayinska-shi-platforma-dlya-ocinki-profesiynih-rizikiv-ta-navchannya"
+    },
+    "image": "/images/news/IMG-0017-3-c2fd3ce0.webp"
+  },
+  "/news/esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya": {
+    "title": "ESOSH — ESOSH підтримує Глобальний тиждень обізнаності про азбест, який проходить 1–7 квітня",
+    "description": "Дізнайтесь більше про \"ESOSH підтримує Глобальний тиждень обізнаності про азбест, який проходить 1–7 квітня\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya",
+      "en": "/en/news/esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya"
+    },
+    "image": "/images/news/2026-03-31-145345186-a75e2438.webp"
+  },
+  "/en/news/esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya": {
+    "title": "ESOSH — ESOSH supports Global Asbestos Awareness Week, which takes place April 1-7",
+    "description": "Learn more about \"ESOSH supports Global Asbestos Awareness Week, which takes place April 1-7”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya",
+      "en": "/en/news/esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya"
+    },
+    "image": "/images/news/2026-03-31-145345186-a75e2438.webp"
+  },
+  "/news/estafeta-bezpeki-vid-fahivcya-do-fahivcya---dilimosya-pidsilyuiemo": {
+    "title": "ESOSH — Естафета безпеки: від фахівця до фахівця – ділимося, підсилюємо!",
+    "description": "Дізнайтесь більше про \"Естафета безпеки: від фахівця до фахівця – ділимося, підсилюємо!\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/estafeta-bezpeki-vid-fahivcya-do-fahivcya---dilimosya-pidsilyuiemo",
+      "en": "/en/news/estafeta-bezpeki-vid-fahivcya-do-fahivcya---dilimosya-pidsilyuiemo"
+    },
+    "image": "/images/news/IMG-0016-390b3e5f.webp"
+  },
+  "/en/news/estafeta-bezpeki-vid-fahivcya-do-fahivcya---dilimosya-pidsilyuiemo": {
+    "title": "ESOSH — Safety relay: from specialist to specialist — share, strengthen!",
+    "description": "Learn more about \"Safety relay: from specialist to specialist — share, strengthen!”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/estafeta-bezpeki-vid-fahivcya-do-fahivcya---dilimosya-pidsilyuiemo",
+      "en": "/en/news/estafeta-bezpeki-vid-fahivcya-do-fahivcya---dilimosya-pidsilyuiemo"
+    },
+    "image": "/images/news/IMG-0016-390b3e5f.webp"
+  },
+  "/news/hristos-voskres": {
+    "title": "ESOSH — Христос Воскрес!",
+    "description": "Дізнайтесь більше про \"Христос Воскрес!\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/hristos-voskres",
+      "en": "/en/news/hristos-voskres"
+    },
+    "image": "/images/news/2026-04-12-140354386-430af24a.webp"
+  },
+  "/en/news/hristos-voskres": {
+    "title": "ESOSH — Christ is Risen!",
+    "description": "Learn more about \"Christ is Risen!”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/hristos-voskres",
+      "en": "/en/news/hristos-voskres"
+    },
+    "image": "/images/news/2026-04-12-140354386-430af24a.webp"
+  },
+  "/news/levoviy-zahist----kurs-dityachogo-samozahistu": {
+    "title": "ESOSH — Левовий захист — курс дитячого самозахисту",
+    "description": "Дізнайтесь більше про \"Левовий захист — курс дитячого самозахисту\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/levoviy-zahist----kurs-dityachogo-samozahistu",
+      "en": "/en/news/levoviy-zahist----kurs-dityachogo-samozahistu"
+    },
+    "image": "/images/news/2026-04-07-161026106-a3c26d96.webp"
+  },
+  "/en/news/levoviy-zahist----kurs-dityachogo-samozahistu": {
+    "title": "ESOSH — Lion Defense — Children's Self-Defense Course",
+    "description": "Learn more about \"Lion Defense — Children's Self-Defense Course”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/levoviy-zahist----kurs-dityachogo-samozahistu",
+      "en": "/en/news/levoviy-zahist----kurs-dityachogo-samozahistu"
+    },
+    "image": "/images/news/2026-04-07-161026106-a3c26d96.webp"
+  },
+  "/news/podbaymo-pro-zdorove-psihosocialne-roboche-seredovishche": {
+    "title": "ESOSH — Подбаймо про здорове психосоціальне робоче середовище",
+    "description": "Дізнайтесь більше про \"Подбаймо про здорове психосоціальне робоче середовище \"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/podbaymo-pro-zdorove-psihosocialne-roboche-seredovishche",
+      "en": "/en/news/podbaymo-pro-zdorove-psihosocialne-roboche-seredovishche"
+    },
+    "image": "/images/news/2026-04-22-171701296-e4e18c1d.webp"
+  },
+  "/en/news/podbaymo-pro-zdorove-psihosocialne-roboche-seredovishche": {
+    "title": "ESOSH — Take care of a healthy psychosocial work environment",
+    "description": "Learn more about \"Take care of a healthy psychosocial work environment ”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/podbaymo-pro-zdorove-psihosocialne-roboche-seredovishche",
+      "en": "/en/news/podbaymo-pro-zdorove-psihosocialne-roboche-seredovishche"
+    },
+    "image": "/images/news/2026-04-22-171701296-e4e18c1d.webp"
+  },
+  "/news/slipi-zoni-bezbariernosti-chogo-ne-bachit-biznes": {
+    "title": "ESOSH — Сліпі зони безбар’єрності: чого не бачить бізнес?",
+    "description": "Дізнайтесь більше про \"Сліпі зони безбар’єрності: чого не бачить бізнес?\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/slipi-zoni-bezbariernosti-chogo-ne-bachit-biznes",
+      "en": "/en/news/slipi-zoni-bezbariernosti-chogo-ne-bachit-biznes"
+    },
+    "image": "/images/news/2026-05-01-160411053-a0d3089d.webp"
+  },
+  "/en/news/slipi-zoni-bezbariernosti-chogo-ne-bachit-biznes": {
+    "title": "ESOSH — Blind barrier-free zones: what does business not see?",
+    "description": "Learn more about \"Blind barrier-free zones: what does business not see?”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/slipi-zoni-bezbariernosti-chogo-ne-bachit-biznes",
+      "en": "/en/news/slipi-zoni-bezbariernosti-chogo-ne-bachit-biznes"
+    },
+    "image": "/images/news/2026-05-01-160411053-a0d3089d.webp"
+  },
+  "/news/vakansiya-inzhener-z-ohoroni-praci": {
+    "title": "ESOSH — Вакансія: Інженер з охорони праці",
+    "description": "Дізнайтесь більше про \"Вакансія: Інженер з охорони праці \"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/vakansiya-inzhener-z-ohoroni-praci",
+      "en": "/en/news/vakansiya-inzhener-z-ohoroni-praci"
+    },
+    "image": "/images/news/2026-04-15-150045432-ae172cbd.webp"
+  },
+  "/en/news/vakansiya-inzhener-z-ohoroni-praci": {
+    "title": "ESOSH — Vacancy: Occupational Safety Engineer",
+    "description": "Learn more about \"Vacancy: Occupational Safety Engineer ”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/vakansiya-inzhener-z-ohoroni-praci",
+      "en": "/en/news/vakansiya-inzhener-z-ohoroni-praci"
+    },
+    "image": "/images/news/2026-04-15-150045432-ae172cbd.webp"
+  },
+  "/news/vakansiya-kerivnik-viddilu-ohoroni-praci": {
+    "title": "ESOSH — Вакансія: Керівник відділу охорони праці",
+    "description": "Дізнайтесь більше про \"Вакансія: Керівник відділу охорони праці  \"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/vakansiya-kerivnik-viddilu-ohoroni-praci",
+      "en": "/en/news/vakansiya-kerivnik-viddilu-ohoroni-praci"
+    },
+    "image": "/images/news/2026-04-15-145713592-d89c8406.webp"
+  },
+  "/en/news/vakansiya-kerivnik-viddilu-ohoroni-praci": {
+    "title": "ESOSH — Vacancy: Head of Occupational Safety and Health",
+    "description": "Learn more about \"Vacancy: Head of Occupational Safety and Health  ”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/vakansiya-kerivnik-viddilu-ohoroni-praci",
+      "en": "/en/news/vakansiya-kerivnik-viddilu-ohoroni-praci"
+    },
+    "image": "/images/news/2026-04-15-145713592-d89c8406.webp"
+  },
+  "/en/news/vebinar-standart-z-ocinki-rizikiv-na-pidpriiemstvi-yak-vprovadzhuvati-v-ukrayini": {
+    "title": "ESOSH — Webinar: «Enterprise Risk Assessment Standard: How to Implement in Ukraine?»",
+    "description": "Learn more about \"Webinar: «Enterprise Risk Assessment Standard: How to Implement in Ukraine?»”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/vebinar-standart-z-ocinki-rizikiv-na-pidpriiemstvi-yak-vprovadzhuvati-v-ukrayini",
+      "en": "/en/news/vebinar-standart-z-ocinki-rizikiv-na-pidpriiemstvi-yak-vprovadzhuvati-v-ukrayini"
+    },
+    "image": "/images/news/2026-06-02-153641811-a52b381a.webp"
+  },
+  "/news/vebinar-standart-z-ocinki-rizikiv-na-pidpriiemstvi-yak-vprovadzhuvati-v-ukrayini": {
+    "title": "ESOSH — Вебінар: «Стандарт з оцінки ризиків на підприємстві: як впроваджувати в Україні?»",
+    "description": "Дізнайтесь більше про \"Вебінар: «Стандарт з оцінки ризиків на підприємстві: як впроваджувати в Україні?»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/vebinar-standart-z-ocinki-rizikiv-na-pidpriiemstvi-yak-vprovadzhuvati-v-ukrayini",
+      "en": "/en/news/vebinar-standart-z-ocinki-rizikiv-na-pidpriiemstvi-yak-vprovadzhuvati-v-ukrayini"
+    },
+    "image": "/images/news/2026-06-02-153641811-a52b381a.webp"
+  },
+  "/news/vpershe-v-ukrayini-kvalifikaciyniy-kurs-koordinator-z-inklyuziyi-ta-bezbariernosti": {
+    "title": "ESOSH — Вперше в Україні кваліфікаційний курс «Координатор з інклюзії та безбар’єрності»",
+    "description": "Дізнайтесь більше про \"Вперше в Україні кваліфікаційний курс «Координатор з інклюзії та безбар’єрності»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/vpershe-v-ukrayini-kvalifikaciyniy-kurs-koordinator-z-inklyuziyi-ta-bezbariernosti",
+      "en": "/en/news/vpershe-v-ukrayini-kvalifikaciyniy-kurs-koordinator-z-inklyuziyi-ta-bezbariernosti"
+    },
+    "image": "/images/news/2400-1257px-fb-22-03-d5192018.webp"
+  },
+  "/en/news/vpershe-v-ukrayini-kvalifikaciyniy-kurs-koordinator-z-inklyuziyi-ta-bezbariernosti": {
+    "title": "ESOSH — For the first time in Ukraine, the qualification course “Coordinator on Inclusion and Barriers”",
+    "description": "Learn more about \"For the first time in Ukraine, the qualification course “Coordinator on Inclusion and Barriers””",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/vpershe-v-ukrayini-kvalifikaciyniy-kurs-koordinator-z-inklyuziyi-ta-bezbariernosti",
+      "en": "/en/news/vpershe-v-ukrayini-kvalifikaciyniy-kurs-koordinator-z-inklyuziyi-ta-bezbariernosti"
+    },
+    "image": "/images/news/2400-1257px-fb-22-03-d5192018.webp"
+  },
+  "/news/vstupna-kampaniya----same-chas-obirati-profesiyu-yaka-bude-potribna-zavzhdi": {
+    "title": "ESOSH — Вступна кампанія — саме час обирати професію, яка буде потрібна завжди.",
+    "description": "Дізнайтесь більше про \"Вступна кампанія — саме час обирати професію, яка буде потрібна завжди.\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/vstupna-kampaniya----same-chas-obirati-profesiyu-yaka-bude-potribna-zavzhdi",
+      "en": "/en/news/vstupna-kampaniya----same-chas-obirati-profesiyu-yaka-bude-potribna-zavzhdi"
+    },
+    "image": "/images/news/2026-07-29-132928930-c7caa873.webp"
+  },
+  "/en/news/vstupna-kampaniya----same-chas-obirati-profesiyu-yaka-bude-potribna-zavzhdi": {
+    "title": "ESOSH — The admissions campaign is the perfect time to choose a career that will always be in demand.",
+    "description": "Learn more about \"The admissions campaign is the perfect time to choose a career that will always be in demand.”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/vstupna-kampaniya----same-chas-obirati-profesiyu-yaka-bude-potribna-zavzhdi",
+      "en": "/en/news/vstupna-kampaniya----same-chas-obirati-profesiyu-yaka-bude-potribna-zavzhdi"
+    },
+    "image": "/images/news/2026-07-29-132928930-c7caa873.webp"
+  },
+  "/news/z-dne": {
+    "title": "ESOSH — З днем охорони праці!",
+    "description": "Дізнайтесь більше про \"З днем охорони праці!\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/z-dne",
+      "en": "/en/news/z-dne"
+    },
+    "image": "/images/news/2026-04-28-195225949-07aeed9f.webp"
+  },
+  "/en/news/z-dne": {
+    "title": "ESOSH — Happy Occupational Safety and Health Day!",
+    "description": "Learn more about \"Happy Occupational Safety and Health Day!”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/z-dne",
+      "en": "/en/news/z-dne"
+    },
+    "image": "/images/news/2026-04-28-195225949-07aeed9f.webp"
+  },
+  "/en/news/z-dnem-budivelnika": {
+    "title": "ESOSH — Happy Builder's Day!",
+    "description": "Learn more about \"Happy Builder's Day!”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/",
+      "en": "/en/news/z-dnem-budivelnika"
+    },
+    "image": "/images/home/ChatGPT-Image-9-2026-14-43-21-821d0611.webp"
+  },
+  "/news/z-dnem-nezalezhnosti-ukrayini": {
+    "title": "ESOSH — З Днем Незалежності України!",
+    "description": "Дізнайтесь більше про \"З Днем Незалежності України!\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/z-dnem-nezalezhnosti-ukrayini",
+      "en": "/en/news/z-dnem-nezalezhnosti-ukrayini"
+    },
+    "image": "/images/home/ChatGPT-Image-24-2026-17-32-49-7a506cfa.webp"
+  },
+  "/en/news/z-dnem-nezalezhnosti-ukrayini": {
+    "title": "ESOSH — Happy Independence Day of Ukraine!",
+    "description": "Learn more about \"Happy Independence Day of Ukraine!”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/z-dnem-nezalezhnosti-ukrayini",
+      "en": "/en/news/z-dnem-nezalezhnosti-ukrayini"
+    },
+    "image": "/images/home/ChatGPT-Image-24-2026-17-32-49-7a506cfa.webp"
+  },
+  "/news/zahist-leva": {
+    "title": "ESOSH — Презентуємо програму «Захист лева»",
+    "description": "Дізнайтесь більше про \"Презентуємо програму «Захист лева»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zahist-leva",
+      "en": "/en/news/zahist-leva"
+    },
+    "image": "/images/news/2026-05-21-161712035-fdf848ee.webp"
+  },
+  "/en/news/zahist-leva": {
+    "title": "ESOSH — Introducing the \"Lion's Protection\" program",
+    "description": "Learn more about \"Introducing the \"Lion's Protection\" program”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zahist-leva",
+      "en": "/en/news/zahist-leva"
+    },
+    "image": "/images/news/2026-05-21-161712035-fdf848ee.webp"
+  },
+  "/news/zaproshuiemo-na-anglomovniy-vebinar-lyudskiy-faktor-v-organizaciyniy-efektivnosti": {
+    "title": "ESOSH — Запрошуємо на англомовний вебінар «Людський фактор в організаційній ефективності»",
+    "description": "Дізнайтесь більше про \"Запрошуємо на англомовний вебінар «Людський фактор в організаційній ефективності»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-anglomovniy-vebinar-lyudskiy-faktor-v-organizaciyniy-efektivnosti",
+      "en": "/en/news/zaproshuiemo-na-anglomovniy-vebinar-lyudskiy-faktor-v-organizaciyniy-efektivnosti"
+    },
+    "image": "/images/news/2026-04-08-150525644-5ea57c06.webp"
+  },
+  "/en/news/zaproshuiemo-na-anglomovniy-vebinar-lyudskiy-faktor-v-organizaciyniy-efektivnosti": {
+    "title": "ESOSH — We invite you to the English-language webinar “Human Factors in Organizational Efficiency”",
+    "description": "Learn more about \"We invite you to the English-language webinar “Human Factors in Organizational Efficiency””",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-anglomovniy-vebinar-lyudskiy-faktor-v-organizaciyniy-efektivnosti",
+      "en": "/en/news/zaproshuiemo-na-anglomovniy-vebinar-lyudskiy-faktor-v-organizaciyniy-efektivnosti"
+    },
+    "image": "/images/news/2026-04-08-150525644-5ea57c06.webp"
+  },
+  "/en/news/zaproshuiemo-na-bezoplatniy-vebinar-upravlinnya-rizikami-zakonodavchi-zmini-suchasni-pidhodi-ta-cifrovi-instrumenti": {
+    "title": "ESOSH — We invite you to the free webinar “Risk Management: Legislative Changes, Modern Approaches, and Digital Tools”",
+    "description": "Learn more about \"We invite you to the free webinar “Risk Management: Legislative Changes, Modern Approaches, and Digital Tools””",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-bezoplatniy-vebinar-upravlinnya-rizikami-zakonodavchi-zmini-suchasni-pidhodi-ta-cifrovi-instrumenti",
+      "en": "/en/news/zaproshuiemo-na-bezoplatniy-vebinar-upravlinnya-rizikami-zakonodavchi-zmini-suchasni-pidhodi-ta-cifrovi-instrumenti"
+    },
+    "image": "/images/news/2026-06-16-140446517-ae36b873.webp"
+  },
+  "/news/zaproshuiemo-na-bezoplatniy-vebinar-upravlinnya-rizikami-zakonodavchi-zmini-suchasni-pidhodi-ta-cifrovi-instrumenti": {
+    "title": "ESOSH — Запрошуємо на безоплатний вебінар «Управління ризиками: законодавчі зміни, сучасні підходи та цифрові інструменти»",
+    "description": "Дізнайтесь більше про \"Запрошуємо на безоплатний вебінар «Управління ризиками: законодавчі зміни, сучасні підходи та цифрові інструменти»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-bezoplatniy-vebinar-upravlinnya-rizikami-zakonodavchi-zmini-suchasni-pidhodi-ta-cifrovi-instrumenti",
+      "en": "/en/news/zaproshuiemo-na-bezoplatniy-vebinar-upravlinnya-rizikami-zakonodavchi-zmini-suchasni-pidhodi-ta-cifrovi-instrumenti"
+    },
+    "image": "/images/news/2026-06-16-140446517-ae36b873.webp"
+  },
+  "/news/zaproshuiemo-na-forum-stiykosti-bezpeka-praci-v-ukrayini---2026": {
+    "title": "ESOSH — Запрошуємо на  «Форум стійкості: Безпека праці в Україні – 2026»",
+    "description": "Дізнайтесь більше про \"Запрошуємо на  «Форум стійкості: Безпека праці в Україні – 2026»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-forum-stiykosti-bezpeka-praci-v-ukrayini---2026",
+      "en": "/en/news/zaproshuiemo-na-forum-stiykosti-bezpeka-praci-v-ukrayini---2026"
+    },
+    "image": "/images/news/2026-07-22-153332962-1e393a68.webp"
+  },
+  "/en/news/zaproshuiemo-na-forum-stiykosti-bezpeka-praci-v-ukrayini---2026": {
+    "title": "ESOSH — Join us for the \"Resilience Forum: Occupational Safety in Ukraine – 2026\"",
+    "description": "Learn more about \"Join us for the \"Resilience Forum: Occupational Safety in Ukraine – 2026\"”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-forum-stiykosti-bezpeka-praci-v-ukrayini---2026",
+      "en": "/en/news/zaproshuiemo-na-forum-stiykosti-bezpeka-praci-v-ukrayini---2026"
+    },
+    "image": "/images/news/2026-07-22-153332962-1e393a68.webp"
+  },
+  "/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey": {
+    "title": "ESOSH — Запрошуємо на вебінар:  🎓 «Вигорання колективів: чому компанії втрачають людей»",
+    "description": "Дізнайтесь більше про \"Запрошуємо на вебінар:  🎓 «Вигорання колективів: чому компанії втрачають людей»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey",
+      "en": "/en/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey"
+    },
+    "image": "/images/home/2026-07-29-134120988-150e8eca.webp"
+  },
+  "/en/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey": {
+    "title": "ESOSH — Join our webinar:  🎓 \"Team Burnout: Why Companies Are Losing People\"",
+    "description": "Learn more about \"Join our webinar:  🎓 \"Team Burnout: Why Companies Are Losing People\"”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey",
+      "en": "/en/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey"
+    },
+    "image": "/images/home/2026-07-29-134120988-150e8eca.webp"
+  },
+  "/news/zaproshuiemo-na-xxii-mizhnarodnu-specializovanu-vistavku-tehnologiyi-zahistu-pozhteh---2026": {
+    "title": "ESOSH — Запрошуємо на XXII Міжнародну спеціалізовану виставку «ТЕХНОЛОГІЇ ЗАХИСТУ / ПОЖТЕХ – 2026»",
+    "description": "Дізнайтесь більше про \"Запрошуємо на XXII Міжнародну спеціалізовану виставку «ТЕХНОЛОГІЇ ЗАХИСТУ / ПОЖТЕХ – 2026»\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-xxii-mizhnarodnu-specializovanu-vistavku-tehnologiyi-zahistu-pozhteh---2026",
+      "en": "/en/news/zaproshuiemo-na-xxii-mizhnarodnu-specializovanu-vistavku-tehnologiyi-zahistu-pozhteh---2026"
+    },
+    "image": "/images/news/2026-04-20-174444519-1-1-8e0dbd45.webp"
+  },
+  "/en/news/zaproshuiemo-na-xxii-mizhnarodnu-specializovanu-vistavku-tehnologiyi-zahistu-pozhteh---2026": {
+    "title": "ESOSH — We invite you to the XXII International Specialized Exhibition “PROTECTION TECHNOLOGIES/POZHTECH — 2026”",
+    "description": "Learn more about \"We invite you to the XXII International Specialized Exhibition “PROTECTION TECHNOLOGIES/POZHTECH — 2026””",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zaproshuiemo-na-xxii-mizhnarodnu-specializovanu-vistavku-tehnologiyi-zahistu-pozhteh---2026",
+      "en": "/en/news/zaproshuiemo-na-xxii-mizhnarodnu-specializovanu-vistavku-tehnologiyi-zahistu-pozhteh---2026"
+    },
+    "image": "/images/news/2026-04-20-174444519-1-1-8e0dbd45.webp"
+  },
+  "/news/zustrinemos-na-mizhnarodnomu-promislovomu-forumi-2026": {
+    "title": "ESOSH — Зустрінемося на міжнародному форумі 2026",
+    "description": "Дізнайтесь більше про \"Зустрінемося на міжнародному форумі 2026\"",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/news/zustrinemos-na-mizhnarodnomu-promislovomu-forumi-2026",
+      "en": "/en/news/zustrinemos-na-mizhnarodnomu-promislovomu-forumi-2026"
+    },
+    "image": "/images/news/IMG-0018-1-adbd53ca.webp"
+  },
+  "/en/news/zustrinemos-na-mizhnarodnomu-promislovomu-forumi-2026": {
+    "title": "ESOSH — We will meet at the 2026 International Forum",
+    "description": "Learn more about \"We will meet at the 2026 International Forum”",
+    "locale": "en",
+    "alternates": {
+      "uk": "/news/zustrinemos-na-mizhnarodnomu-promislovomu-forumi-2026",
+      "en": "/en/news/zustrinemos-na-mizhnarodnomu-promislovomu-forumi-2026"
+    },
+    "image": "/images/news/IMG-0018-1-adbd53ca.webp"
+  }
+}

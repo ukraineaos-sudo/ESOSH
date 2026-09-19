@@ -1,0 +1,58 @@
+---
+description: "Постоянный контекст, критические области и границы проекта ESOSH."
+alwaysApply: true
+---
+
+# ESOSH: контекст проекта
+
+- Продукт: публичный корпоративный сайт ассоциации ESOSH (European Society of Occupational Safety & Health).
+- Цель: миграция с живого сайта [esosh.net](https://www.esosh.net/) в этот репозиторий с паритетом **структуры, контента и визуала**; хостинг — Vercel.
+- Тип: двуязычный маркетинговый сайт + staff-кабинет `/admin` (замена Webflow); без публичного личного кабинета.
+- Языки: `uk` по умолчанию (без префикса), `en` под `/en/...`.
+- Стек: Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4 + next-intl + zod; Neon/Drizzle + Vercel Blob для CMS; package manager — npm.
+- Контент страниц: dual-read — Neon CMS blocks **или** legacy Webflow-TSX в `src/content/pages/{uk,en}/**`.
+- Отложено намеренно: канал доставки формы (нужен `CONTACT_WEBHOOK_URL`); публична форма вступу (таблиці applications/members уже в схемі).
+- Binotel GetCall + chat подключены (паритет с esosh.net).
+
+## Основные сценарии
+
+- главная и «Про ESOSH»;
+- «Підприємствам» / businesses;
+- блок «Доєднатися» (enrollment, participation, codex, terms, best practices);
+- навчання (courses, projects);
+- новини (листинг + статьи);
+- контакти (реквизиты + форма);
+- переключение `uk` / `en`;
+- staff `/admin` (новини, сторінки, медіа, контакти, заявки/члени-заглушки).
+
+## Критические области
+
+- паритет маршрутов и slug с esosh.net (`src/content/page-loaders.ts`, `page-metadata.json`);
+- двуязычные страницы и SEO (`lang`, titles, canonical) без тихих fallback;
+- визуал по reference CSS / референсу — не чужая дизайн-система;
+- контактная форма и PII (`POST /api/contact`);
+- локальные медиа (`public/images/**`) и PDF (`public/docs/**`);
+- отсутствие сторонних Webflow-скриптов в продакшен-разметке (Binotel — разрешённый runtime).
+
+## Источники истины
+
+- фактическая реализация: код, `package.json`, `package-lock.json`, конфиги;
+- продуктовый референс: [https://www.esosh.net/](https://www.esosh.net/);
+- маршруты и загрузчики страниц: `src/content/page-loaders.ts`, `src/content/page-metadata.json`;
+- тело страниц: `src/content/pages/**`;
+- chrome футера: `src/content/chrome/**`;
+- UI-строки навигации/формы: `messages/{uk,en}.json` (ключи `nav`, `contact`);
+- стили паритета: `src/styles/reference.css` (+ `navigation.css`, `contact.css`, `refinements.css`);
+- архитектурная навигация: `CODE_MAP.md`.
+
+Память модели и правила других проектов (Ramose, UAOS и т.п.) не являются источником истины об ESOSH.
+
+## Границы
+
+- Не меняй назначение продукта и не добавляй публичную регистрацию пользователей сайта без отдельной задачи.
+- Staff `/admin` (Neon + Blob) — разрешённая замена Webflow CMS.
+- Не меняй стек без отдельной задачи или уже существующего manifest.
+- Commit, push, PR, deploy и внешние записи — только с прямым разрешением.
+- Не «улучшай» визуал самовольно относительно reference CSS / живого сайта.
+- При конфликте референса esosh.net и кода сначала обозначь расхождение.
+- Не возвращай Webflow runtime-скрипты без явной задачи.
