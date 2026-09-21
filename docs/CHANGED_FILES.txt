@@ -154,6 +154,7 @@ src/lib/enrollment/quiz.ts
 src/lib/enrollment/ids.ts
 src/lib/enrollment/files.ts
 src/lib/enrollment/notify.ts
+src/lib/enrollment/brevo.ts
 src/lib/enrollment/members.ts
 src/app/api/enrollment/route.ts
 src/app/api/enrollment/quiz/route.ts
@@ -164,3 +165,5 @@ src/app/api/admin/applications/export/route.ts
 src/app/admin/applications/[id]/page.tsx
 tests/enrollment-classify.test.mjs
 tests/enrollment-classify-lib.mjs
+tests/enrollment-brevo.test.mjs
+tests/enrollment-brevo.test.ts

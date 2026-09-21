@@ -1,4 +1,5 @@
 import { SITE } from "@/lib/site";
+import { deliverBrevoAdminNewApplication } from "./brevo";
 import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "./levels";
 
 export type EnrollmentNotifyEvent =
@@ -27,8 +28,7 @@ export type EnrollmentNotifyEvent =
       locale: "uk" | "en";
     };
 
-/** RU: Доставляє подію форми вступу (webhook). EN: Deliver enrollment notification via webhook. */
-export async function deliverEnrollmentNotify(
+async function deliverEnrollmentWebhook(
   event: EnrollmentNotifyEvent,
 ): Promise<"delivered" | "unavailable" | "failed"> {
   const endpoint =
@@ -61,4 +61,29 @@ export async function deliverEnrollmentNotify(
   } catch {
     return "failed";
   }
+}
+
+/**
+ * RU: Доставляє подію форми вступу.
+ * Адмін про нову заявку — Brevo (якщо налаштовано), інакше webhook.
+ * Інші події — лише webhook (best-effort).
+ * EN: Deliver enrollment notify; admin new application prefers Brevo.
+ */
+export async function deliverEnrollmentNotify(
+  event: EnrollmentNotifyEvent,
+): Promise<"delivered" | "unavailable" | "failed"> {
+  if (event.type === "application_submitted" && event.to === "admin") {
+    const brevo = await deliverBrevoAdminNewApplication({
+      fullName: event.fullName,
+      email: event.email,
+      organization: event.organization,
+      autoLevelLabelUk: event.autoLevelLabelUk,
+      applicationPublicId: event.applicationPublicId,
+      adminUrl: event.adminUrl,
+    });
+    if (brevo !== "unavailable") return brevo;
+    return deliverEnrollmentWebhook(event);
+  }
+
+  return deliverEnrollmentWebhook(event);
 }

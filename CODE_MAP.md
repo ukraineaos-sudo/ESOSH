@@ -51,7 +51,7 @@
 | Contact validation | `src/lib/contact.ts` |
 | Contact delivery | `src/lib/contact/deliver-contact.ts` |
 | Enrollment form | `src/components/EnrollmentForm.tsx` + `src/styles/enrollment.css` |
-| Enrollment schema / classify / files / notify | `src/lib/enrollment/**` |
+| Enrollment schema / classify / files / notify / Brevo | `src/lib/enrollment/**` |
 | Applications / members | Neon `applications`, `members`, `application_files`, `application_events` |
 | Binotel widget URLs | `src/lib/binotel.ts` |
 | Phones / social fallback | `src/lib/site.ts` |
@@ -64,9 +64,9 @@
 - Contact API body: `{ name, email, message, locale?, company? }`
   - honeypot `company` → `{ ok: true }` без доставки
   - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
-- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files); `POST /api/enrollment/preview`; success = запис у Neon (листи — best-effort webhook)
+- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files); `POST /api/enrollment/preview`; success = запис у Neon (лист адміну — Brevo best-effort; інше — webhook)
 - Admin: `/admin/login`, session cookie `esosh_admin_session`, roles `admin` | `editor`
-- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц., fallback на contact), `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
+- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`
 
 ## Проверки
@@ -88,3 +88,4 @@
 2. EN-копія UI форми вступу (реліз 1 — українською; маршрут `/en/join/apply` уже є)
 3. Текст питань тесту Кодексу — v1-заглушка; замінити офіційним банком ESOSH
 4. Кастомний домен через Wix — окремо
+5. Brevo Domains для `esosh.net` ще без DKIM/DMARC (deliverability warning у Brevo)

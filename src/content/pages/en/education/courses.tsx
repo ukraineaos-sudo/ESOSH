@@ -953,8 +953,6 @@ export default function PageContent() {
             <a id={"w-node-b578ccad-8e5d-ba8f-310e-de66f3797649-4d31721d"} href={"#"} className={"wrapper is--course w-inline-block"}>
               <div className={"course-image-wrapper"}>
                 <img src={"/images/education-courses/wes-hicks-4-EeTnaC1S4-unsplash-54f9f9da.webp"} loading={"lazy"} alt={""} className={"course-image"} width={1920} height={1280} decoding="async" />
-                <img src={"/images/education-courses/wes-hicks-4-EeTnaC1S4-unsplash-54f9f9da.webp"} loading={"lazy"} alt={""} className={"course-image"} width={1920} height={1280} decoding="async" />
-                <img src={"/images/education-courses/wes-hicks-4-EeTnaC1S4-unsplash-54f9f9da.webp"} loading={"lazy"} alt={""} className={"course-image"} width={1920} height={1280} decoding="async" />
               </div>
               <div className={"course-content"}>
                 <div className={"chips is--purple"}>
@@ -982,32 +980,36 @@ export default function PageContent() {
                 </h3>
               </div>
             </a>
-            <div className={"course-content"}>
-              <img src={"/images/education-courses/2026-05-18-164254654-14baae75.webp"} loading={"lazy"} alt={""} width={1536} height={1024} decoding="async" />
-              <div className={"chips is--purple"}>
-                <div className={"medium-xs"}>
-                  {"Поглиблений"}
-                </div>
+            <a href={"#"} className={"wrapper is--course w-inline-block"}>
+              <div className={"course-image-wrapper"}>
+                <img src={"/images/education-courses/2026-05-18-164254654-14baae75.webp"} loading={"lazy"} alt={""} className={"course-image"} width={1536} height={1024} decoding="async" />
               </div>
-              <h3 className={"h3 is--max-width-440"}>
-                <strong>
-                  {"Безпека виконання земляних робіт"}
-                </strong>
-              </h3>
-            </div>
-            <div className={"course-content"}>
-              <img src={"/images/education-courses/018-cd32dd3e.webp"} loading={"lazy"} alt={""} width={1920} height={1280} decoding="async" />
-              <div className={"chips is--purple"}>
-                <div className={"medium-xs"}>
-                  {"Поглиблений"}
+              <div className={"course-content"}>
+                <div className={"chips is--purple"}>
+                  <div className={"medium-xs"}>
+                    {"Advanced"}
+                  </div>
                 </div>
+                <h3 className={"h3 is--max-width-440"}>
+                  {"Safety of excavation works"}
+                </h3>
               </div>
-              <h3 className={"h3 is--max-width-440"}>
-                <strong>
-                  {"Оцінка технологічних ризиків методами HAZOP/HAZID"}
-                </strong>
-              </h3>
-            </div>
+            </a>
+            <a href={"#"} className={"wrapper is--course w-inline-block"}>
+              <div className={"course-image-wrapper"}>
+                <img src={"/images/education-courses/018-cd32dd3e.webp"} loading={"lazy"} alt={""} className={"course-image"} width={1920} height={1280} decoding="async" />
+              </div>
+              <div className={"course-content"}>
+                <div className={"chips is--purple"}>
+                  <div className={"medium-xs"}>
+                    {"Advanced"}
+                  </div>
+                </div>
+                <h3 className={"h3 is--max-width-440"}>
+                  {"Technological risk assessment using HAZOP/HAZID methods"}
+                </h3>
+              </div>
+            </a>
           </div>
         </div>
       </section>
