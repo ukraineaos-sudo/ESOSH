@@ -175,7 +175,7 @@ export async function AdminShell({
           <div className="admin-warn-banner admin-warn-banner--bar" role="status">
             Змініть початковий пароль у розділі{" "}
             <Link href="/admin/security">Безпека</Link>
-            {" — "}типовий admin/admin небезпечний у продакшені.
+            {" — "}типовий admin/admin небезпечний.
           </div>
         ) : null}
         <main className="admin-main">{children}</main>

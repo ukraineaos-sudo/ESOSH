@@ -14,7 +14,7 @@ type Props = {
   onConfirm: () => void | Promise<void>;
 };
 
-/** RU: Діалог видалення з підтвердженням словом «да». EN: Delete dialog requiring «да». */
+/** RU: Діалог видалення з підтвердженням словом «так». EN: Delete dialog requiring «так». */
 export function AdminConfirmDelete({
   open,
   title,

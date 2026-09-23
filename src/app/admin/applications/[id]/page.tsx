@@ -74,6 +74,7 @@ export default async function AdminApplicationDetailPage({ params }: Props) {
           id: f.id,
           fieldKey: f.fieldKey,
           originalName: f.originalName,
+          contentType: f.contentType,
           reviewStatus: f.reviewStatus,
           sizeBytes: f.sizeBytes,
         }))}

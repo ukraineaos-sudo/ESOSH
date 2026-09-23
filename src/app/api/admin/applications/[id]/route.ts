@@ -110,8 +110,18 @@ export async function PATCH(request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "bad_level" }, { status: 400 });
   }
 
+  const resolvedStatus = nextStatus || row.application.status;
+  const resolvedLevel =
+    resolvedStatus === "confirmed_no_level"
+      ? null
+      : nextLevel === undefined
+        ? row.application.approvedLevel
+        : nextLevel;
+
   if (
+    resolvedStatus !== "confirmed_no_level" &&
     nextLevel !== undefined &&
+    nextLevel !== null &&
     nextLevel !== row.application.autoLevel &&
     !(body.adminComment || row.application.adminComment)?.trim()
   ) {
@@ -121,9 +131,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
   const [updated] = await db
     .update(applications)
     .set({
-      status: nextStatus || row.application.status,
-      approvedLevel:
-        nextLevel === undefined ? row.application.approvedLevel : nextLevel,
+      status: resolvedStatus,
+      approvedLevel: resolvedLevel,
       adminComment:
         body.adminComment !== undefined
           ? body.adminComment
@@ -135,13 +144,13 @@ export async function PATCH(request: Request, ctx: Ctx) {
     .where(eq(applications.id, id))
     .returning();
 
-  if (row.member && (nextStatus === "confirmed" || nextStatus === "confirmed_no_level")) {
+  if (row.member && (resolvedStatus === "confirmed" || resolvedStatus === "confirmed_no_level")) {
     await db
       .update(members)
       .set({
-        status: nextStatus === "confirmed" ? "active" : "active_no_level",
+        status: resolvedStatus === "confirmed" ? "active" : "active_no_level",
         level:
-          nextStatus === "confirmed"
+          resolvedStatus === "confirmed"
             ? updated.approvedLevel || updated.autoLevel
             : "community",
         updatedAt: new Date(),

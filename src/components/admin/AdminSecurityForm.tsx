@@ -46,7 +46,7 @@ export function AdminSecurityForm({ mustChangePassword }: { mustChangePassword: 
     <div className="admin-stack">
       {mustChangePassword ? (
         <p className="admin-warn-banner" role="status">
-          Використовується початковий пароль. Змініть його зараз — типовий <code>admin/admin</code> небезпечний у продакшені.
+          Використовується початковий пароль. Змініть його зараз — типовий <code>admin/admin</code> небезпечний.
         </p>
       ) : null}
       <form className="admin-panel admin-form" onSubmit={onSubmit}>

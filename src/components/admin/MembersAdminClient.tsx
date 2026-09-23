@@ -45,7 +45,7 @@ export function MembersAdminClient({ initialItems }: { initialItems: MemberListI
       if (!response.ok) {
         setDeleteError(
           data.error === "confirm_required"
-            ? "Потрібне підтвердження словом «да»"
+            ? "Потрібне підтвердження словом «так»"
             : response.status === 401
               ? "Видалення доступне лише адміністратору"
               : "Не вдалося видалити картку",

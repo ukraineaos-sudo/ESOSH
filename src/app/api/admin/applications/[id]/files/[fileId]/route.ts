@@ -8,7 +8,7 @@ import { getEnrollmentBlob } from "@/lib/enrollment/files";
 type Ctx = { params: Promise<{ id: string; fileId: string }> };
 
 /** RU: Проксі приватного файлу заявки. EN: Proxy private application file. */
-export async function GET(_request: Request, ctx: Ctx) {
+export async function GET(request: Request, ctx: Ctx) {
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
@@ -35,10 +35,14 @@ export async function GET(_request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "blob_missing" }, { status: 404 });
   }
 
+  const dispositionParam = new URL(request.url).searchParams.get("disposition");
+  const disposition = dispositionParam === "inline" ? "inline" : "attachment";
+  const encodedName = encodeURIComponent(file.originalName);
+
   return new NextResponse(blob.stream, {
     headers: {
       "Content-Type": file.contentType || "application/octet-stream",
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(file.originalName)}`,
+      "Content-Disposition": `${disposition}; filename*=UTF-8''${encodedName}`,
       "Cache-Control": "private, no-store",
     },
   });

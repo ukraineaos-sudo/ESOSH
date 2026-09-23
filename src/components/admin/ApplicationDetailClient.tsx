@@ -18,6 +18,7 @@ type FileRow = {
   id: number;
   fieldKey: string;
   originalName: string;
+  contentType: string | null;
   reviewStatus: string;
   sizeBytes: number | null;
 };
@@ -72,18 +73,22 @@ export function ApplicationDetailClient(props: Props) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [fileAction, setFileAction] = useState<FileRow | null>(null);
 
   async function save() {
     setSaving(true);
     setError(null);
     setOk(false);
     try {
+      const statusToSave = status;
+      const levelToSave =
+        statusToSave === "confirmed_no_level" ? null : approvedLevel || null;
       const response = await fetch(`/api/admin/applications/${props.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          status,
-          approvedLevel: approvedLevel || null,
+          status: statusToSave,
+          approvedLevel: levelToSave,
           adminComment,
           notifyCandidate,
           candidateMessage: candidateMessage || undefined,
@@ -94,6 +99,7 @@ export function ApplicationDetailClient(props: Props) {
         setError(data.error === "comment_required" ? "Коментар обов’язковий при зміні рівня" : "Помилка збереження");
         return;
       }
+      if (statusToSave === "confirmed_no_level") setApprovedLevel("");
       setOk(true);
       setEvents((prev) => [
         {
@@ -135,7 +141,7 @@ export function ApplicationDetailClient(props: Props) {
       if (!response.ok) {
         setDeleteError(
           data.error === "confirm_required"
-            ? "Потрібне підтвердження словом «да»"
+            ? "Потрібне підтвердження словом «так»"
             : "Не вдалося видалити заявку",
         );
         return;
@@ -214,7 +220,7 @@ export function ApplicationDetailClient(props: Props) {
           </li>
           <li>Оберіть статус і затверджений рівень у блоці «Рішення».</li>
           <li>За потреби напишіть внутрішній коментар (обов’язково при зміні рівня).</li>
-          <li>Натисніть «Зберегти рішення». Кандидату лист піде лише якщо увімкнете сповіщення нижче.</li>
+          <li>Натисніть «Зберегти рішення» внизу сторінки. Кандидату лист піде лише якщо увімкнете сповіщення в блоці «Рішення».</li>
         </ol>
       </div>
 
@@ -234,49 +240,6 @@ export function ApplicationDetailClient(props: Props) {
           {props.application.requiresManualReview ? " · потребує перевірки" : ""}
           {props.application.testScore != null ? ` · тест ${props.application.testScore}%` : ""}
         </p>
-      </div>
-
-      <div className="admin-panel admin-stack">
-        <h3>Рішення</h3>
-        <label className="admin-label">
-          Статус
-          <select className="admin-input" value={status} onChange={(e) => setStatus(e.target.value)}>
-            {APPLICATION_STATUSES.map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS_UK[s as ApplicationStatus]}</option>
-            ))}
-          </select>
-        </label>
-        <label className="admin-label">
-          Затверджений рівень
-          <select className="admin-input" value={approvedLevel} onChange={(e) => setApprovedLevel(e.target.value)}>
-            <option value="">—</option>
-            {LEVEL_CODES.map((l) => (
-              <option key={l} value={l}>{LEVEL_LABELS_UK[l]}</option>
-            ))}
-          </select>
-        </label>
-        <label className="admin-label">
-          Внутрішній коментар
-          <textarea className="admin-input" rows={3} value={adminComment} onChange={(e) => setAdminComment(e.target.value)} />
-        </label>
-        <label className="admin-label">
-          Текст для кандидата (якщо надсилаєте сповіщення)
-          <textarea className="admin-input" rows={3} value={candidateMessage} onChange={(e) => setCandidateMessage(e.target.value)} />
-        </label>
-        <label className="admin-check">
-          <input type="checkbox" checked={notifyCandidate} onChange={(e) => setNotifyCandidate(e.target.checked)} />
-          Надіслати сповіщення кандидату
-        </label>
-        <p className="admin-muted admin-note">
-          Лист адміністраторам про нову заявку вже може йти через Brevo окремо. Галочка вище стосується лише
-          повідомлення кандидату через налаштований канал сповіщень — якщо канал не налаштовано, збереження рішення
-          все одно спрацює, а лист кандидату може не піти.
-        </p>
-        {error ? <p className="admin-error">{error}</p> : null}
-        {ok ? <p className="admin-ok">Рішення збережено</p> : null}
-        <button type="button" className="admin-btn" onClick={() => void save()} disabled={saving}>
-          {saving ? "Зберігаємо…" : "Зберегти рішення"}
-        </button>
       </div>
 
       <div className="admin-panel admin-stack">
@@ -362,7 +325,13 @@ export function ApplicationDetailClient(props: Props) {
                 <tr key={f.id}>
                   <td>{fileFieldUk(f.fieldKey)}</td>
                   <td>
-                    <a href={`/api/admin/applications/${props.id}/files/${f.id}`}>{f.originalName}</a>
+                    <button
+                      type="button"
+                      className="admin-file-link"
+                      onClick={() => setFileAction(f)}
+                    >
+                      {f.originalName}
+                    </button>
                     <div className="admin-muted">{f.sizeBytes ? `${Math.round(f.sizeBytes / 1024)} КБ` : ""}</div>
                   </td>
                   <td>
@@ -382,6 +351,68 @@ export function ApplicationDetailClient(props: Props) {
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="admin-panel admin-stack">
+        <h3>Рішення</h3>
+        <label className="admin-label">
+          Статус
+          <select
+            className="admin-input"
+            value={status}
+            onChange={(e) => {
+              const next = e.target.value;
+              setStatus(next);
+              if (next === "confirmed_no_level") setApprovedLevel("");
+            }}
+          >
+            {APPLICATION_STATUSES.map((s) => (
+              <option key={s} value={s}>{STATUS_LABELS_UK[s as ApplicationStatus]}</option>
+            ))}
+          </select>
+        </label>
+        <label className="admin-label">
+          Затверджений рівень
+          <select
+            className="admin-input"
+            value={approvedLevel}
+            onChange={(e) => setApprovedLevel(e.target.value)}
+            disabled={status === "confirmed_no_level"}
+          >
+            <option value="">—</option>
+            {LEVEL_CODES.map((l) => (
+              <option key={l} value={l}>{LEVEL_LABELS_UK[l]}</option>
+            ))}
+          </select>
+        </label>
+        {status === "confirmed_no_level" ? (
+          <p className="admin-muted admin-note">
+            Для статусу «Підтверджено без рівня» затверджений професійний рівень не обирається — учасник лишається без
+            підтвердженого рівня.
+          </p>
+        ) : null}
+        <label className="admin-label">
+          Внутрішній коментар
+          <textarea className="admin-input" rows={3} value={adminComment} onChange={(e) => setAdminComment(e.target.value)} />
+        </label>
+        <label className="admin-label">
+          Текст для кандидата (якщо надсилаєте сповіщення)
+          <textarea className="admin-input" rows={3} value={candidateMessage} onChange={(e) => setCandidateMessage(e.target.value)} />
+        </label>
+        <label className="admin-check">
+          <input type="checkbox" checked={notifyCandidate} onChange={(e) => setNotifyCandidate(e.target.checked)} />
+          Надіслати сповіщення кандидату
+        </label>
+        <p className="admin-muted admin-note">
+          Лист адміністраторам про нову заявку вже може йти через Brevo окремо. Галочка вище стосується лише
+          повідомлення кандидату через налаштований канал сповіщень — якщо канал не налаштовано, збереження рішення
+          все одно спрацює, а лист кандидату може не піти.
+        </p>
+        {error ? <p className="admin-error">{error}</p> : null}
+        {ok ? <p className="admin-ok">Рішення збережено</p> : null}
+        <button type="button" className="admin-btn" onClick={() => void save()} disabled={saving}>
+          {saving ? "Зберігаємо…" : "Зберегти рішення"}
+        </button>
       </div>
 
       <div className="admin-panel">
@@ -431,6 +462,51 @@ export function ApplicationDetailClient(props: Props) {
         }}
         onConfirm={confirmDelete}
       />
+
+      {fileAction ? (
+        <div
+          className="admin-dialog-backdrop"
+          role="presentation"
+          onClick={() => setFileAction(null)}
+        >
+          <div
+            className="admin-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-file-action-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="admin-file-action-title">Файл</h2>
+            <p className="admin-muted">{fileAction.originalName}</p>
+            <div className="admin-dialog-actions admin-dialog-actions--stack">
+              {canPreviewInBrowser(fileAction) ? (
+                <a
+                  className="admin-btn"
+                  href={`/api/admin/applications/${props.id}/files/${fileAction.id}?disposition=inline`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setFileAction(null)}
+                >
+                  Переглянути
+                </a>
+              ) : (
+                <p className="admin-muted">Перегляд у браузері для цього типу файлу недоступний — збережіть файл.</p>
+              )}
+              <a
+                className="admin-btn admin-btn-secondary"
+                href={`/api/admin/applications/${props.id}/files/${fileAction.id}?disposition=attachment`}
+                download={fileAction.originalName}
+                onClick={() => setFileAction(null)}
+              >
+                Зберегти
+              </a>
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setFileAction(null)}>
+                Скасувати
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -504,6 +580,14 @@ function fileFieldUk(fieldKey: string): string {
   if (fieldKey.startsWith("diploma_")) return "Диплом";
   if (fieldKey.startsWith("certificate_")) return "Сертифікат";
   return fieldKey;
+}
+
+/** RU: Чи можна відкрити файл inline у новій вкладці. EN: Whether browser can preview inline. */
+function canPreviewInBrowser(file: FileRow): boolean {
+  const type = (file.contentType || "").toLowerCase();
+  if (type.startsWith("image/") || type === "application/pdf") return true;
+  const name = file.originalName.toLowerCase();
+  return /\.(png|jpe?g|gif|webp|pdf)$/i.test(name);
 }
 
 function actorUk(actorType: string): string {

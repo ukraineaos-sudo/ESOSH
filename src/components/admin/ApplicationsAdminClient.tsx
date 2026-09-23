@@ -123,7 +123,7 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
       if (!response.ok) {
         setDeleteError(
           data.error === "confirm_required"
-            ? "Потрібне підтвердження словом «да»"
+            ? "Потрібне підтвердження словом «так»"
             : "Не вдалося видалити заявку",
         );
         return;
