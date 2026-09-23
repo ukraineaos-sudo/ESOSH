@@ -1,16 +1,42 @@
+import { count, desc, inArray } from "drizzle-orm";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { MembersAdminClient, type MemberListItem } from "@/components/admin/MembersAdminClient";
 import { getDb } from "@/db";
-import { members } from "@/db/schema";
-import { LEVEL_LABELS_UK, memberStatusLabelUk, type LevelCode } from "@/lib/enrollment/levels";
-import { desc } from "drizzle-orm";
+import { applications, members } from "@/db/schema";
 
 /** RU: Реєстр учасників. EN: Members registry. */
 export default async function AdminMembersPage() {
-  let items: (typeof members.$inferSelect)[] = [];
+  let items: MemberListItem[] = [];
   const db = getDb();
   if (db) {
     try {
-      items = await db.select().from(members).orderBy(desc(members.createdAt)).limit(100);
+      const rows = await db.select().from(members).orderBy(desc(members.createdAt)).limit(100);
+      const ids = rows.map((row) => row.id);
+      const linkedMap = new Map<number, number>();
+      if (ids.length > 0) {
+        const linkedRows = await db
+          .select({
+            memberId: applications.memberId,
+            value: count(),
+          })
+          .from(applications)
+          .where(inArray(applications.memberId, ids))
+          .groupBy(applications.memberId);
+        for (const row of linkedRows) {
+          if (row.memberId != null) linkedMap.set(row.memberId, Number(row.value));
+        }
+      }
+      items = rows.map((row) => ({
+        id: row.id,
+        publicId: row.publicId,
+        firstName: row.firstName,
+        lastName: row.lastName,
+        primaryEmail: row.primaryEmail,
+        secondaryEmail: row.secondaryEmail,
+        status: row.status,
+        level: row.level,
+        linkedApplications: linkedMap.get(row.id) ?? 0,
+      }));
     } catch {
       items = [];
     }
@@ -18,49 +44,8 @@ export default async function AdminMembersPage() {
 
   return (
     <AdminShell title="Члени" pathname="/admin/members">
-      <div className="admin-panel admin-stack">
-        <p className="admin-muted">
-          Картки учасників: публічний код, основна та додаткова електронна скринька. Створюються автоматично з
-          форми вступу.
-        </p>
-        {items.length === 0 ? (
-          <p className="admin-muted">Поки немає записів.</p>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>№</th>
-                <th>Публічний код</th>
-                <th>ПІБ</th>
-                <th>Основна скринька</th>
-                <th>Додаткова скринька</th>
-                <th>Статус</th>
-                <th>Рівень</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.id}</td>
-                  <td>{item.publicId}</td>
-                  <td>
-                    {item.lastName} {item.firstName}
-                  </td>
-                  <td>{item.primaryEmail}</td>
-                  <td>{item.secondaryEmail || "—"}</td>
-                  <td>
-                    <span className="admin-badge">{memberStatusLabelUk(item.status)}</span>
-                  </td>
-                  <td>
-                    {item.level
-                      ? LEVEL_LABELS_UK[item.level as LevelCode] || item.level
-                      : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="admin-panel">
+        <MembersAdminClient initialItems={items} />
       </div>
     </AdminShell>
   );

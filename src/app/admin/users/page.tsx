@@ -11,12 +11,13 @@ export default async function AdminUsersPage() {
   if (!user || !requireAdmin(user)) redirect("/admin");
 
   const db = getDb();
-  let initialItems: { id: number; email: string; role: string; active: boolean }[] = [];
+  let initialItems: { id: number; username: string; email: string | null; role: string; active: boolean }[] = [];
   if (db) {
     try {
       initialItems = await db
         .select({
           id: adminUsers.id,
+          username: adminUsers.username,
           email: adminUsers.email,
           role: adminUsers.role,
           active: adminUsers.active,

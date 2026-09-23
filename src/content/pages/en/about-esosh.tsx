@@ -119,7 +119,7 @@ export default function PageContent() {
                   </p>
                 </div>
                 <a href={"/en/join/enrollment"} className={"btn is--primary w-button"}>
-                  {"Join"}
+                  {"Learn more"}
                 </a>
               </div>
             </div>

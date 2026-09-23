@@ -12,12 +12,17 @@ import {
 
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
-  email: varchar("email", { length: 256 }).notNull(),
+  username: varchar("username", { length: 64 }).notNull(),
+  email: varchar("email", { length: 256 }),
   passwordHash: text("password_hash").notNull(),
   role: varchar("role", { length: 32 }).notNull().default("editor"),
   active: boolean("active").notNull().default(true),
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [uniqueIndex("admin_users_email_uidx").on(table.email)]);
+}, (table) => [
+  uniqueIndex("admin_users_username_uidx").on(table.username),
+  uniqueIndex("admin_users_email_uidx").on(table.email),
+]);
 
 export const adminSessions = pgTable("admin_sessions", {
   id: serial("id").primaryKey(),

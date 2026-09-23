@@ -1,4 +1,4 @@
-import { put, get } from "@vercel/blob";
+import { put, get, del } from "@vercel/blob";
 import { createPublicId, safeFileName } from "./ids";
 import {
   ALLOWED_DOC_TYPES,
@@ -69,4 +69,16 @@ export async function getEnrollmentBlob(pathname: string) {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) return null;
   return get(pathname, { access: blobAccess(), token });
+}
+
+/** RU: Best-effort видалення blob-файлів заявки. EN: Best-effort enrollment blob cleanup. */
+export async function deleteEnrollmentBlobs(pathnames: string[]): Promise<void> {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const unique = [...new Set(pathnames.filter(Boolean))];
+  if (!token || unique.length === 0) return;
+  try {
+    await del(unique, { token });
+  } catch {
+    // DB cascade already owns truth; orphan blobs are acceptable.
+  }
 }

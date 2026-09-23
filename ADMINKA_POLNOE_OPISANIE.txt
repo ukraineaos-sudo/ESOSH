@@ -1,0 +1,956 @@
+================================================================================
+АДМИНКА LÖWEN DEFENCE® УКРАЇНА — ПОЛНОЕ ОПИСАНИЕ ДЛЯ ПЕРЕНОСА НА ДРУГОЙ САЙТ
+================================================================================
+Источник: репозиторий Löwen_Defence_Ukraine (Next.js App Router).
+Дата описания: 2026-09-23.
+Назначение файла: взять функционал, архитектуру, UX и визуальный стиль
+(не палитру) в другой проект. Цвета здесь не копировать — копировать форму,
+ритм, плотность, иерархию и поведение.
+
+Это НЕ runtime-CMS вроде Sanity/Strapi. Это встроенная однопользовательская
+админка внутри того же Next.js-приложения, что и публичный лендинг.
+
+
+================================================================================
+0. КОРОТКО: ЧТО ЭТО
+================================================================================
+
+Админка — закрытая панель /admin для одного администратора.
+
+Что умеет:
+  • править CMS-контент (курсы, команда, контакты) без Git и без деплоя;
+  • загружать фото JPEG/PNG/WebP и задавать точку обрезки (focal point);
+  • смотреть черновик сайта в рамках desktop / tablet / mobile;
+  • принимать заявки с публичной формы, менять статус, удалять;
+  • хранить историю сохранений (до 20 версий) и откатывать;
+  • менять пароль; старые сессии после смены гаснут;
+  • публиковать изменения кнопкой «Зберегти» (OCC, без тихой перезаписи).
+
+Что НЕ умеет (важно для переноса):
+  • нет ролей, нет нескольких админов, нет ACL;
+  • нет WYSIWYG / rich-text / markdown;
+  • нет редактирования Hero, FAQ, Why, Method и прочих «зашитых» секций;
+  • нет UI-полей английского языка и НЕТ живого AI-перевода в админке
+    (кнопки «Перекласти», OpenAI/другого API нет). Перевод сделан иначе —
+    см. раздел 12.
+
+
+================================================================================
+1. СТЕК И ГРАНИЦЫ СИСТЕМЫ
+================================================================================
+
+Стек:
+  • Next.js 15 App Router, React 19, TypeScript
+  • Tailwind CSS v4 (утилиты, особенно в админке)
+  • Семантические CSS-классы из app/globals.css (.btn, .btn-primary,
+    .btn-secondary, .btn-dark) — те же примитивы, что и на публичке
+  • lucide-react (иконки)
+  • шрифт Manrope (Google Fonts, веса 400–800)
+  • zod — валидация контента на границе API
+  • @vercel/blob — два отдельных стора
+  • vitest — юнит-тесты доменной логики
+
+Два хранилища (обязательная идея для продакшена):
+  1) Media Blob (PUBLIC)  — фото курсов/команды
+     env: MEDIA_BLOB_READ_WRITE_TOKEN
+  2) Data Blob (PRIVATE)  — JSON контента, история, заявки, хеш пароля
+     env: DATA_BLOB_READ_WRITE_TOKEN
+
+Локальный fallback (только без токенов / non-prod):
+  • data/site-content.json
+  • data/history/
+  • data/applications/
+  • data/admin-password-hash.txt
+  • public/uploads/  — локальные фото
+
+Fail-closed правило:
+  если токен Blob задан, но запись/чтение упало — НЕ маскировать локальным
+  файлом. Иначе прод молча пишет не туда.
+
+Публичный сайт vs админка:
+  • публичка: graceful fallback Blob → local → default-site-content.ts
+  • админка: fail-closed. Если current пропал, а marker/history есть —
+    аварийный экран, default НЕ подставляется (чтобы не затереть прод).
+
+
+================================================================================
+2. КАРТА МАРШРУТОВ
+================================================================================
+
+Страницы (тонкие обёртки → app/admin/_AdminPage.tsx):
+  /admin                    dashboard «Огляд»
+  /admin/login              форма входа
+  /admin/applications       заявки
+  /admin/courses            программы/курсы
+  /admin/team               команда
+  /admin/contacts           контакты
+  /admin/preview            превью сайта в рамках устройств
+  /admin/history            история версий + rollback
+  /admin/security           смена пароля
+
+Все секции кроме login рендерятся одним клиентским AdminShell.
+section передаётся с сервера. Навигация — router.push между URL,
+контент живёт в состоянии шелла (черновик до «Зберегти»).
+
+API auth:
+  POST /api/auth/login      логин, Set-Cookie
+  POST /api/auth/logout     сброс cookie
+  GET  /api/auth/session    authenticated + статус Data/Media Blob
+
+API admin (нужна сессия):
+  GET  /api/admin/content               контент + revision (ETag)
+  POST /api/admin/content               сохранить (OCC expectedRevision)
+  GET  /api/admin/history               список бэкапов
+  POST /api/admin/rollback              откат версии (тоже OCC)
+  POST /api/admin/upload                фото (data:URL → public URL)
+  POST /api/admin/password              смена пароля
+  GET  /api/admin/applications          список заявок
+  PATCH /api/admin/applications/[id]    статус new | processed
+  DELETE /api/admin/applications/[id]   удаление
+
+Публичные API (не админка, но админка их потребляет):
+  GET  /api/content                     контент сайта
+  POST /api/applications                заявка с лендинга
+
+Middleware (Edge):
+  • /admin/* кроме /admin/login — проверка cookie-сессии;
+    нет сессии → редирект /admin/login?next=<path>
+  • X-Robots-Tag: noindex, nofollow на всех /admin
+  • публичный /?lang=uk|en → cookie ld_locale + редирект без query
+    (для тестов без UI-тоггла)
+
+
+================================================================================
+3. АРХИТЕКТУРА СЛОЁВ (КАК ПЕРЕНОСИТЬ)
+================================================================================
+
+Поток:
+  app/admin/* (SSR session + read content)
+    → AdminShell (клиент: черновик, табы, save)
+      → editors (Courses / Team / Contacts / Apps / History / Preview / Password)
+        → adminFetch (единый клиент)
+          → app/api/admin/* (session + CSRF)
+            → lib/* (домен: content, applications, auth, blob)
+              → Vercel Blob / data/ / public/uploads/
+
+Ключевые файлы:
+  app/admin/_AdminPage.tsx              серверная оболочка секции
+  src/components/admin/AdminShell.tsx   оркестратор UI
+  src/components/admin/AdminLogin.tsx
+  src/components/admin/CoursesEditor.tsx
+  src/components/admin/TeamEditor.tsx
+  src/components/admin/ContactsEditor.tsx
+  src/components/admin/ApplicationsManager.tsx
+  src/components/admin/HistoryManager.tsx
+  src/components/admin/DeviceFramePreview.tsx
+  src/components/admin/ImageFocalPointPicker.tsx
+  src/components/admin/PasswordChangeForm.tsx
+  src/components/admin/ContentMissingPanel.tsx
+  lib/admin/admin-fetch.ts
+  lib/content/store.ts
+  lib/content/validate.ts
+  lib/content/content-state.ts
+  lib/applications/store.ts
+  lib/auth/session.ts + session-edge.ts
+  lib/auth/password.ts + password-store.ts
+  lib/auth/csrf.ts
+  lib/blob/media.ts + media-storage.ts
+  src/types/content.ts
+  src/types/application.ts
+
+Правило оркестрации (не ломать при переносе):
+  AdminShell только координирует: вкладки, save/load, notice, conflict.
+  Не класть туда Blob I/O, SQL, криптографию, парсинг файлов.
+  Редакторы — controlled: получают slice контента + onChange.
+  Сохранение одно на всю CMS (не «сохранить курс» по отдельности).
+
+
+================================================================================
+4. АВТОРИЗАЦИЯ И БЕЗОПАСНОСТЬ
+================================================================================
+
+Модель: ОДИН админ.
+  ADMIN_USERNAME (default "admin")
+  ADMIN_PASSWORD_HASH — scrypt:salt:hex (генерируется
+    npm run generate:credentials -- "Пароль")
+  AUTH_SECRET — HMAC-секрет сессии
+
+Сессия:
+  cookie: ld_admin_token
+  HttpOnly, SameSite=Lax, Secure в production, path=/, TTL 12 часов
+  токен = base64url(JSON {u, exp, pv}).HMAC-SHA256
+  pv = fingerprint текущего хеша пароля (первые 24 символа HMAC)
+  смена пароля → pv не совпадает → старые сессии мертвы
+  старые токены без pv (до внедрения) живут до exp
+
+Где живёт хеш пароля:
+  1) private Blob: auth/admin-password-hash.txt  (после смены в админке)
+  2) local: data/admin-password-hash.txt        (dev)
+  3) env ADMIN_PASSWORD_HASH                    (стартовый bootstrap)
+  Есть password-state marker: если хранилище уже инициализировано,
+  а файл хеша пропал — env-пароль НЕ поднимается (PASSWORD_HASH_MISSING).
+
+Логин:
+  POST JSON {username, password}
+  CSRF Origin/Referer
+  rate limit: 8 неудачных попыток / 15 мин / IP (in-memory, per-isolate)
+  успех → Set-Cookie
+  503 если AUTH_SECRET нет или хранилище пароля недоступно
+  UI логина: поле логина по умолчанию "admin"
+
+CSRF:
+  мутирующие admin/auth запросы проверяют Origin или Referer
+  против Host текущего запроса или SITE_URL
+  в dev запросы без Origin пропускаются (инструменты)
+
+Клиентский fetch (lib/admin/admin-fetch.ts):
+  credentials: include
+  JSON, без throw на HTTP-ошибках
+  401 → один редирект /admin/login?reason=session_expired&next=...
+  стабильные коды: 400/401/403/404/409/413/429/503
+  envelope: { error: { code, message, fields }, code, message }
+
+Другие защиты:
+  /admin noindex
+  публичная форма заявок: honeypot, timing (_t ≥ 2.5с, ≤ 2ч),
+    consent, rate 5/15мин/IP
+  upload: magic bytes JPEG/PNG/WebP, declared MIME должен совпасть,
+    SVG запрещён, ≤ 3 МБ, javascript/data URL в контенте режутся Zod
+  image.url только https или относительный /...
+  phoneHref только tel:+цифры
+  website URL только https
+
+
+================================================================================
+5. МОДЕЛЬ КОНТЕНТА (CMS JSON)
+================================================================================
+
+Тип SiteContent (src/types/content.ts):
+
+{
+  schemaVersion: number,          // сейчас 1
+  updatedAt: string,              // ISO, ставит сервер при save
+  courses: Course[],
+  team: TeamMember[],
+  contacts: Contacts
+}
+
+Course:
+  id, enabled, featured, order,
+  tag, title, description,        // LocalizedText
+  meta: LocalizedText[],          // чипы: «до 14 осіб», «2 години»
+  price, priceNote, buttonLabel,  // LocalizedText
+  image: ResponsiveImageData
+
+Инварианты курса:
+  • featured только у ОДНОГО курса (в UI снятие у остальных)
+  • enabled = виден на публичке
+  • order = позиция, пересчитывается при swap/delete
+  • лимиты Zod: title 160, tag 200, description 2000, meta max 8×200,
+    price/priceNote/button 200, id 80, курсов max 100
+
+TeamMember:
+  id, enabled, order, name, description, image
+  лимиты: name 200, description 2000
+
+Contacts (НЕ локализованы — цифры/URL одинаковы для uk/en):
+  phoneDisplay, phoneHref,
+  email, websiteDisplay, websiteUrl,
+  germanWebsiteUrl, privacyUrl
+
+Замечание для переноса:
+  ContactsEditor НЕ показывает privacyUrl, хотя поле есть в модели
+  и валидации. Редактируется только через JSON/default.
+
+ResponsiveImageData:
+  url, alt (LocalizedText),
+  focalX, focalY (0–100),
+  опционально mobileUrl / mobileFocalX / mobileFocalY
+  (в UI picker пишет только desktop focal; mobile-поля в типе есть)
+
+LocalizedText = string | { uk: string, en?: string }
+  • string трактуется как украинский канон
+  • dual-shape хранит en, если он уже был
+  • админка пишет через withLocalizedUk(prev, newUk):
+      если prev имел en — сохраняет {uk: new, en: старый}
+      иначе пишет plain string
+  Следствие: правка украинского текста НЕ стирает английский,
+  но и НЕ обновляет его. Новые курсы создаются как plain uk-строки
+  без en.
+
+Где лежит JSON:
+  Blob: content/current/site-content.json
+  Blob history: content/history/{iso}-site-content.json  (max 20)
+  Blob marker: content/state.json
+    { schemaVersion: 1, initializedAt, lastContentUpdatedAt }
+  recovery raw (не для UI rollback): content/recovery/raw/
+
+
+================================================================================
+6. СОХРАНЕНИЕ КОНТЕНТА, OCC, ИСТОРИЯ
+================================================================================
+
+Черновик живёт в React state AdminShell:
+  content        — текущая правка
+  savedContent   — последний успешно сохранённый снимок
+  revision       — ETag Blob (или updatedAt локально)
+  dirty = JSON.stringify(content) !== JSON.stringify(savedContent)
+
+Поведение dirty:
+  • баннер «є незбережені зміни» + кнопка «Опублікувати зараз»
+  • кнопка «Зберегти» прыгает (animate-bounce) и становится primary
+  • beforeunload предупреждение
+  • переход по табам: confirm() если dirty
+  • «Скасувати» откатывает к savedContent
+
+POST /api/admin/content body:
+  { expectedRevision: string | null, content: SiteContent }
+
+Алгоритм writeSiteContent:
+  1. Zod validate (input без updatedAt)
+  2. next.updatedAt = now ISO
+  3. прочитать current
+  4. если current есть:
+       expected должен совпасть с ETag (после нормализации weak W/"…")
+       иначе 409 CONTENT_CONFLICT
+       перед записью snapshot current → history
+       put current с ifMatch = expected
+  5. если current нет (первый запуск):
+       expected обязан быть null
+       put без allowOverwrite
+  6. обновить content/state.json marker
+     если marker не записался — контент всё равно сохранён,
+     код CONTENT_STATE_WRITE_FAILED, UI warning «збережіть ще раз»
+
+Конфликт в UI:
+  модалка «Контент уже змінено»
+  • Продовжити редагування (черновик этой вкладки жив)
+  • Завантажити актуальну версію (GET content, черновик теряется)
+
+History:
+  до 20 версий, старые prune
+  UI: список «Версія #N (дата)», курсов/команда counts
+  rollback = записать выбранный snapshot как новый current
+  (не delete current; история растёт)
+  rollback тоже OCC (expectedRevision)
+  timestamp: "latest" на аварийном экране = последняя версия
+
+Аварийный ContentMissingPanel:
+  current отсутствует, но marker или history существуют.
+  Default запрещён. Можно восстановить из истории или «повторити перевірку».
+  Если истории нет — ручной put валидного site-content.json в Blob.
+
+Публичное чтение:
+  Blob found → его и отдаём
+  Blob unavailable → local/default (сайт не падает)
+  Админ при unavailable — 503, save заблокирован.
+
+
+================================================================================
+7. ЭКРАНЫ: ЧТО ПОКАЗЫВАЕТ И КАК РАБОТАЕТ
+================================================================================
+
+----- 7.1 Login /admin/login -----
+Полноэкранный тёмный фон, по центру белая карточка.
+Щит-иконка сверху, заголовок «Панель управління», подпись бренда.
+Поля: логін (иконка User слева), пароль (Lock).
+Кнопка на всю ширину «Увійти в адмінку →».
+Ошибки в красном чипе. Session expired — янтарный чип.
+Ссылка «Повернутися на публічний сайт».
+После успеха: hard navigation window.location.assign(next)
+(мягкий router.replace гонялся с RSC-кэшем middleware).
+
+----- 7.2 Шапка AdminShell (на всех секциях кроме login) -----
+Sticky header, две полосы.
+
+Верхняя полоса:
+  слева: квадратная иконка Shield + «Löwen Defence®» + бейдж «АДМІН»
+         + «Користувач: {username}»
+  центр (desktop): чипы-счётчики
+         Курсів: N активных
+         Команда: N активных
+         Заявок: N новых  — кликабельно, пульсирует если N>0
+  справа: Скасувати (если dirty) | Зберегти | На сайт | Logout
+
+Нижняя полоса — горизонтальные табы (overflow-x-auto, без сайдбара):
+  Огляд | Заявки (+красный бейдж count) | Програми (total)
+  | Команда (total) | Контакти | Попередній перегляд
+  | Історія версій | Пароль
+
+Активный таб — «залитый» pill. Неактивный — текст на тёмном, hover
+полупрозрачный.
+
+Под шапкой, в main (max-w-7xl):
+  • предупреждение если Blob не настроен (локальный режим)
+  • notice success/warning/error с «Закрити»
+  • dirty-баннер
+
+----- 7.3 Dashboard «Огляд» -----
+Сетка 4 карточки (2 на sm, 4 на lg), кликабельные:
+  Активні курси     value + «з N усього»     → courses
+  Команда           value + «з N усього»     → team
+  Нові заявки       value + «потребують уваги» → applications
+                    (карточка подсвечена, если count>0)
+  Оновлено          locale uk-UA дата        → history
+
+Это не аналитика и не графики — только оперативные числа.
+
+----- 7.4 Програми / курсы -----
+Master-detail 5+7 колонок.
+
+Слева список:
+  кнопка «Додати курс»
+  скролл max-h 600px
+  карточка: стрелки вверх/вниз, #N, название, тег-pill, цена,
+            звезда featured, глаз enabled/hidden
+  выбранная карточка инвертирована (тёмный фон)
+
+Справа форма выбранного:
+  заголовок «Редагування курсу» + pill «Головна картка» если featured
+  Дублювати / Видалити
+  поля: віковий тег, назва, опис (textarea), ціна, підпис до ціни,
+        текст кнопки
+  meta — набор pill-чипов, × удаляет, «+ Додати параметр» через prompt()
+  ImageFocalPointPicker
+
+Add: шаблон с Unsplash-заглушкой, id course-{timestamp}
+Duplicate: копия, title += « (Копія)», featured=false, новый id
+Delete: confirm с названием
+Toggle featured: снимает featured у всех остальных
+
+Тексты редактируются как uk (localizedUk / withLocalizedUk).
+EN в форме не видно.
+
+----- 7.5 Команда -----
+Тот же master-detail паттерн.
+Слева: имя, усечённое описание, глаз, стрелки порядка.
+Справа: ім’я та прізвище, посада та опис, фото+focal.
+Add: шаблон «Ім’я Прізвище» + Unsplash.
+Delete: confirm.
+
+----- 7.6 Контакти -----
+Одна узкая карточка max-w-2xl, не master-detail.
+Пояснение: «зміни оновляться у шапці, футері та формі».
+Поля с иконками Phone/Mail/Globe/ExternalLink:
+  відображуваний телефон / tel: ссылка
+  email / відображуваний сайт
+  повний URL / німецький сайт
+privacyUrl в UI нет.
+
+----- 7.7 Заявки -----
+Данные: poll GET /api/admin/applications каждые 30 секунд
+(стоп при 401). Badge в шапке живёт с этим списком.
+
+Панель: поиск (ім’я / телефон / назва курсу) + фильтр
+Всі / Нові / Опрацьовані с counts.
+
+Карточка заявки:
+  статус-pill «Нова» / «Опрацьована» + дата uk-UA
+  кнопки: Позначити опрацьованою ↔ Повернути у Нові; корзина
+  сетка 3 колонки: заявник (имя + tel: ссылка), курс-snapshot,
+  комментарий или «Без коментаря»
+  новые — яркая рамка; обработанные — приглушённые
+
+Модель CourseApplication:
+  id, createdAt, updatedAt, name, phone,
+  courseId, courseTitleSnapshot, comment,
+  status: "new" | "processed", processedAt
+
+Снимок названия курса берётся на сервере из CMS (uk), клиентский
+title игнорируется. Спец. id: "corporate", иначе «Індивідуальний запит».
+
+Публичная форма → createApplication → best-effort email Brevo
+(таймаут 2.5с, ошибка почты форму не валит). В письме ссылка
+на /admin/applications.
+
+----- 7.8 Попередній перегляд -----
+DeviceFramePreview:
+  тёмная панель переключателей Desktop / Tablet (768px) / Mobile (375px)
+  белый «экран» в тёмной «студии»
+  внутри рендерится <PublicSite content={черновик} showAdminLink={false} />
+То есть превью показывает НЕ сохранённое, а текущий draft.
+Язык превью — текущий cookie публички (админка язык не переключает).
+
+----- 7.9 Історія версій -----
+Белая карточка, «Оновити список».
+Пусто: «після першого збереження з’явиться історія».
+Строка: иконка часов, Версія #N (дата), курсов·команда, кнопка
+«Відновити цю версію» (confirm + OCC).
+
+----- 7.10 Пароль -----
+Форма: поточний / новий (мін. 8) / підтвердження.
+Успех: «Увійдіть з новим паролем при наступному логіні»
+(текущая сессия с новым pv ещё может жить до проверки;
+следующий запрос с pv-mismatch выкинет).
+
+----- 7.11 Недоступность хранилища -----
+Отдельный экран (не shell): «Сховище тимчасово недоступне»,
+кнопка «Спробувати знову». Save намеренно заблокирован.
+
+
+================================================================================
+8. ФОТО И FOCAL POINT
+================================================================================
+
+Компонент ImageFocalPointPicker — общий для курсов и команды.
+
+Upload:
+  hidden file input, accept jpeg/png/webp, ≤ 3 МБ
+  FileReader → data:URL → POST /api/admin/upload
+    { dataUrl, fileName, folder: "courses/{id}" | "team/{id}" }
+  сервер: decode base64, magic bytes, MIME match, storeMediaBuffer
+  Media Blob public → URL в JSON (не data:URL)
+  без токена в dev → public/uploads/{folder}/...
+  с токеном и ошибкой Blob → ошибка, старое фото не трогаем
+
+UI:
+  поля URL и Alt (SEO, uk)
+  клик по картинке ставит focalX/Y в % (маркер-перекрестье)
+  превью обрезки object-position в рамках desktop/tablet/mobile
+  подсказка «клікніть щоб встановити точку фокусу»
+
+Публичный ResponsiveImage читает focal как object-position.
+
+
+================================================================================
+9. ЗАЯВКИ С ПУБЛИЧНОЙ ФОРМЫ (КАК ПОПАДАЮТ В АДМИНКУ)
+================================================================================
+
+POST /api/applications:
+  1. rate limit 5 / 15 мин / IP
+  2. honeypot (honeypot | website | company_url | website_url_check)
+     → при срабатывании фейковый success:true (бот думает, что ок)
+  3. _t / formStartedAt: missing/too_fast → фейковый success
+     expired (>2ч) → 400 FORM_EXPIRED
+  4. consent обязателен
+  5. name + phone обязательны
+  6. курс резолвится на сервере
+  7. createApplication в private Blob applications/{yyyy}/{mm}/{iso}-{id}.json
+  8. email Brevo best-effort
+     env: BREVO_API_KEY, NOTIFY_EMAIL_TO, NOTIFY_EMAIL_FROM
+
+Админ видит заявки без деплоя. Статус и удаление — PATCH/DELETE по id.
+
+
+================================================================================
+10. ВИЗУАЛЬНЫЙ СТИЛЬ АДМИНКИ (НЕ ЦВЕТА, А ФОРМА)
+================================================================================
+
+Копировать стиль — значит копировать геометрию, плотность, иерархию
+и поведение. Палитру целевого сайта подставить свою.
+
+10.1 Общая геометрия
+  • нет бокового сайдбара; навигация — горизонтальные pills под sticky
+    шапкой (как toolbar, не как SaaS-sidebar)
+  • контент в контейнере max-w-7xl, padding 16/24
+  • фон страницы слегка «бумажный», не чисто белый холст
+  • шапка тёмная, контент светлый — двухполосный контраст «инструмент /
+    рабочее поле»
+  • скругления крупные: карточки rounded-2xl (~16–20px), инпуты
+    rounded-xl, кнопки-действия часто rounded-full (капсулы .btn)
+  • тени слабые (shadow-sm), не неоновые, не glassmorphism
+  • границы тонкие; выбранный элемент усиливается заливкой, не толстым
+    бордером
+
+10.2 Типографика
+  • тот же Manrope, что и публичка (не отдельный admin-font)
+  • заголовки секций: font-black, ~text-lg
+  • подписи полей: text-xs font-bold
+  • бейджи/табы: font-extrabold / font-black, uppercase + tracking-wider
+    для меток дашборда
+  • плотный набор: мало «воздуха Medium», много compact xs
+  • числа в дашборде крупные (text-2xl font-black)
+  • никаких декоративных serif, никаких моноширинных UI-шрифтов
+    (моно только в code ADMIN_PASSWORD_HASH)
+
+10.3 Компонентный язык
+  Карточка:
+    белая поверхность, тонкая рамка, p-4…p-6, rounded-2xl.
+  Список слева / форма справа:
+    кликабельные строки-карточки; selected = инверс (тёмная заливка,
+    белый текст); hover слегка поднимает границу.
+  Pill / chip:
+    маленькие rounded-full для тегов, статусов, meta-параметров.
+  Segmented control:
+    группа кнопок в общем «ложе» (device preview, фильтр заявок,
+    focal device). Активная — залита, остальные прозрачные.
+  Кнопки:
+    .btn капсула, font-weight 800, hover translateY(-2px).
+    В админке часто уменьшены (text-xs py-1.5 px-3) относительно
+    публичных 52px-высоких CTA.
+    Primary — главное действие (сохранить, войти).
+    Dark — вторичное сильное (rollback, upload).
+    Иконка + короткий глагол, не иконка-only кроме logout.
+  Иконки:
+    lucide, stroke ~2, размер 3.5–5 (w-4/w-5). Всегда рядом с текстом
+    в навигации и заголовках. В инпутах — абсолютное позиционирование
+    слева (login, search).
+  Алерты:
+    полноширинная полоса под шапкой, иконка AlertCircle, мелкий жирный
+    текст, кнопка «Закрити» или CTA справа. Не toast в углу.
+  Модалка конфликта:
+    затемнение 40%, белая карточка max-w-md, rounded-2xl, две капсульные
+    кнопки внизу (продолжить / загрузить актуальную).
+  Confirm:
+    нативный window.confirm/alert/prompt. Нет своей design-system
+    модалки на delete/rollback/add-meta.
+
+10.4 Паттерн master-detail
+  Курсы и команда — визитная карточка UX админки:
+  слева вертикальный список с ручной сортировкой стрелками
+  (не drag-and-drop), справа форма.
+  Список не таблица: это карточки, не <table>, не Excel.
+  Нет пагинации (списки короткие, max 100 в схеме).
+
+10.5 Дашборд
+  Не графики. Крупные кликабельные плитки-метрики.
+  Hover: лёгкий подъём (-translate-y-0.5).
+  Акцентная плитка (новые заявки) визуально «громче» остальных.
+
+10.6 Состояния кнопок и «живость»
+  Dirty save: bounce + жирнее подпись «Зберегти зміни!»
+  Success: иконка Check, текст «Збережено!» на 3 секунды
+  Saving: Loader2 spin
+  Новые заявки в шапке: animate-pulse
+  Disabled: opacity-30…50, без спиннера на стрелках порядка
+
+10.7 Превью устройств
+  «Студия»: тёмная площадка, белый экран с толстой рамкой-корпусом
+  на tablet/mobile (border-8 / border-12, скругление «телефона» 40px).
+  Переключатель устройств — segmented на тёмной плашке.
+  Это не BrowserStack, а декоративная рамка + фиксированная ширина.
+
+10.8 Focal picker
+  Тёмное ложе для изображения, курсор crosshair, круглый маркер
+  с точкой в центре. Превью кропа — отдельные мини-кадры разных
+  пропорций, не оверлей сетки.
+
+10.9 Login
+  Центрированная «карточка-остров» на полном тёмном холсте.
+  Крупная квадратная иконка-щит сверху (не логотип-картинка).
+  Ощущение «закрытый кабинет», не корпоративный SSO-экран.
+
+10.10 Чего в стиле НЕТ (не тащить)
+  • sidebar + nested menu
+  • data-table с сортировкой колонок
+  • breadcrumbs
+  • dark mode toggle
+  • shadcn / MUI / Ant / Framer / GSAP
+  • glass, градиентные кнопки, неон
+  • иллюстрации empty-state
+  • command palette
+  • вкладки внутри формы (uk/en) — их нарочно нет
+
+10.11 Язык интерфейса
+  Админка целиком украинская. Подписи глагольные, короткие,
+  без канцелярита. Ошибки — человеческим языком, не stacktrace.
+
+
+================================================================================
+11. i18n ПУБЛИЧНОГО САЙТА (СВЯЗЬ С АДМИНКОЙ)
+================================================================================
+
+Локали: uk (default) | en
+Хранение выбора: cookie ld_locale, Max-Age 1 год, SameSite=Lax
+URL-префикса /en НЕТ — админка и / остаются без locale-сегмента.
+Форс: /?lang=en → middleware ставит cookie и редиректит на /
+Клиентский тоггл UA|EN в Header и Footer (LanguageToggle):
+  пишет cookie, меняет document.documentElement.lang, без reload.
+
+Два слоя текстов:
+
+A) Статический словарь lib/i18n/dictionary.ts
+   chrome UI публички: hero, trust, why, courses-секция (заголовки),
+   method, business, standards, team-секция, faq, contact-форма,
+   footer, privacy-модалка, header nav, brand tagline.
+   Это КОД, не CMS. Админка это не редактирует.
+   Смена языка словаря = деплой.
+
+B) CMS LocalizedText в SiteContent (курсы, команда, alt картинок)
+   resolveSiteContent(content, locale):
+     для en: stored.en → default-site-content.en (по id курса/участника)
+             → fallback uk
+   Если админ создал новый курс без en — на английском сайте
+   покажется украинский текст (или default.en, только если id совпал
+   с seed: course-1, course-2, …).
+
+Privacy policy: отдельный файл src/data/privacy-policy.ts, uk+en,
+модалка, не CMS.
+
+Админка:
+  I18nProvider не оборачивает /admin
+  html lang всё равно из cookie публички (layout общий)
+  UI админки всегда украинский независимо от ld_locale
+
+
+================================================================================
+12. «ВНЕДРЕНИЕ AI ДЛЯ ПЕРЕВОДА КОНТЕНТА» — КАК ЕСТЬ НА САМОМ ДЕЛЕ
+================================================================================
+
+ФАКТ ПО КОДУ (проверено поиском openai/anthropic/gpt/translate API):
+  в проекте НЕТ:
+    • OpenAI / Anthropic / Google Translate SDK
+    • env-ключа нейросети
+    • endpoint /api/admin/translate
+    • кнопки «Перекласти» / «Generate EN»
+    • очереди, кэша переводов, webhooks
+
+Как перевод реально внедряли (это и есть «AI-перевод» в этом сайте):
+
+  1. Решение продукта (чат 2026-07-31):
+     публичный сайт uk/en; админку на EN не переводить;
+     CMS dual-shape {uk, en?}; админ правит только uk.
+
+  2. Агент (AI) сгенерировал и влил в репозиторий:
+     • словари uk+en в lib/i18n/dictionary.ts
+     • английские поля в src/data/default-site-content.ts
+       (каждый курс/участник: { uk: "…", en: "…" })
+     • английскую политику в privacy-policy.ts
+     • хелперы localized.ts / resolve-content.ts
+     • тесты Tests/i18n-localized.test.ts, resolve-content-i18n.test.ts
+
+  3. Коммит feat: add public site Ukrainian/English i18n
+
+Итог: перевод контента — ОДНОРАЗОВЫЙ, в исходниках, сделанный AI
+на этапе разработки. Дальше он живёт как статические строки + seed CMS.
+
+Что происходит при работе админа после этого:
+  • правит украинский текст курса → withLocalizedUk сохраняет старый en
+    (английский на сайте остаётся СТАРЫМ, пока его не поправят в JSON)
+  • добавляет новый курс → en нет → английская версия сайта показывает uk
+    либо, если id совпал с seed, подставляет default.en
+  • чтобы обновить EN без деплоя, сейчас нужно править Blob JSON вручную
+    (админ-UI этого не даёт)
+
+Это ограничение, не баг: так и задумывалось («админка остаётся
+украинской, без EN-полей»).
+
+----- Как перенести «AI-перевод» на другой сайт ПРАВИЛЬНО -----
+
+Вариант A — как здесь (минимум, уже доказан):
+  • dual-shape поля в CMS
+  • AI один раз переводит seed + словари в коде
+  • админ работает на исходном языке
+  • fallback: target-locale → source-locale
+  Плюс: нет ключа API, нет счетов, нет галлюцинаций в проде.
+  Минус: новые/изменённые тексты на втором языке устаревают.
+
+Вариант B — живой AI в админке (этого здесь нет, но модель готова):
+  • кнопка у поля «Перекласти uk → en»
+  • POST /api/admin/translate { texts: string[], from, to }
+  • сервер → LLM с жёстким промптом (сохранить имена бренда,
+    не переводить Löwen Defence®, цены оставить как есть)
+  • ответ пишется в content.field.en, dirty=true, публикация
+    обычным Save + OCC
+  • rate limit, секрет только на сервере, логи без ПД
+  Точки расширения уже есть: LocalizedText, withLocalizedUk,
+  validate union string|{uk,en}, resolveSiteContent.
+  Не хватает только: UI второго языка, API перевода, политики
+  «когда сбрасывать устаревший en».
+
+Вариант C — автоперевод при Save:
+  если uk изменился и en пустой или помечен stale — вызвать LLM
+  на сервере внутри writeSiteContent.
+  Риски: Save станет медленным, 409 сложнее, нужен stale-флаг.
+
+Рекомендация при переносе:
+  начать с A (как этот сайт). Если редактор реально пишет оба языка
+  часто — добавить B точечно на курсы/описания, не на весь словарь UI.
+
+
+================================================================================
+13. ЧТО АДМИНКА НЕ РЕДАКТИРУЕТ (ЧАСТАЯ ОШИБКА ПРИ ПЕРЕНОСЕ)
+================================================================================
+
+Не CMS, а код / словари:
+  Hero, TrustStrip, Why, Method, Business, Standards, FAQ,
+  подписи формы, футер, header nav, LanguageToggle,
+  тексты ошибок формы, privacy policy.
+
+Контакты частично CMS; privacyUrl в UI нет.
+
+Чтобы «Александр менял тексты hero без разработчика» — нужно
+расширить SiteContent новыми полями и редакторами. Сейчас этого нет
+намеренно: CMS только то, что реально меняется (цены, фото, состав,
+телефоны, заявки).
+
+
+================================================================================
+14. ENV ДЛЯ ПОДЪЁМА АДМИНКИ НА ДРУГОМ САЙТЕ
+================================================================================
+
+Обязательные:
+  AUTH_SECRET
+  ADMIN_USERNAME
+  ADMIN_PASSWORD_HASH          (npm run generate:credentials)
+  SITE_URL                     (CSRF + ссылки в письмах)
+
+Прод-хранение:
+  MEDIA_BLOB_READ_WRITE_TOKEN  (public photos)
+  DATA_BLOB_READ_WRITE_TOKEN   (private JSON)
+
+Опционально:
+  BREVO_API_KEY
+  NOTIFY_EMAIL_TO
+  NOTIFY_EMAIL_FROM
+
+Локально без Blob админка работает через data/ и public/uploads/.
+На Vercel production без Data-токена заявки/контент не пишутся
+(APPLICATION_STORAGE_MISSING / STORAGE).
+
+
+================================================================================
+15. ТЕСТЫ, КОТОРЫЕ ЗАКРЕПЛЯЮТ КОНТРАКТЫ АДМИНКИ
+================================================================================
+
+Папка Tests/*.test.ts (Vitest):
+  password / HMAC / session + pv
+  password-store
+  form-guards (honeypot, timing, consent)
+  rate-limit
+  validate-content (LocalizedText dual-shape, URL safety)
+  content-state / migration / OCC concurrency
+  media-storage fail-closed
+  admin-fetch
+  application status
+  i18n LocalizedText + resolve-content
+
+При переносе имеет смысл тащить тесты домена вместе с lib/*,
+а не только UI-компоненты.
+
+
+================================================================================
+16. РЕЦЕПТ ПЕРЕНОСА ФУНКЦИОНАЛА НА ДРУГОЙ САЙТ
+================================================================================
+
+Минимальный каркас (повторить 1-в-1 по смыслу, не по цветам):
+
+  1. Next.js App Router. Шрифт и .btn-капсулы из своей ДС.
+  2. middleware: guard /admin + noindex.
+  3. cookie-сессия HMAC + scrypt пароль + CSRF Origin.
+  4. SiteContent JSON + Zod на POST.
+  5. AdminShell: dirty draft, одна кнопка Save, OCC expectedRevision.
+  6. Master-detail редакторы для списковых сущностей.
+  7. ImageFocalPointPicker + public media store.
+  8. Applications list + poll 30s + статусы.
+  9. History max N + rollback как новая current.
+  10. Fail-closed: токен есть, стор упал → не писать в local.
+  11. adminFetch с 401→login.
+  12. i18n: словарь в коде + dual-shape CMS; админ UI на одном языке.
+  13. AI-перевод: либо seed в репозитории (как здесь), либо отдельный
+      authenticated translate endpoint (этого здесь нет).
+
+Порядок внедрения (как делали тут):
+  login → shell + dashboard → courses/team/contacts save
+  → upload/focal → preview frames → applications
+  → history/rollback → password + pv
+  → OCC conflict UX → content-state fail-closed
+  → публичный i18n без EN-полей в админке
+
+Не копировать:
+  зелёно-жёлтую палитру Löwen, бейдж «АДМІН» как бренд,
+  Unsplash-заглушки, Brevo если другая почта, конкретные поля курса
+  (tag/meta/price) если у другого сайта другая предметка.
+  Предметные поля заменить, оболочку (shell, save, OCC, media,
+  applications, history) оставить.
+
+
+================================================================================
+17. ИНВАРИАНТЫ, КОТОРЫЕ ЛЕГКО СЛОМАТЬ ПРИ ПЕРЕНОСЕ
+================================================================================
+
+  • Save без expectedRevision на уже существующем current = всегда 409.
+  • Weak ETag Blob надо нормализовать (срезать W/), иначе вечный conflict.
+  • withLocalizedUk обязателен, иначе правка uk сотрёт en в JSON.
+  • featured: в UI один; на публичке есть запасной хардкод
+    «первая карточка featured, если никто не помечен» — проверять
+    при переносе, это может удивить.
+  • Default контент в админке разрешён только first_run
+    (нет marker и нет history).
+  • Публичка может показывать default, админка — нет, если marker есть.
+  • Upload не кладёт data:URL в site-content.json.
+  • Локальная запись медиа/заявок в production без токена запрещена.
+  • Rate limit in-memory: на serverless это per-instance, не кластер.
+  • Preview рендерит черновик, сайт — только сохранённое.
+  • Смена пароля не логинит заново автоматически в той же вкладке
+    до следующей проверки pv.
+
+
+================================================================================
+18. СПИСОК ФАЙЛОВ АДМИНКИ (ЧЕКЛИСТ КОПИРОВАНИЯ)
+================================================================================
+
+UI:
+  src/components/admin/AdminShell.tsx
+  src/components/admin/AdminLogin.tsx
+  src/components/admin/CoursesEditor.tsx
+  src/components/admin/TeamEditor.tsx
+  src/components/admin/ContactsEditor.tsx
+  src/components/admin/ApplicationsManager.tsx
+  src/components/admin/HistoryManager.tsx
+  src/components/admin/DeviceFramePreview.tsx
+  src/components/admin/ImageFocalPointPicker.tsx
+  src/components/admin/PasswordChangeForm.tsx
+  src/components/admin/ContentMissingPanel.tsx
+
+Страницы:
+  app/admin/_AdminPage.tsx
+  app/admin/page.tsx
+  app/admin/login/page.tsx
+  app/admin/{courses,team,contacts,applications,history,preview,security}/page.tsx
+
+API:
+  app/api/auth/{login,logout,session}/route.ts
+  app/api/admin/content/route.ts
+  app/api/admin/history/route.ts
+  app/api/admin/rollback/route.ts
+  app/api/admin/upload/route.ts
+  app/api/admin/password/route.ts
+  app/api/admin/applications/route.ts
+  app/api/admin/applications/[id]/route.ts
+  app/api/applications/route.ts          (вход заявок)
+  app/api/content/route.ts               (публичное чтение)
+
+Домен:
+  lib/admin/admin-fetch.ts
+  lib/auth/*
+  lib/content/*
+  lib/applications/*
+  lib/blob/*
+  lib/mail/notify-application.ts
+  lib/security/rate-limit.ts
+  lib/api/errors.ts
+  lib/env.ts
+  middleware.ts
+
+i18n (публичка + модель CMS, не UI админки):
+  lib/i18n/locale.ts
+  lib/i18n/localized.ts
+  lib/i18n/dictionary.ts
+  lib/i18n/I18nProvider.tsx
+  lib/i18n/resolve-content.ts
+  lib/i18n/get-request-locale.ts
+  src/data/default-site-content.ts
+  src/data/privacy-policy.ts
+  src/components/public/LanguageToggle.tsx
+
+Типы:
+  src/types/content.ts
+  src/types/application.ts
+
+
+================================================================================
+19. ОГРАНИЧЕНИЯ ЭТОГО ОПИСАНИЯ
+================================================================================
+
+Собрано по текущему коду репозитория (чтение файлов админки, API, lib,
+i18n, README, CODE_MAP). Браузерный проход по задеплоенной админке
+в этой сессии не выполнялся. Секреты из .env.local не читались.
+
+AI-перевод как runtime-функция в админке отсутствует — это подтверждено
+кодом, не предположение. «Внедрение AI» здесь = генерация двуязычных
+словарей и seed CMS на этапе разработки плюс dual-shape модель,
+готовая к будущей кнопке перевода.
+
+Конец файла.
+)

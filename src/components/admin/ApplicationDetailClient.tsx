@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AdminConfirmDelete } from "@/components/admin/AdminConfirmDelete";
+import { ADMIN_DELETE_CONFIRM } from "@/lib/admin/confirm-delete";
 import {
   APPLICATION_STATUSES,
   LEVEL_CODES,
@@ -55,16 +58,20 @@ type Props = {
 
 /** RU: Картка заявки в адмінці. EN: Application detail admin client. */
 export function ApplicationDetailClient(props: Props) {
+  const router = useRouter();
   const [status, setStatus] = useState(props.application.status);
   const [approvedLevel, setApprovedLevel] = useState(props.application.approvedLevel || "");
   const [adminComment, setAdminComment] = useState(props.application.adminComment || "");
   const [candidateMessage, setCandidateMessage] = useState("");
-  const [notifyCandidate, setNotifyCandidate] = useState(true);
+  const [notifyCandidate, setNotifyCandidate] = useState(false);
   const [files, setFiles] = useState(props.files);
   const [events, setEvents] = useState(props.events);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function save() {
     setSaving(true);
@@ -115,6 +122,33 @@ export function ApplicationDetailClient(props: Props) {
     setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, reviewStatus } : f)));
   }
 
+  async function confirmDelete() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const response = await fetch(`/api/admin/applications/${props.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: ADMIN_DELETE_CONFIRM }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setDeleteError(
+          data.error === "confirm_required"
+            ? "Потрібне підтвердження словом «да»"
+            : "Не вдалося видалити заявку",
+        );
+        return;
+      }
+      router.push("/admin/applications");
+      router.refresh();
+    } catch {
+      setDeleteError("Мережева помилка");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const payload = props.application.payload || {};
   const rules =
     props.application.autoLevelRules &&
@@ -162,12 +196,28 @@ export function ApplicationDetailClient(props: Props) {
   ].filter((row) => row.value && row.value !== "—");
 
   const courses = Array.isArray(payload.courses) ? payload.courses : [];
+  const pendingFiles = files.filter((f) => f.reviewStatus === "pending").length;
 
   return (
     <div className="admin-stack">
       <p>
-        <Link href="/admin/applications">← До реєстру</Link>
+        <Link href="/admin/applications">← До реєстру заявок</Link>
       </p>
+
+      <div className="admin-panel admin-guide">
+        <h3>Що робити далі</h3>
+        <ol className="admin-steps">
+          <li>Перегляньте анкету та попередню класифікацію.</li>
+          <li>
+            Перевірте файли
+            {pendingFiles > 0 ? ` (${pendingFiles} очікують перевірки)` : ""} і позначте статус кожного.
+          </li>
+          <li>Оберіть статус і затверджений рівень у блоці «Рішення».</li>
+          <li>За потреби напишіть внутрішній коментар (обов’язково при зміні рівня).</li>
+          <li>Натисніть «Зберегти рішення». Кандидату лист піде лише якщо увімкнете сповіщення нижче.</li>
+        </ol>
+      </div>
+
       <div className="admin-panel">
         <h2>{props.application.publicId}</h2>
         <p className="admin-muted">
@@ -210,31 +260,40 @@ export function ApplicationDetailClient(props: Props) {
           <textarea className="admin-input" rows={3} value={adminComment} onChange={(e) => setAdminComment(e.target.value)} />
         </label>
         <label className="admin-label">
-          Повідомлення кандидату
+          Текст для кандидата (якщо надсилаєте сповіщення)
           <textarea className="admin-input" rows={3} value={candidateMessage} onChange={(e) => setCandidateMessage(e.target.value)} />
         </label>
         <label className="admin-check">
           <input type="checkbox" checked={notifyCandidate} onChange={(e) => setNotifyCandidate(e.target.checked)} />
-          Надіслати повідомлення кандидату (через канал сповіщень)
+          Надіслати сповіщення кандидату
         </label>
+        <p className="admin-muted admin-note">
+          Лист адміністраторам про нову заявку вже може йти через Brevo окремо. Галочка вище стосується лише
+          повідомлення кандидату через налаштований канал сповіщень — якщо канал не налаштовано, збереження рішення
+          все одно спрацює, а лист кандидату може не піти.
+        </p>
         {error ? <p className="admin-error">{error}</p> : null}
-        {ok ? <p className="admin-ok">Збережено</p> : null}
-        <button type="button" className="admin-btn" onClick={save} disabled={saving}>
-          {saving ? "Зберігаємо…" : "Зберегти"}
+        {ok ? <p className="admin-ok">Рішення збережено</p> : null}
+        <button type="button" className="admin-btn" onClick={() => void save()} disabled={saving}>
+          {saving ? "Зберігаємо…" : "Зберегти рішення"}
         </button>
       </div>
 
       <div className="admin-panel admin-stack">
         <h3>Анкетні відповіді</h3>
         <p className="admin-muted">Дані, які кандидат вказав у формі вступу.</p>
-        <dl className="admin-dl">
-          {answerRows.map((row) => (
-            <div key={row.label} className="admin-dl__row">
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
-            </div>
-          ))}
-        </dl>
+        {answerRows.length === 0 ? (
+          <p className="admin-muted">Немає збережених відповідей.</p>
+        ) : (
+          <dl className="admin-dl">
+            {answerRows.map((row) => (
+              <div key={row.label} className="admin-dl__row">
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
         {courses.length > 0 ? (
           <>
             <h4>Курси та кваліфікації</h4>
@@ -285,7 +344,10 @@ export function ApplicationDetailClient(props: Props) {
       <div className="admin-panel admin-stack">
         <h3>Файли</h3>
         {files.length === 0 ? (
-          <p className="admin-muted">Немає файлів</p>
+          <div className="admin-empty">
+            <p>Кандидат не додав файлів.</p>
+            <p className="admin-muted">Якщо потрібні документи — змініть статус на «потрібні уточнення» і напишіть кандидату.</p>
+          </div>
         ) : (
           <table className="admin-table">
             <thead>
@@ -307,7 +369,7 @@ export function ApplicationDetailClient(props: Props) {
                     <select
                       className="admin-input"
                       value={f.reviewStatus}
-                      onChange={(e) => setFileStatus(f.id, e.target.value)}
+                      onChange={(e) => void setFileStatus(f.id, e.target.value)}
                     >
                       <option value="pending">очікує</option>
                       <option value="verified">перевірений</option>
@@ -324,17 +386,51 @@ export function ApplicationDetailClient(props: Props) {
 
       <div className="admin-panel">
         <h3>Журнал</h3>
-        <ul className="admin-list">
-          {events.map((e) => (
-            <li key={e.id}>
-              <span className="admin-muted">
-                {new Date(e.createdAt).toLocaleString("uk-UA")} · {actorUk(e.actorType)}
-              </span>
-              <div>{e.message || e.eventType}</div>
-            </li>
-          ))}
-        </ul>
+        {events.length === 0 ? (
+          <p className="admin-muted">Подій ще немає.</p>
+        ) : (
+          <ul className="admin-list">
+            {events.map((e) => (
+              <li key={e.id}>
+                <span className="admin-muted">
+                  {new Date(e.createdAt).toLocaleString("uk-UA")} · {actorUk(e.actorType)}
+                </span>
+                <div>{e.message || e.eventType}</div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
+
+      <div className="admin-panel admin-danger-zone">
+        <h3>Небезпечна зона</h3>
+        <p className="admin-muted">
+          Видалення прибере заявку, вкладені файли та журнал. Картка члена залишиться — її можна видалити окремо в
+          реєстрі членів.
+        </p>
+        <button
+          type="button"
+          className="admin-btn admin-btn-danger"
+          onClick={() => {
+            setDeleteError(null);
+            setDeleteOpen(true);
+          }}
+        >
+          Видалити заявку
+        </button>
+      </div>
+
+      <AdminConfirmDelete
+        open={deleteOpen}
+        title="Видалити цю заявку?"
+        description={`Заявку ${props.application.publicId} буде видалено назавжди разом із файлами та журналом.`}
+        busy={deleting}
+        error={deleteError}
+        onCancel={() => {
+          if (!deleting) setDeleteOpen(false);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

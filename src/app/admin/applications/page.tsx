@@ -55,7 +55,10 @@ export default async function AdminApplicationsPage() {
 
   return (
     <AdminShell title="Заявки" pathname="/admin/applications">
-      <div className="admin-panel">
+      <div className="admin-panel admin-stack">
+        <p className="admin-muted">
+          Відкрийте заявку, щоб перевірити анкету й документи, затвердити рівень або видалити запис.
+        </p>
         <ApplicationsAdminClient initialItems={items} />
       </div>
     </AdminShell>

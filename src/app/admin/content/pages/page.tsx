@@ -1,3 +1,15 @@
+import { redirect } from "next/navigation";
+
+/**
+ * RU: Кімната CMS-сторінок тимчасово вимкнена (прихована з меню).
+ * EN: CMS pages room temporarily disabled (hidden from nav).
+ * Код редактора: `PagesManager` + цей файл — розкоментувати повернення UI нижче при потребі.
+ */
+export default function AdminPagesPage() {
+  redirect("/admin");
+}
+
+/*
 import { AdminShell } from "@/components/admin/AdminShell";
 import { PagesManager } from "@/components/admin/PagesManager";
 import { getDb } from "@/db";
@@ -6,8 +18,7 @@ import { listCatalogRoutes } from "@/lib/cms/catalog";
 import type { CmsBlock } from "@/lib/cms/blocks";
 import { desc } from "drizzle-orm";
 
-/** RU: Комната страниц. EN: Pages room. */
-export default async function AdminPagesPage() {
+export default async function AdminPagesPageEnabled() {
   const catalog = listCatalogRoutes();
   const db = getDb();
   let initialItems: {
@@ -43,3 +54,4 @@ export default async function AdminPagesPage() {
     </AdminShell>
   );
 }
+*/

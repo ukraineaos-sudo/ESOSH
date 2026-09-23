@@ -2,7 +2,13 @@
 
 import { FormEvent, useState } from "react";
 
-type UserItem = { id: number; email: string; role: string; active: boolean };
+type UserItem = {
+  id: number;
+  username: string;
+  email: string | null;
+  role: string;
+  active: boolean;
+};
 
 /** RU: Управление пользователями админки. EN: Admin users manager. */
 export function UsersManager({ initialItems }: { initialItems: UserItem[] }) {
@@ -23,18 +29,22 @@ export function UsersManager({ initialItems }: { initialItems: UserItem[] }) {
   async function onCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
+    setError("");
     const form = new FormData(event.currentTarget);
     const response = await fetch("/api/admin/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: form.get("email"),
+        username: form.get("username"),
+        email: form.get("email") || null,
         password: form.get("password"),
         role: form.get("role"),
       }),
     });
     if (!response.ok) {
-      setError("Не вдалося створити користувача (мін. 8 символів пароля).");
+      const payload = await response.json().catch(() => ({}));
+      if (payload.error === "duplicate") setError("Такий логін або email уже існує.");
+      else setError("Не вдалося створити (логін + пароль мін. 8 символів).");
       return;
     }
     event.currentTarget.reset();
@@ -58,15 +68,19 @@ export function UsersManager({ initialItems }: { initialItems: UserItem[] }) {
       <form className="admin-panel admin-form" onSubmit={onCreate}>
         <h2>Новий користувач</h2>
         <label>
-          Email
-          <input name="email" type="email" required />
+          Логін
+          <input name="username" type="text" autoComplete="off" autoCapitalize="none" spellCheck={false} required />
         </label>
         <label>
-          Password
+          Email (опційно)
+          <input name="email" type="email" />
+        </label>
+        <label>
+          Пароль
           <input name="password" type="password" minLength={8} required />
         </label>
         <label>
-          Role
+          Роль
           <select name="role" defaultValue="editor">
             <option value="editor">editor</option>
             <option value="admin">admin</option>
@@ -80,9 +94,10 @@ export function UsersManager({ initialItems }: { initialItems: UserItem[] }) {
         <thead>
           <tr>
             <th>ID</th>
+            <th>Логін</th>
             <th>Email</th>
-            <th>Role</th>
-            <th>Active</th>
+            <th>Роль</th>
+            <th>Активний</th>
             <th />
           </tr>
         </thead>
@@ -90,18 +105,19 @@ export function UsersManager({ initialItems }: { initialItems: UserItem[] }) {
           {items.map((item) => (
             <tr key={item.id}>
               <td>{item.id}</td>
-              <td>{item.email}</td>
+              <td>{item.username}</td>
+              <td>{item.email || "—"}</td>
               <td>
                 <span className="admin-badge">{item.role}</span>
               </td>
-              <td>{item.active ? "yes" : "no"}</td>
+              <td>{item.active ? "так" : "ні"}</td>
               <td>
                 <button
                   className="admin-btn admin-btn-secondary"
                   type="button"
                   onClick={() => void toggleActive(item.id, !item.active)}
                 >
-                  {item.active ? "Deactivate" : "Activate"}
+                  {item.active ? "Вимкнути" : "Увімкнути"}
                 </button>
               </td>
             </tr>
