@@ -39,7 +39,12 @@
 .enrollment-progress__step.is-done {
   background: color-mix(in srgb, var(--accent, #1e4f91) 18%, white);
 }
-.enrollment-step-label { margin-bottom: 20px; opacity: .8; }
+.enrollment-step-label { margin-bottom: 8px; opacity: .8; }
+.enrollment-required-legend {
+  margin: 0 0 20px;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
 .enrollment-level-box {
   padding: 18px 20px;
   margin-bottom: 24px;

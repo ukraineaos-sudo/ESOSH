@@ -488,8 +488,8 @@ export function EnrollmentForm() {
           ID учасника: <strong>{result.memberPublicId}</strong>
         </p>
         <p className="regular-l is--margin-bottom-12">
-          Попередньо вам визначено рівень «{result.autoLevelLabelUk}». Остаточний рівень підтвердить
-          адміністратор ESOSH після перевірки документів (орієнтовно {REVIEW_BUSINESS_DAYS} робочих днів).
+          Попередній рівень: «{result.autoLevelLabelUk}». Остаточний рівень визначить адміністратор
+          при розгляді (орієнтовно {REVIEW_BUSINESS_DAYS} робочих днів).
         </p>
         <p className="regular-l">Підтвердження також надішлемо на вашу електронну скриньку (якщо налаштовано доставку).</p>
       </div>
@@ -509,20 +509,18 @@ export function EnrollmentForm() {
         ))}
       </div>
       <p className="regular-s enrollment-step-label">Крок {step} з {STEPS}</p>
+      <p className="enrollment-required-legend">
+        Поля з <span className="enrollment-req">*</span> обов’язкові
+      </p>
 
       {liveClassify && step >= 2 ? (
         <div className="enrollment-level-box" role="status">
-          <p className="enrollment-level-box__eyebrow">Автоматична попередня оцінка</p>
           <p className="enrollment-level-box__title">
-            Попередньо: {liveClassify.labelUk}
+            Попередній рівень: {liveClassify.labelUk}
           </p>
           <p className="enrollment-level-box__text">
-            Це не фінальне рішення. Система лише підказує рівень за вашими відповідями за критеріями ESOSH.
-            Адміністратор перевірить документи і підтвердить або змінить рівень.
+            Остаточний рівень визначить адміністратор при розгляді.
           </p>
-          {liveClassify.requiresManualReview ? (
-            <p className="enrollment-warn">Є курси «інше/еквівалент» — потрібна ручна перевірка адміністратором.</p>
-          ) : null}
         </div>
       ) : null}
 
@@ -649,13 +647,28 @@ export function EnrollmentForm() {
                 <label><input type="radio" checked={draft.profileEducation === false} onChange={() => update("profileEducation", false)} /> Ні</label>
               </div>
             </Field>
-            <Field id="institution" label="Навчальний заклад" error={errors.institution}>
+            <Field
+              id="institution"
+              label="Навчальний заклад"
+              required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
+              error={errors.institution}
+            >
               <input className="form-input text-field w-input" value={draft.institution} onChange={(e) => update("institution", e.target.value)} />
             </Field>
-            <Field id="speciality" label="Спеціальність" error={errors.speciality}>
+            <Field
+              id="speciality"
+              label="Спеціальність"
+              required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
+              error={errors.speciality}
+            >
               <input className="form-input text-field w-input" value={draft.speciality} onChange={(e) => update("speciality", e.target.value)} />
             </Field>
-            <Field id="graduationYear" label="Рік закінчення" error={errors.graduationYear}>
+            <Field
+              id="graduationYear"
+              label="Рік закінчення"
+              required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
+              error={errors.graduationYear}
+            >
               <input className="form-input text-field w-input" type="number" min={1950} max={new Date().getFullYear()} value={draft.graduationYear} onChange={(e) => update("graduationYear", e.target.value)} />
             </Field>
             <Field id="diplomaFiles" label="Диплом (файли)">
@@ -783,9 +796,9 @@ export function EnrollmentForm() {
           <fieldset className="enrollment-fieldset">
             <legend className="h3">Кодекс поведінки</legend>
             <p className="regular-l is--margin-bottom-16">
-              Ознайомтеся з{" "}
+              Для проходження тесту рекомендуємо ознайомитися з{" "}
               <Link href="/join/codex" target="_blank" className="is--link">
-                Кодексом поведінки ESOSH
+                Кодексом поведінки
               </Link>
               .
             </p>
@@ -799,7 +812,7 @@ export function EnrollmentForm() {
               </label>
             </Field>
             {CODEX_QUESTIONS_PUBLIC.map((q) => (
-              <Field key={q.id} id={`test_${q.id}`} label={q.promptUk} error={errors[`test_${q.id}`]}>
+              <Field key={q.id} id={`test_${q.id}`} label={q.promptUk} required error={errors[`test_${q.id}`]}>
                 <div className="enrollment-radios enrollment-radios--stack">
                   {q.options.map((opt) => (
                     <label key={opt.id}>
@@ -830,16 +843,9 @@ export function EnrollmentForm() {
                 <p className="regular-l is--margin-top-12">
                   Попередній рівень: <strong>{liveClassify.labelUk}</strong>
                 </p>
-                <ul className="enrollment-criteria">
-                  {liveClassify.criteria.map((c) => (
-                    <li key={c.id} data-state={c.state}>
-                      {c.state === "met" ? "✓" : c.state === "pending_docs" ? "!" : "–"} {c.labelUk}
-                    </li>
-                  ))}
-                </ul>
-                {liveClassify.nextLevelHintUk ? (
-                  <p className="regular-s is--margin-top-12">{liveClassify.nextLevelHintUk}</p>
-                ) : null}
+                <p className="regular-s is--margin-top-8">
+                  Остаточний рівень визначить адміністратор при розгляді.
+                </p>
               </div>
             ) : null}
             <div className="enrollment-consents">
