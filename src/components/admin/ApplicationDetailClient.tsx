@@ -160,7 +160,7 @@ export function ApplicationDetailClient(props: Props) {
     props.application.autoLevelRules &&
     typeof props.application.autoLevelRules === "object"
       ? (props.application.autoLevelRules as {
-          criteria?: { id: string; state: string; labelUk: string }[];
+          criteria?: { id: string; state: string; labelUk: string; detailUk?: string }[];
           matchedRules?: string[];
           nextLevelHintUk?: string | null;
         })
@@ -283,6 +283,8 @@ export function ApplicationDetailClient(props: Props) {
         <h3>Попередня класифікація</h3>
         <p className="admin-muted">
           Автоматична перевірка критеріїв рівнів ESOSH. Це підказка для адміністратора, не фінальне рішення.
+          Позначка «потребує перевірки» означає заявлене «інше/еквівалент» — файли дивіться в блоці «Файли», окремих
+          слотів для кожного курсу зі списку немає.
         </p>
         {rules.criteria && rules.criteria.length > 0 ? (
           <ul className="admin-criteria">
@@ -294,6 +296,7 @@ export function ApplicationDetailClient(props: Props) {
                 <span>
                   {c.labelUk}
                   <span className="admin-muted"> · {criterionStateUk(c.state)}</span>
+                  {c.detailUk ? <div className="admin-muted">{c.detailUk}</div> : null}
                 </span>
               </li>
             ))}
@@ -568,9 +571,9 @@ function courseTypeUk(value: unknown): string {
 }
 
 function criterionStateUk(state: string): string {
-  if (state === "met") return "виконано";
-  if (state === "pending_docs") return "потребує документів";
-  if (state === "missing") return "не виконано";
+  if (state === "met") return "підтверджено";
+  if (state === "pending_docs") return "потребує перевірки адміном";
+  if (state === "missing") return "не підтверджено";
   return state;
 }
 

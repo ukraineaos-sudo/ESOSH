@@ -639,6 +639,22 @@
   border-bottom: 0;
 }
 
+.admin-table a {
+  color: var(--admin-accent-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-table a:hover,
+.admin-table a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.admin-table a:visited {
+  color: var(--admin-accent-2);
+}
+
 .admin-login-wrap {
   min-height: 100dvh;
   display: grid;
@@ -908,6 +924,39 @@
 .admin-stat span {
   color: var(--admin-muted);
   font-size: 0.84rem;
+}
+
+/* Клікабельні плитки статистики на /admin/members */
+.admin-stat--btn {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.admin-stat--btn:hover {
+  border-color: color-mix(in srgb, var(--admin-accent) 45%, var(--admin-border));
+  box-shadow: var(--admin-shadow-sm);
+}
+
+.admin-stat--btn.is-active {
+  border-color: color-mix(in srgb, var(--admin-accent) 70%, var(--admin-border));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--admin-accent) 14%, var(--admin-panel-elevated)),
+    var(--admin-panel)
+  );
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--admin-accent) 35%, transparent);
+}
+
+.admin-stat--btn:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
 }
 
 .admin-metric-grid {

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/site.test.mjs tests/enrollment-classify.test.mjs tests/enrollment-brevo.test.mjs tests/admin-confirm-delete.test.mjs tests/admin-password-policy.test.mjs",
+    "test": "node --test tests/site.test.mjs tests/enrollment-classify.test.mjs tests/enrollment-brevo.test.mjs tests/admin-confirm-delete.test.mjs tests/admin-password-policy.test.mjs tests/admin-member-registry.test.mjs",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"

@@ -55,6 +55,7 @@
 | Enrollment form | `src/components/EnrollmentForm.tsx` + `src/styles/enrollment.css` |
 | Enrollment schema / classify / files / notify / Brevo | `src/lib/enrollment/**` |
 | Applications / members | Neon `applications`, `members`, `application_files`, `application_events` |
+| Member registry filters/stats | `src/lib/admin/member-registry.ts` + `/admin/members` + `GET /api/admin/members` |
 | Binotel widget URLs | `src/lib/binotel.ts` |
 | Phones / social fallback | `src/lib/site.ts` |
 | PDF docs | `public/docs/*-{uk\|en}.pdf` |
@@ -70,6 +71,7 @@
 - Admin: `/admin/login` (username + password), session cookie `esosh_admin_session`, roles `admin` | `editor`; зміна пароля `/admin/security` → `POST /api/admin/password` (мін. 8 символів; інші сесії відкликаються)
 - Admin bootstrap: якщо `admin_users` порожня — створює користувача з `ADMIN_BOOTSTRAP_USERNAME` / `ADMIN_BOOTSTRAP_PASSWORD` (default `admin` / `admin`, `must_change_password`); **не залишати admin/admin у production**
 - Admin DELETE: `DELETE /api/admin/applications/[id]` і `DELETE /api/admin/members/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх
+- Admin members registry: `GET /api/admin/members?q&status&level&industry&oshFunctions&minOshYears` → `{ items, stats, facets }`; статистика рахується по **відфільтрованому** набору; профіль з `members.profile` + fallback з останньої заявки
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
 - Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`

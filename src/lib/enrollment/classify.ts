@@ -128,7 +128,7 @@ export function classifyEnrollment(input: ClassifyInput): ClassifyResult {
     {
       id: "l2_course",
       labelUk: "Курс ESOSH ≥21 / IOSH MS / NEBOSH Award",
-      state: l2Course ? "met" : otherClaim ? "pending_docs" : "missing",
+      state: l2Course ? "met" : "missing",
     },
     {
       id: "l3_exp",
@@ -138,15 +138,25 @@ export function classifyEnrollment(input: ClassifyInput): ClassifyResult {
     {
       id: "l3_course",
       labelUk: "Курс ESOSH ≥130 / NEBOSH IGC",
-      state: l3Course ? "met" : otherClaim ? "pending_docs" : "missing",
+      state: l3Course ? "met" : "missing",
     },
     { id: "cpd", labelUk: "Участь або готовність до БПР", state: cpd ? "met" : "missing" },
     {
       id: "l4_course",
       labelUk: "ESOSH ≥1,5 року / NEBOSH Diploma / NVQ5",
-      state: l4Course ? "met" : otherClaim ? "pending_docs" : "missing",
+      state: l4Course ? "met" : "missing",
     },
   );
+
+  // «Інше/еквівалент» не зараховує автоматично жоден рівень курсу — одна позначка для ручної перевірки сертифіката.
+  if (otherClaim) {
+    criteria.push({
+      id: "equivalent_course",
+      labelUk: "Заявлено курс «інше / еквівалент»",
+      state: "pending_docs",
+      detailUk: "Сертифікат уже може бути в файлах заявки — адмін вирішує, чи зарахувати як еквівалент визнаного курсу.",
+    });
+  }
 
   if (otherClaim) {
     rules.push("equivalent_course_needs_review");

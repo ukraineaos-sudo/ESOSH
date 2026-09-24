@@ -182,3 +182,7 @@ tests/admin-password-policy.test.mjs
 scripts/list-admins.mjs
 scripts/reset-admin-password.mjs
 scripts/apply-admin-username-migration.mjs
+src/lib/admin/member-registry.ts
+tests/admin-member-registry.test.mjs
+CODE_MAP.md
+package.json

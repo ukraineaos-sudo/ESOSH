@@ -72,6 +72,10 @@ test("classify: other course does not auto-credit and flags review", () => {
   });
   assert.notEqual(result.level, "accredited");
   assert.equal(result.requiresManualReview, true);
+  assert.equal(result.criteria.find((c) => c.id === "l2_course")?.state, "missing");
+  assert.equal(result.criteria.find((c) => c.id === "l3_course")?.state, "missing");
+  assert.equal(result.criteria.find((c) => c.id === "l4_course")?.state, "missing");
+  assert.equal(result.criteria.find((c) => c.id === "equivalent_course")?.state, "pending_docs");
 });
 
 test("quiz scoring 100%", () => {

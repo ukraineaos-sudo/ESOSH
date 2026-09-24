@@ -15,14 +15,36 @@ export async function findMemberByEmail(db: Db, email: string) {
   return rows[0] ?? null;
 }
 
+/** RU: Поля анкети для фільтрів/статистики в profile. EN: Filterable profile fields from enrollment. */
+export function buildMemberProfileFromEnrollment(
+  payload: EnrollmentPayload,
+  extra: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    ...extra,
+    middleName: payload.middleName || null,
+    country: payload.country,
+    city: payload.city,
+    jobTitle: payload.jobTitle,
+    organization: payload.organization || null,
+    industry: payload.industry,
+    companySize: payload.companySize,
+    oshYears: payload.oshYears,
+    oshFunctions: payload.oshFunctions,
+    educationLevel: payload.educationLevel,
+    profileEducation: payload.profileEducation,
+  };
+}
+
 /** RU: Знаходить або створює картку учасника (ID якорь, до 2 email). EN: Find/create member by email anchor. */
 export async function upsertMemberFromEnrollment(
   db: Db,
   payload: EnrollmentPayload,
-  profileExtra: Record<string, unknown>,
+  profileExtra: Record<string, unknown> = {},
 ): Promise<{ memberId: number; publicId: string; created: boolean }> {
   const email = payload.email.trim().toLowerCase();
   const secondary = payload.secondaryEmail?.trim().toLowerCase() || null;
+  const nextProfile = buildMemberProfileFromEnrollment(payload, profileExtra);
 
   const byPrimary = await findMemberByEmail(db, email);
   const bySecondary = secondary ? await findMemberByEmail(db, secondary) : null;
@@ -44,7 +66,7 @@ export async function upsertMemberFromEnrollment(
         secondaryEmail: nextSecondary,
         profile: {
           ...(typeof row.profile === "object" && row.profile ? (row.profile as object) : {}),
-          ...profileExtra,
+          ...nextProfile,
         },
         updatedAt: new Date(),
       })
@@ -63,7 +85,7 @@ export async function upsertMemberFromEnrollment(
       secondaryEmail: secondary,
       phone: payload.phone,
       status: "candidate",
-      profile: profileExtra,
+      profile: nextProfile,
     })
     .returning({ id: members.id, publicId: members.publicId });
 
