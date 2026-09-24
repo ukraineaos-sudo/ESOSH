@@ -7,7 +7,7 @@ import {
   applications,
   members,
 } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
 import {
   APPLICATION_STATUSES,
@@ -69,6 +69,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
   if (!user || !canEditContent(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const { id: idRaw } = await ctx.params;
@@ -156,6 +158,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
         updatedAt: new Date(),
       })
       .where(eq(members.id, row.member.id));
+  } else if (row.member && (resolvedStatus === "rejected" || resolvedStatus === "needs_info")) {
+    // Reject / needs_info: картка знову кандидат (мінімальний відкат після confirm).
+    await db
+      .update(members)
+      .set({
+        status: "candidate",
+        level: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(members.id, row.member.id));
   }
 
   await db.insert(applicationEvents).values({
@@ -193,6 +205,8 @@ export async function DELETE(request: Request, ctx: Ctx) {
   if (!user || !canEditContent(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const { id: idRaw } = await ctx.params;

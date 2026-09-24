@@ -122,10 +122,10 @@ const COURSE_LABELS: Record<CourseType, string> = {
   iosh_ms: "IOSH Managing Safely",
   nebosh_award: "NEBOSH Award",
   esosh_130: "ESOSH 130 год",
-  nebosh_igc: "NEBOSH IGC",
+  nebosh_igc: "NEBOSH IGC (International General Certificate)",
   esosh_15y: "ESOSH ≥1,5 року",
   nebosh_diploma: "NEBOSH Diploma",
-  nvq5: "NVQ5",
+  nvq5: "NVQ5 (National Vocational Qualification, рівень 5)",
   other: "Інша / еквівалент",
 };
 
@@ -186,12 +186,14 @@ export function EnrollmentForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [blockingIssues, setBlockingIssues] = useState<FormIssue[]>([]);
   const [result, setResult] = useState<{
-    applicationPublicId: string;
-    autoLevelLabelUk: string;
-    memberPublicId: string;
+    kind: "ok" | "duplicate" | "honeypot";
+    applicationPublicId?: string;
+    autoLevelLabelUk?: string;
+    memberPublicId?: string;
   } | null>(null);
   const [idempotencyKey] = useState(newIdempotencyKey);
   const [liveClassify, setLiveClassify] = useState<ClassifyResult | null>(null);
+  const [previewUnavailable, setPreviewUnavailable] = useState(false);
 
   useEffect(() => {
     const { photo, experienceFiles, diplomaFiles, courses, ...rest } = draft;
@@ -243,6 +245,7 @@ export function EnrollmentForm() {
         });
         const data = await response.json();
         if (response.ok && data.ok) {
+          setPreviewUnavailable(false);
           setLiveClassify({
             level: data.level,
             labelUk: data.labelUk,
@@ -251,9 +254,12 @@ export function EnrollmentForm() {
             criteria: data.criteria,
             nextLevelHintUk: data.nextLevelHintUk,
           });
+        } else {
+          setPreviewUnavailable(true);
         }
-      } catch {
-        /* ignore abort/network */
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setPreviewUnavailable(true);
       }
     }, 350);
     return () => {
@@ -465,9 +471,26 @@ export function EnrollmentForm() {
         return;
       }
       sessionStorage.removeItem(STORAGE_KEY);
+      if (data.honeypot) {
+        setResult({ kind: "honeypot" });
+        return;
+      }
+      if (data.duplicate) {
+        setResult({
+          kind: "duplicate",
+          applicationPublicId: data.applicationPublicId,
+          autoLevelLabelUk:
+            data.autoLevelLabelUk ||
+            LEVEL_LABELS_UK[data.autoLevel as keyof typeof LEVEL_LABELS_UK] ||
+            "",
+        });
+        return;
+      }
       setResult({
+        kind: "ok",
         applicationPublicId: data.applicationPublicId,
-        autoLevelLabelUk: data.autoLevelLabelUk || LEVEL_LABELS_UK[data.autoLevel as keyof typeof LEVEL_LABELS_UK] || "",
+        autoLevelLabelUk:
+          data.autoLevelLabelUk || LEVEL_LABELS_UK[data.autoLevel as keyof typeof LEVEL_LABELS_UK] || "",
         memberPublicId: data.memberPublicId,
       });
     } catch {
@@ -478,20 +501,45 @@ export function EnrollmentForm() {
   }
 
   if (result) {
+    if (result.kind === "honeypot") {
+      return (
+        <div className="enrollment-success" role="status">
+          <h2 className="h2 is--margin-bottom-16">Дякуємо!</h2>
+          <p className="regular-l">Ваше повідомлення отримано.</p>
+        </div>
+      );
+    }
     return (
       <div className="enrollment-success" role="status">
-        <h2 className="h2 is--margin-bottom-16">Дякуємо! Заявку отримано</h2>
-        <p className="regular-l is--margin-bottom-12">
-          Номер заявки: <strong>{result.applicationPublicId}</strong>
-        </p>
-        <p className="regular-l is--margin-bottom-12">
-          ID учасника: <strong>{result.memberPublicId}</strong>
-        </p>
-        <p className="regular-l is--margin-bottom-12">
-          Попередній рівень: «{result.autoLevelLabelUk}». Остаточний рівень визначить адміністратор
-          при розгляді (орієнтовно {REVIEW_BUSINESS_DAYS} робочих днів).
-        </p>
-        <p className="regular-l">Підтвердження також надішлемо на вашу електронну скриньку (якщо налаштовано доставку).</p>
+        <h2 className="h2 is--margin-bottom-16">
+          {result.kind === "duplicate" ? "Заявку вже отримано раніше" : "Дякуємо! Заявку отримано"}
+        </h2>
+        {result.applicationPublicId ? (
+          <p className="regular-l is--margin-bottom-12">
+            Номер заявки: <strong>{result.applicationPublicId}</strong>
+          </p>
+        ) : null}
+        {result.kind === "ok" && result.memberPublicId ? (
+          <p className="regular-l is--margin-bottom-12">
+            ID учасника: <strong>{result.memberPublicId}</strong>
+          </p>
+        ) : null}
+        {result.autoLevelLabelUk ? (
+          <p className="regular-l is--margin-bottom-12">
+            Попередній рівень: «{result.autoLevelLabelUk}». Остаточний рівень визначить адміністратор
+            при розгляді (орієнтовно {REVIEW_BUSINESS_DAYS} робочих днів).
+          </p>
+        ) : (
+          <p className="regular-l is--margin-bottom-12">
+            Остаточний рівень визначить адміністратор при розгляді (орієнтовно {REVIEW_BUSINESS_DAYS}{" "}
+            робочих днів).
+          </p>
+        )}
+        {result.kind === "duplicate" ? (
+          <p className="regular-l">Повторне надсилання не створило нову заявку — використано вже збережений запис.</p>
+        ) : (
+          <p className="regular-l">Підтвердження також надішлемо на вашу електронну скриньку (якщо налаштовано доставку).</p>
+        )}
       </div>
     );
   }
@@ -522,6 +570,10 @@ export function EnrollmentForm() {
             Остаточний рівень визначить адміністратор при розгляді.
           </p>
         </div>
+      ) : previewUnavailable && step >= 2 ? (
+        <p className="enrollment-hint" role="status">
+          Попередній рівень тимчасово недоступний — заявку все одно можна подати.
+        </p>
       ) : null}
 
       {blockingIssues.length > 0 ? (
@@ -605,7 +657,13 @@ export function EnrollmentForm() {
                 <option value="gt50">понад 50</option>
               </select>
             </Field>
-            <Field id="oshFunctions" label="Чи виконуєте або виконували функції з БЗР?" required error={errors.oshFunctions}>
+            <Field
+              id="oshFunctions"
+              label="Чи виконуєте або виконували функції з БЗР?"
+              expand="безпека та здоров’я на роботі"
+              required
+              error={errors.oshFunctions}
+            >
               <div className="enrollment-radios">
                 <label><input type="radio" checked={draft.oshFunctions === true} onChange={() => update("oshFunctions", true)} /> Так</label>
                 <label><input type="radio" checked={draft.oshFunctions === false} onChange={() => update("oshFunctions", false)} /> Ні</label>
@@ -614,7 +672,13 @@ export function EnrollmentForm() {
             <Field id="totalYears" label="Загальний стаж (роки)">
               <input className="form-input text-field w-input" type="number" min={0} max={60} step={0.5} value={draft.totalYears} onChange={(e) => update("totalYears", e.target.value)} />
             </Field>
-            <Field id="oshYears" label="Стаж у сфері БЗР (роки)" required error={errors.oshYears}>
+            <Field
+              id="oshYears"
+              label="Стаж у сфері БЗР (роки)"
+              expand="безпека та здоров’я на роботі"
+              required
+              error={errors.oshYears}
+            >
               <input className="form-input text-field w-input" type="number" min={0} max={60} step={0.5} value={draft.oshYears} onChange={(e) => update("oshYears", e.target.value)} />
             </Field>
             <Field id="responsibilities" label="Основні обов’язки" required error={errors.responsibilities} hint={`${draft.responsibilities.length}/1500`}>
@@ -636,12 +700,18 @@ export function EnrollmentForm() {
                 <option value="junior_bachelor">молодший бакалавр</option>
                 <option value="bachelor">бакалавр</option>
                 <option value="master">магістр</option>
-                <option value="phd">PhD</option>
+                <option value="phd">PhD (доктор філософії)</option>
                 <option value="doctor">доктор наук</option>
                 <option value="other">інше</option>
               </select>
             </Field>
-            <Field id="profileEducation" label="Чи є освіта профільною для БЗР?" required error={errors.profileEducation}>
+            <Field
+              id="profileEducation"
+              label="Чи є освіта профільною для БЗР?"
+              expand="безпека та здоров’я на роботі"
+              required
+              error={errors.profileEducation}
+            >
               <div className="enrollment-radios">
                 <label><input type="radio" checked={draft.profileEducation === true} onChange={() => update("profileEducation", true)} /> Так</label>
                 <label><input type="radio" checked={draft.profileEducation === false} onChange={() => update("profileEducation", false)} /> Ні</label>
@@ -756,7 +826,13 @@ export function EnrollmentForm() {
         {step === 5 ? (
           <fieldset className="enrollment-fieldset">
             <legend className="h3">Безперервний професійний розвиток</legend>
-            <Field id="cpdStatus" label="Участь у БПР ESOSH" required error={errors.cpdStatus}>
+            <Field
+              id="cpdStatus"
+              label="Участь у БПР ESOSH"
+              expand="безперервний професійний розвиток"
+              required
+              error={errors.cpdStatus}
+            >
               <select className="form-input text-field w-select" value={draft.cpdStatus} onChange={(e) => update("cpdStatus", e.target.value as CpdStatus | "")}>
                 <option value="">Оберіть…</option>
                 <option value="participating">беру участь</option>
@@ -904,6 +980,7 @@ export function EnrollmentForm() {
 function Field({
   id,
   label,
+  expand,
   required,
   error,
   hint,
@@ -911,6 +988,7 @@ function Field({
 }: {
   id?: string;
   label: string;
+  expand?: string;
   required?: boolean;
   error?: string;
   hint?: string;
@@ -921,6 +999,7 @@ function Field({
       {label ? (
         <label className="enrollment-question">
           {label}
+          {expand ? <span className="enrollment-expand"> ({expand})</span> : null}
           {required ? <span className="enrollment-req" aria-hidden="true"> *</span> : null}
         </label>
       ) : null}

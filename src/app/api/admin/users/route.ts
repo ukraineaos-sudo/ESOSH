@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { adminUsers } from "@/db/schema";
-import { getAdminSession, requireAdmin } from "@/lib/admin/auth";
+import { getAdminSession, passwordChangeRequiredResponse, requireAdmin } from "@/lib/admin/auth";
 import { hashPassword } from "@/lib/admin/password";
 import { isValidNewPassword, isValidUsername, normalizeUsername } from "@/lib/admin/password-policy";
 
@@ -27,6 +27,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const user = await getAdminSession();
   if (!user || !requireAdmin(user)) return NextResponse.json({ ok: false }, { status: 401 });
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const body = await request.json();
@@ -62,6 +64,8 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const user = await getAdminSession();
   if (!user || !requireAdmin(user)) return NextResponse.json({ ok: false }, { status: 401 });
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const body = await request.json();

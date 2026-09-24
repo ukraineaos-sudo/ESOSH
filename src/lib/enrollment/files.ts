@@ -15,9 +15,9 @@ export type StoredEnrollmentFile = {
   sizeBytes: number;
 };
 
-/** RU: access Blob: private лише якщо ENROLLMENT_BLOB_ACCESS=private. EN: Default public store-compatible. */
+/** RU: access Blob: за замовчуванням private; public лише явно. EN: Default private; opt-in public. */
 function blobAccess(): "public" | "private" {
-  return process.env.ENROLLMENT_BLOB_ACCESS === "private" ? "private" : "public";
+  return process.env.ENROLLMENT_BLOB_ACCESS === "public" ? "public" : "private";
 }
 
 /** RU: Перевірка типу/розміру файлу заявки. EN: Validate enrollment upload constraints. */

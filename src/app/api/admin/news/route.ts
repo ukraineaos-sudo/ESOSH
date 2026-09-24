@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { newsPosts } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { emptyBlocks } from "@/lib/cms/blocks";
 
 /** RU: Список новостей CMS. EN: List CMS news posts. */
@@ -19,6 +19,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const body = await request.json();
@@ -43,6 +45,8 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const body = await request.json();

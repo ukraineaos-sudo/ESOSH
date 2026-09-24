@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { ApplicationDetailClient } from "@/components/admin/ApplicationDetailClient";
@@ -9,11 +9,15 @@ import {
   applications,
   members,
 } from "@/db/schema";
+import { canEditContent, getAdminSession } from "@/lib/admin/auth";
 
 type Props = { params: Promise<{ id: string }> };
 
 /** RU: Картка заявки. EN: Application detail page. */
 export default async function AdminApplicationDetailPage({ params }: Props) {
+  const user = await getAdminSession();
+  if (!user || !canEditContent(user)) redirect("/admin/login");
+
   const { id: idRaw } = await params;
   const id = Number(idRaw);
   if (!Number.isFinite(id)) notFound();

@@ -3,7 +3,7 @@ import { put } from "@vercel/blob";
 import { desc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { mediaAssets } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 
 /** RU: Список медиа. EN: List media assets. */
 export async function GET() {
@@ -19,6 +19,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ ok: false, error: "blob_unavailable" }, { status: 503 });
   }

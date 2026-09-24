@@ -197,3 +197,14 @@ export function requireAdmin(user: AdminSessionUser): boolean {
 export function canEditContent(user: AdminSessionUser): boolean {
   return user.role === "admin" || user.role === "editor";
 }
+
+/**
+ * RU: Блокує write-API, поки не змінено початковий пароль.
+ * EN: Block mutating admin APIs until bootstrap password is changed.
+ */
+export function passwordChangeRequiredResponse(
+  user: AdminSessionUser,
+): Response | null {
+  if (!user.mustChangePassword) return null;
+  return Response.json({ ok: false, error: "password_change_required" }, { status: 403 });
+}

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { count, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
-import { getAdminSession, requireAdmin } from "@/lib/admin/auth";
+import { getAdminSession, passwordChangeRequiredResponse, requireAdmin } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -13,6 +13,8 @@ export async function DELETE(request: Request, ctx: Ctx) {
   if (!user || !requireAdmin(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const { id: idRaw } = await ctx.params;

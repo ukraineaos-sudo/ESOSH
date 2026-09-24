@@ -136,6 +136,15 @@
   font-weight: 700;
   white-space: pre;
 }
+.enrollment-expand {
+  display: inline;
+  margin-left: 0.15em;
+  font-size: 0.82em;
+  font-weight: 400;
+  font-style: italic;
+  opacity: 0.72;
+  white-space: normal;
+}
 .enrollment-hint {
   margin: 0;
   font-size: 0.85rem;

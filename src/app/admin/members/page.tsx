@@ -1,4 +1,5 @@
 import { count, desc, inArray } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { MembersAdminClient } from "@/components/admin/MembersAdminClient";
 import {
@@ -10,12 +11,19 @@ import {
 } from "@/lib/admin/member-registry";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
+import { canEditContent, getAdminSession } from "@/lib/admin/auth";
 
 /** RU: Реєстр учасників зі статистикою. EN: Members registry with stats. */
 export default async function AdminMembersPage() {
+  const user = await getAdminSession();
+  if (!user || !canEditContent(user)) redirect("/admin/login");
+
   let items: MemberRegistryItem[] = [];
+  let loadError: "unavailable" | null = null;
   const db = getDb();
-  if (db) {
+  if (!db) {
+    loadError = "unavailable";
+  } else {
     try {
       const rows = await db.select().from(members).orderBy(desc(members.createdAt)).limit(500);
       const ids = rows.map((row) => row.id);
@@ -73,8 +81,10 @@ export default async function AdminMembersPage() {
           city: fromProfile.city || fromPayload.city,
         };
       });
-    } catch {
+    } catch (error) {
+      console.error("[admin/members] list failed", error instanceof Error ? error.message : "error");
       items = [];
+      loadError = "unavailable";
     }
   }
 
@@ -84,6 +94,11 @@ export default async function AdminMembersPage() {
   return (
     <AdminShell title="Члени" pathname="/admin/members">
       <div className="admin-panel">
+        {loadError ? (
+          <p className="admin-warn-banner" role="alert">
+            Не вдалося завантажити реєстр (БД недоступна). Спробуйте пізніше.
+          </p>
+        ) : null}
         <MembersAdminClient
           initialItems={items}
           initialStats={stats}

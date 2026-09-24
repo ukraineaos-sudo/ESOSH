@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applicationFiles } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { getEnrollmentBlob } from "@/lib/enrollment/files";
 
 type Ctx = { params: Promise<{ id: string; fileId: string }> };
@@ -54,6 +54,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
   if (!user || !canEditContent(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+  const passwordBlock = passwordChangeRequiredResponse(user);
+  if (passwordBlock) return passwordBlock;
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   const { id: idRaw, fileId: fileRaw } = await ctx.params;

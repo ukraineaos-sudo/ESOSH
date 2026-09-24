@@ -96,7 +96,13 @@ export function ApplicationDetailClient(props: Props) {
       });
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error === "comment_required" ? "Коментар обов’язковий при зміні рівня" : "Помилка збереження");
+        setError(
+          data.error === "comment_required"
+            ? "Коментар обов’язковий при зміні рівня"
+            : data.error === "password_change_required"
+              ? "Спочатку змініть пароль у розділі «Безпека»"
+              : "Помилка збереження",
+        );
         return;
       }
       if (statusToSave === "confirmed_no_level") setApprovedLevel("");

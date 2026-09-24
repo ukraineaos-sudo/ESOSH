@@ -1,16 +1,27 @@
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Db } from "@/db";
 import { members } from "@/db/schema";
 import { createPublicId } from "./ids";
 import type { EnrollmentPayload } from "./schema";
 
-/** RU: Знаходить учасника за email (primary або secondary). EN: Find member by either email. */
-export async function findMemberByEmail(db: Db, email: string) {
+/** RU: Знаходить учасника за primary email. EN: Find member by primary email only. */
+export async function findMemberByPrimaryEmail(db: Db, email: string) {
   const normalized = email.trim().toLowerCase();
   const rows = await db
     .select()
     .from(members)
-    .where(or(eq(members.primaryEmail, normalized), eq(members.secondaryEmail, normalized)))
+    .where(eq(members.primaryEmail, normalized))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** RU: Знаходить учасника за secondary email. EN: Find member by secondary email. */
+export async function findMemberBySecondaryEmail(db: Db, email: string) {
+  const normalized = email.trim().toLowerCase();
+  const rows = await db
+    .select()
+    .from(members)
+    .where(eq(members.secondaryEmail, normalized))
     .limit(1);
   return rows[0] ?? null;
 }
@@ -36,7 +47,10 @@ export function buildMemberProfileFromEnrollment(
   };
 }
 
-/** RU: Знаходить або створює картку учасника (ID якорь, до 2 email). EN: Find/create member by email anchor. */
+/**
+ * RU: Upsert лише за primary email; secondary — тільки conflict-check (без overwrite чужої картки).
+ * EN: Upsert by primary only; secondary used for conflict, never as overwrite key.
+ */
 export async function upsertMemberFromEnrollment(
   db: Db,
   payload: EnrollmentPayload,
@@ -46,17 +60,30 @@ export async function upsertMemberFromEnrollment(
   const secondary = payload.secondaryEmail?.trim().toLowerCase() || null;
   const nextProfile = buildMemberProfileFromEnrollment(payload, profileExtra);
 
-  const byPrimary = await findMemberByEmail(db, email);
-  const bySecondary = secondary ? await findMemberByEmail(db, secondary) : null;
-
-  if (byPrimary && bySecondary && byPrimary.id !== bySecondary.id) {
+  const byPrimary = await findMemberByPrimaryEmail(db, email);
+  const emailAsOthersSecondary = await findMemberBySecondaryEmail(db, email);
+  if (emailAsOthersSecondary && emailAsOthersSecondary.id !== byPrimary?.id) {
     throw new Error("email_conflict");
   }
 
-  const row = byPrimary || bySecondary;
-  if (row) {
+  if (secondary) {
+    if (secondary === email) {
+      // same as primary — ignore duplicate secondary
+    } else {
+      const secAsPrimary = await findMemberByPrimaryEmail(db, secondary);
+      const secAsSecondary = await findMemberBySecondaryEmail(db, secondary);
+      if (secAsPrimary && secAsPrimary.id !== byPrimary?.id) {
+        throw new Error("email_conflict");
+      }
+      if (secAsSecondary && secAsSecondary.id !== byPrimary?.id) {
+        throw new Error("email_conflict");
+      }
+    }
+  }
+
+  if (byPrimary) {
     const nextSecondary =
-      secondary && secondary !== row.primaryEmail ? secondary : row.secondaryEmail;
+      secondary && secondary !== byPrimary.primaryEmail ? secondary : byPrimary.secondaryEmail;
     await db
       .update(members)
       .set({
@@ -65,13 +92,15 @@ export async function upsertMemberFromEnrollment(
         phone: payload.phone,
         secondaryEmail: nextSecondary,
         profile: {
-          ...(typeof row.profile === "object" && row.profile ? (row.profile as object) : {}),
+          ...(typeof byPrimary.profile === "object" && byPrimary.profile
+            ? (byPrimary.profile as object)
+            : {}),
           ...nextProfile,
         },
         updatedAt: new Date(),
       })
-      .where(eq(members.id, row.id));
-    return { memberId: row.id, publicId: row.publicId, created: false };
+      .where(eq(members.id, byPrimary.id));
+    return { memberId: byPrimary.id, publicId: byPrimary.publicId, created: false };
   }
 
   const publicId = createPublicId("MBR");
@@ -82,7 +111,7 @@ export async function upsertMemberFromEnrollment(
       firstName: payload.firstName,
       lastName: payload.lastName,
       primaryEmail: email,
-      secondaryEmail: secondary,
+      secondaryEmail: secondary && secondary !== email ? secondary : null,
       phone: payload.phone,
       status: "candidate",
       profile: nextProfile,
