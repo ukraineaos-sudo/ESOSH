@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MailtoActionLink } from "@/components/MailtoActionLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -557,9 +558,12 @@ export default function PageContent() {
                 {"По закінченню курсу «Левовий захист» ваші діти отримають іменний сертифікат від Європейського співтовариства з охорони праці (ESOSH). А також до курсу готується і власний мерч, щоб кожна дитина відчувала себе частиною команди «левів»."}
               </p>
             </div>
-            <a href={"mailto:office@esosh.net"} className={"btn is--primary w-button"}>
-              {"Зареєструватись"}
-            </a>
+            <MailtoActionLink
+              subject="Замовлення програми «Левовий захист»"
+              className={"btn is--primary w-button"}
+            >
+              {"Замовити програму"}
+            </MailtoActionLink>
           </div>
           <div className={"hero-split"}>
             <img src={"/images/education-courses/photo-5332389781784623196-y-a4845907.jpg"} loading={"lazy"} alt={""} className={"image-inside"} width={1024} height={1280} decoding="async" />

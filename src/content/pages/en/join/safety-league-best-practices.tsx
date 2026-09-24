@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MailtoActionLink } from "@/components/MailtoActionLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -49,9 +50,12 @@ export default function PageContent() {
                     {"Specialized groups on occupational safety in agriculture, oil and gas, mental health, legislative initiatives, information technology, and others have been established by ESOSH for structured work in the following areas."}
                   </p>
                 </div>
-                <a href={"mailto:office@esosh.net"} className={"btn is--primary w-button"}>
+                <MailtoActionLink
+                  subject="ESOSH Safety League / professional groups"
+                  className={"btn is--primary w-button"}
+                >
                   {"Contact Us"}
-                </a>
+                </MailtoActionLink>
               </div>
             </div>
           </div>

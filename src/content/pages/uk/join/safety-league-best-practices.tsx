@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MailtoActionLink } from "@/components/MailtoActionLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -47,9 +48,12 @@ export default function PageContent() {
                     {"Фахові групи з безпеки праці у агропромисловому комплексі, нафтогазовій галузі, у сфері психологічної безпеки, інформаційних технологій, наукових досліджень та законодавчих ініціатив створені ESOSH для структурованої роботи за напрямками."}
                   </p>
                 </div>
-                <a href={"mailto:office@esosh.net"} className={"btn is--primary w-button"}>
+                <MailtoActionLink
+                  subject="Ліга безпеки / фахові групи ESOSH"
+                  className={"btn is--primary w-button"}
+                >
                   {"Зв’яжіться з нами"}
-                </a>
+                </MailtoActionLink>
               </div>
             </div>
           </div>
