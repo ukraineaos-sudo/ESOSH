@@ -274,11 +274,9 @@
   max-width: 220px;
 }
 
-.admin-user-chip--compact .admin-user-chip__avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  font-size: 0.75rem;
+.admin-user-chip--compact .admin-user-chip__meta {
+  flex-direction: row;
+  align-items: center;
 }
 
 .admin-user-chip__avatar {

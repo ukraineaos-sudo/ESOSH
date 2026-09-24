@@ -936,7 +936,18 @@ export function EnrollmentForm() {
               </label>
               <label id="enrollment-field-privacyConsent" className="enrollment-consent-card">
                 <input type="checkbox" checked={draft.privacyConsent} onChange={(e) => update("privacyConsent", e.target.checked)} />
-                <span>Надаю згоду на обробку персональних даних для розгляду заявки та ведення реєстру<span className="enrollment-req"> *</span></span>
+                <span>
+                  Надаю згоду на обробку персональних даних для розгляду заявки, ведення реєстру членів і зберігання у
+                  міжнародних хмарних сервісах (хостинг, файли, email) відповідно до{" "}
+                  <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
+                    Політики конфіденційності
+                  </a>{" "}
+                  та{" "}
+                  <a href="/cookie-policy" target="_blank" rel="noopener noreferrer">
+                    Політики cookies
+                  </a>
+                  <span className="enrollment-req"> *</span>
+                </span>
               </label>
               <label id="enrollment-field-serviceMessages" className="enrollment-consent-card">
                 <input type="checkbox" checked={draft.serviceMessages} onChange={(e) => update("serviceMessages", e.target.checked)} />

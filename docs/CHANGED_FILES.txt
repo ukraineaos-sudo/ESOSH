@@ -117,6 +117,7 @@ src/components/admin/NewsManager.tsx
 src/components/admin/PagesManager.tsx
 src/components/admin/UsersManager.tsx
 src/app/admin/layout.tsx
+public/favicon/admin-icon.svg
 src/app/admin/admin.css
 src/app/admin/page.tsx
 src/app/admin/login/page.tsx
@@ -189,3 +190,19 @@ package.json
 src/styles/enrollment.css
 src/components/admin/ApplicationDetailClient.tsx
 src/app/api/admin/applications/[id]/files/[fileId]/route.ts
+src/lib/consent.ts
+src/styles/consent.css
+src/styles/contact.css
+src/components/consent/ConsentProvider.tsx
+src/components/consent/ConsentBanner.tsx
+src/components/consent/ConsentSettings.tsx
+src/components/consent/OpenConsentSettingsButton.tsx
+src/app/[locale]/privacy-policy/page.tsx
+src/app/[locale]/cookie-policy/page.tsx
+src/content/pages/uk/privacy-policy.tsx
+src/content/pages/en/privacy-policy.tsx
+src/content/pages/uk/cookie-policy.tsx
+src/content/pages/en/cookie-policy.tsx
+tests/consent-parse.test.mjs
+.cursor/rules/10-architecture-contracts.mdc
+.cursor/rules/00-project-context.mdc

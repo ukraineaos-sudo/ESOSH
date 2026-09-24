@@ -1,6 +1,8 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MailtoActionLink } from "@/components/MailtoActionLink";
+import { Link } from "@/i18n/navigation";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -108,9 +110,12 @@ export default function PageContent() {
                     </div>
                   </div>
                 </div>
-                <a href={"mailto:office@esosh.net"} className={"btn is--primary w-button"}>
+                <MailtoActionLink
+                  subject="Вступ організації до ESOSH"
+                  className={"btn is--primary w-button"}
+                >
                   {"Зв'яжіться з нами"}
-                </a>
+                </MailtoActionLink>
               </div>
             </div>
           </div>
@@ -122,7 +127,7 @@ export default function PageContent() {
             {"Три кроки для вступу до ЄСОП"}
           </h2>
           <div className={"w-layout-grid is--grid-3-columns--t-1--m-1"}>
-            <a href={"mailto:office@esosh.net"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"}>
+            <div className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue"}>
               <img src={"/images/join-enrollment/Document-36b7fb28.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
               <div className={"wrapper is--max-width-480"}>
                 <h3 className={"h3 is--margin-bottom-12"}>
@@ -132,8 +137,8 @@ export default function PageContent() {
                   {"Заявіть про себе, як про компанію, що дбає про безпеку своїх працівників, клієнтів, замовників, і ми раді будемо підтвердити це."}
                 </p>
               </div>
-            </a>
-            <a href={"mailto:office@esosh.net"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"}>
+            </div>
+            <div className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue"}>
               <img src={"/images/join-enrollment/Enterprise-e10200cc.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
               <div className={"wrapper is--max-width-480"}>
                 <h3 className={"h3 is--margin-bottom-12"}>
@@ -143,8 +148,8 @@ export default function PageContent() {
                   {"Додайте до листа посилання на Ваш сайт та опис діяльності."}
                 </p>
               </div>
-            </a>
-            <a href={"mailto:office@esosh.net"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"}>
+            </div>
+            <div className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue"}>
               <img src={"/images/join-enrollment/Report-29240bd0.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
               <div className={"wrapper is--max-width-480"}>
                 <h3 className={"h3 is--margin-bottom-12"}>
@@ -154,7 +159,12 @@ export default function PageContent() {
                   {"Після незалежного аудиту та у разі позитивного рішення ми рекомендуватимемо Вас як надійного партнера, який постійно зростає у сфері безпеки праці."}
                 </p>
               </div>
-            </a>
+            </div>
+          </div>
+          <div className={"wrapper is--margin-top-40 is--v-flex-center-center"}>
+            <Link href={"/join/apply"} className={"btn is--primary w-button"}>
+              {"Доєднатися"}
+            </Link>
           </div>
         </div>
       </section>

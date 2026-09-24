@@ -13,7 +13,7 @@ alwaysApply: true
 - Контент страниц: dual-read — Neon CMS blocks **или** legacy Webflow-TSX в `src/content/pages/{uk,en}/**`.
 - Отложено намеренно: канал доставки контактної форми (нужен `CONTACT_WEBHOOK_URL`); EN-копія UI форми вступу.
 - Форма вступу за ТЗ: `/join/apply` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`.
-- Binotel GetCall + chat подключены (паритет с esosh.net).
+- Binotel GetCall + chat подключены після згоди `communications` (паритет з esosh.net за згодою).
 
 ## Основные сценарии
 
@@ -42,8 +42,8 @@ alwaysApply: true
 - маршруты и загрузчики страниц: `src/content/page-loaders.ts`, `src/content/page-metadata.json`;
 - тело страниц: `src/content/pages/**`;
 - chrome футера: `src/content/chrome/**`;
-- UI-строки навигации/формы: `messages/{uk,en}.json` (ключи `nav`, `contact`);
-- стили паритета: `src/styles/reference.css` (+ `navigation.css`, `contact.css`, `refinements.css`);
+- UI-строки навигации/формы/consent: `messages/{uk,en}.json` (ключи `nav`, `contact`, `consent`);
+- стили паритета: `src/styles/reference.css` (+ `navigation.css`, `contact.css`, `consent.css`, `refinements.css`);
 - архитектурная навигация: `CODE_MAP.md`.
 
 Память модели и правила других проектов (Ramose, UAOS и т.п.) не являются источником истины об ESOSH.

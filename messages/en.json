@@ -41,6 +41,36 @@
     "errorName": "Please enter your full name",
     "errorEmail": "Please enter a valid email",
     "errorMessage": "Please enter your question",
-    "unavailable": "The form is currently unavailable. Please email us at"
+    "unavailable": "The form is currently unavailable. Please email us at",
+    "privacyLabel": "I consent to the processing of my personal data in accordance with the",
+    "privacyLink": "Privacy Policy",
+    "privacyRequired": "Privacy consent is required",
+    "privacyHint": "Data may be processed using international cloud services (hosting, email) to respond to your enquiry."
+  },
+  "consent": {
+    "bannerAria": "Cookie and third-party service consent",
+    "bannerTitle": "Cookies and data processing",
+    "bannerBody": "We use necessary cookies to run the site. Third-party communication widgets (Binotel) load only with your consent. Learn more:",
+    "draftNote": "Policy texts are a typical draft and must be approved by ESOSH association legal counsel.",
+    "privacyLink": "Privacy Policy",
+    "cookieLink": "Cookie Policy",
+    "acceptAll": "Accept all",
+    "necessaryOnly": "Necessary only",
+    "settings": "Settings",
+    "settingsTitle": "Cookie settings",
+    "settingsLead": "Choose categories. Necessary cookies stay on. You can change your choice at any time.",
+    "catNecessary": "Necessary",
+    "catNecessaryDesc": "Site operation, security, interface language. Cannot be disabled.",
+    "catCommunications": "Communications",
+    "catCommunicationsDesc": "Callback and chat widgets (Binotel) from a third-party provider.",
+    "catAnalytics": "Analytics",
+    "catAnalyticsDesc": "Not used yet. Reserved for the future.",
+    "catMarketing": "Marketing",
+    "catMarketingDesc": "Not used yet. Reserved for the future.",
+    "save": "Save choice",
+    "close": "Close",
+    "footerPrivacy": "Privacy",
+    "footerCookies": "Cookies",
+    "footerSettings": "Cookie settings"
   }
 }

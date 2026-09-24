@@ -7,3 +7,16 @@
 .site-form-error { color: #a52020; font-size: 14px; margin-top: 8px; }
 .site-form-error a { text-decoration: underline; }
 .site-form-success { padding: 24px; background: var(--white); color: var(--accent); border-radius: 6px; }
+.site-privacy-consent { display: flex; flex-direction: column; gap: 8px; }
+.site-privacy-consent__label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.site-privacy-consent__label input { margin-top: 3px; flex: 0 0 auto; }
+.site-privacy-consent__link { text-decoration: underline; color: inherit; }
+.site-privacy-consent__hint { margin: 0; color: #5a6b82; }

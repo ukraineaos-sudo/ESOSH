@@ -99,6 +99,46 @@
     },
     "image": null
   },
+  "/en/privacy-policy": {
+    "title": "ESOSH — Privacy Policy",
+    "description": "How ESOSH processes personal data on the website, forms and membership applications. Draft pending legal review.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/privacy-policy",
+      "en": "/en/privacy-policy"
+    },
+    "image": null
+  },
+  "/privacy-policy": {
+    "title": "ESOSH — Політика конфіденційності",
+    "description": "Як ESOSH обробляє персональні дані на сайті, у формах і заявках на членство. Draft — pending legal review.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/privacy-policy",
+      "en": "/en/privacy-policy"
+    },
+    "image": null
+  },
+  "/en/cookie-policy": {
+    "title": "ESOSH — Cookie Policy",
+    "description": "Cookies and similar technologies used on the ESOSH website, and how to change your consent. Draft pending legal review.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/cookie-policy",
+      "en": "/en/cookie-policy"
+    },
+    "image": null
+  },
+  "/cookie-policy": {
+    "title": "ESOSH — Політика cookies",
+    "description": "Cookies і подібні технології на сайті ESOSH та як змінити згоду. Draft — pending legal review.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/cookie-policy",
+      "en": "/en/cookie-policy"
+    },
+    "image": null
+  },
   "/en/join/enrollment": {
     "title": "ESOSH — Introduction of organizations to ESOSH",
     "description": "Proclaim yourself as a company that cares about the safety of its employees, customers, customers, and we will be happy to confirm it.",

@@ -155,13 +155,13 @@ export async function AdminShell({
             <div
               className="admin-user-chip admin-user-chip--compact"
               title={user.email ? `${user.username} · ${user.email}` : user.username}
+              aria-label={user.email ? `${roleLabelUk(user.role)}, ${user.username}, ${user.email}` : `${roleLabelUk(user.role)}, ${user.username}`}
             >
               <span className="admin-user-chip__avatar" aria-hidden="true">
                 {avatarLetter(user.username)}
               </span>
               <div className="admin-user-chip__meta">
                 <span className="admin-badge admin-badge-role">{roleLabelUk(user.role)}</span>
-                <span className="admin-user-chip__email">{user.username}</span>
               </div>
             </div>
             <form action="/api/admin/logout" method="post">

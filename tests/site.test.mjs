@@ -57,9 +57,16 @@ test("all migrated URLs serve real content and canonical metadata", async () => 
     assert.match(html, /<html[^>]+lang="en"/, path);
     assert.match(html, /rel="canonical"/, path);
     assert.doesNotMatch(html, /<script[^>]+src="https:\/\/(?:.*webflow)/, path);
-    assert.match(html, /widgets\.binotel\.com\/getcall\/widgets\/9bulqnxtozjrjooret1m\.js/, path);
-    assert.match(html, /widgets\.binotel\.com\/chat\/widgets\/RJMfFe1Abg3L563Rwp05\.js/, path);
+    assert.doesNotMatch(html, /widgets\.binotel\.com\/getcall\/widgets\//, path);
+    assert.doesNotMatch(html, /widgets\.binotel\.com\/chat\/widgets\//, path);
   }
+});
+
+test("Binotel scripts stay out of HTML until communications consent", async () => {
+  const html = await (await fetch(base + "/en")).text();
+  assert.doesNotMatch(html, /widgets\.binotel\.com/);
+  assert.match(html, /\/en\/privacy-policy|\/privacy-policy/);
+  assert.match(html, /\/en\/cookie-policy|\/cookie-policy/);
 });
 
 test("unknown articles return 404 in both languages", async () => {
@@ -99,13 +106,16 @@ test("invalid input and honeypot never reach the recipient", async () => {
   assert.equal(invalid.status, 400);
   const malformed = await fetch(base + "/api/contact", { method: "POST", body: "{" });
   assert.equal(malformed.status, 400);
-  const bot = await fetch(base + "/api/contact", { method: "POST", body: JSON.stringify({ name: "Test", email: "test@example.org", message: "Test", company: "bot" }) });
+  const bot = await fetch(base + "/api/contact", { method: "POST", body: JSON.stringify({ name: "Test", email: "test@example.org", message: "Test", company: "bot", privacyConsent: true }) });
   assert.equal(bot.status, 200);
+  assert.equal(deliveries.length, initial);
+  const noConsent = await fetch(base + "/api/contact", { method: "POST", body: JSON.stringify({ name: "Test", email: "test@example.org", message: "Test", company: "", privacyConsent: false }) });
+  assert.equal(noConsent.status, 400);
   assert.equal(deliveries.length, initial);
 });
 
 test("success requires recipient acceptance; recipient failures are not reported as success", async () => {
-  const body = { name: "Migration test", email: "test@example.org", message: "Local integration test", locale: "uk", company: "" };
+  const body = { name: "Migration test", email: "test@example.org", message: "Local integration test", locale: "uk", company: "", privacyConsent: true };
   const result = await fetch(base + "/api/contact", { method: "POST", body: JSON.stringify(body) });
   assert.equal(result.status, 200);
   assert.deepEqual(deliveries.at(-1), { name: body.name, email: body.email, message: body.message, locale: body.locale });

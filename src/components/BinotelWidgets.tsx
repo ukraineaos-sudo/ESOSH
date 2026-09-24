@@ -1,10 +1,19 @@
+"use client";
+
 import Script from "next/script";
 import { BINOTEL } from "@/lib/binotel";
+import { hasConsent } from "@/lib/consent";
+import { useConsent } from "@/components/consent/ConsentProvider";
 
-/** RU: GetCall и чат Binotel как на esosh.net. EN: Binotel GetCall and chat widgets matching live site. */
+/** RU: Binotel лише після згоди communications. EN: Binotel only after communications consent. */
 export function BinotelWidgets() {
-  return <>
-    <Script src={BINOTEL.getCallWidgetUrl} strategy="afterInteractive" />
-    <Script src={BINOTEL.chatWidgetUrl} strategy="afterInteractive" />
-  </>;
+  const { ready, consent } = useConsent();
+  if (!ready || !hasConsent(consent, "communications")) return null;
+
+  return (
+    <>
+      <Script src={BINOTEL.getCallWidgetUrl} strategy="afterInteractive" />
+      <Script src={BINOTEL.chatWidgetUrl} strategy="afterInteractive" />
+    </>
+  );
 }

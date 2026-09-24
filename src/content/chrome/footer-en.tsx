@@ -1,6 +1,7 @@
 import type { ContactSettings } from "@/lib/site-settings";
 import { defaultContactSettings } from "@/lib/site-settings";
 import { FooterSocialIcons } from "@/components/FooterSocialIcons";
+import { OpenConsentSettingsButton } from "@/components/consent/OpenConsentSettingsButton";
 
 /** RU: Подвал сайта. EN: Localized site footer. */
 export default function FooterContent({
@@ -20,6 +21,17 @@ export default function FooterContent({
               </a>
               <div className={"medium-xs is--grey-20"}>
                 {"© 2022 ESOSH. All Rights Reserved"}
+              </div>
+              <div className={"footer-legal-links wrapper is--v-flex-start-start is--rows-gap-12 is--margin-top-16"}>
+                <a href={"/en/privacy-policy"} className={"footer-menu-link"}>
+                  {"Privacy"}
+                </a>
+                <a href={"/en/cookie-policy"} className={"footer-menu-link"}>
+                  {"Cookies"}
+                </a>
+                <OpenConsentSettingsButton className={"footer-menu-link"}>
+                  {"Cookie settings"}
+                </OpenConsentSettingsButton>
               </div>
               <a href={"/admin"} className={"footer-menu-link footer-admin-link"}>
                 {"Admin"}

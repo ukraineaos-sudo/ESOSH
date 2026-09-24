@@ -1,4 +1,6 @@
 /** RU: Коды уровней ESOSH. EN: ESOSH professional level codes. */
+import { PRIVACY_NOTICE_VERSION } from "@/lib/consent";
+
 export const LEVEL_CODES = [
   "diplomate",
   "certified",
@@ -59,5 +61,6 @@ export function memberStatusLabelUk(status: string): string {
   return status;
 }
 
-export const CONSENT_VERSION = "1.0";
+/** Stored with enrollment applications; aligned with public privacy notice. */
+export const CONSENT_VERSION = PRIVACY_NOTICE_VERSION;
 export const REVIEW_BUSINESS_DAYS = "5–10";
