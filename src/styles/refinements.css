@@ -55,12 +55,41 @@ body { -webkit-font-smoothing: antialiased; }
 .wrapper.is--socials-wrapper a {
   flex-shrink: 0;
   line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0 !important;
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(26, 33, 49, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.wrapper.is--socials-wrapper a:hover,
+.wrapper.is--socials-wrapper a:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(26, 33, 49, 0.2);
+}
+.wrapper.is--socials-wrapper a[aria-label="Telegram"] {
+  background-color: #229ed9 !important;
+}
+.wrapper.is--socials-wrapper a[aria-label="Facebook"] {
+  background-color: #1877f2 !important;
+}
+.wrapper.is--socials-wrapper a[aria-label="LinkedIn"] {
+  background-color: #0a66c2 !important;
+}
+.wrapper.is--socials-wrapper a[aria-label="YouTube"] {
+  background-color: #ff0000 !important;
+}
+.wrapper.is--socials-wrapper a[aria-label="Instagram"] {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
 }
 .wrapper.is--socials-wrapper img {
-  width: 32px !important;
-  height: 32px !important;
-  max-width: 32px !important;
-  max-height: 32px !important;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
   object-fit: contain;
   display: block;
 }
