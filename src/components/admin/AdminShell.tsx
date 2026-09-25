@@ -10,7 +10,7 @@ import { getAdminSession, type AdminRole } from "@/lib/admin/auth";
 const rooms = [
   { href: "/admin", label: "Огляд", group: "main", icon: "⌂" },
   { href: "/admin/content/news", label: "Новини", group: "content", icon: "✎" },
-  // CMS «Сторінки» приховано до окремого ТЗ (WYSIWYG / імпорт legacy).
+  // CMS «Сторінки» приховано — див. docs/PAGES_CMS.md (WYSIWYG + імпорт перед увімкненням).
   // { href: "/admin/content/pages", label: "Сторінки", group: "content", icon: "▦" },
   { href: "/admin/media", label: "Медіа", group: "content", icon: "▣" },
   { href: "/admin/applications", label: "Заявки", group: "crm", icon: "✉", badgeKey: "newApps" as const },

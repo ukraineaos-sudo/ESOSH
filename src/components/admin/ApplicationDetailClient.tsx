@@ -435,7 +435,7 @@ export function ApplicationDetailClient(props: Props) {
                 <span className="admin-muted">
                   {new Date(e.createdAt).toLocaleString("uk-UA")} · {actorUk(e.actorType)}
                 </span>
-                <div>{e.message || e.eventType}</div>
+                <div>{e.message || eventTypeUk(e.eventType)}</div>
               </li>
             ))}
           </ul>
@@ -604,4 +604,10 @@ function actorUk(actorType: string): string {
   if (actorType === "system") return "система";
   if (actorType === "candidate") return "кандидат";
   return actorType;
+}
+
+function eventTypeUk(eventType: string): string {
+  if (eventType === "submitted") return "подано";
+  if (eventType === "updated") return "оновлення";
+  return eventType;
 }

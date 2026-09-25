@@ -11,7 +11,7 @@ alwaysApply: true
 - Языки: `uk` по умолчанию (без префикса), `en` под `/en/...`.
 - Стек: Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4 + next-intl + zod; Neon/Drizzle + Vercel Blob для CMS; package manager — npm.
 - Контент страниц: dual-read — Neon CMS blocks **или** legacy Webflow-TSX в `src/content/pages/{uk,en}/**`.
-- Отложено намеренно: канал доставки контактної форми (нужен `CONTACT_WEBHOOK_URL`); EN-копія UI форми вступу.
+- Отложено намеренно: канал доставки контактної форми (нужен `CONTACT_WEBHOOK_URL`).
 - Форма вступу за ТЗ: `/join/apply` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`.
 - Binotel GetCall + chat подключены після згоди `communications` (паритет з esosh.net за згодою).
 

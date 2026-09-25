@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -37,24 +38,37 @@ type ConsentContextValue = {
 
 const ConsentContext = createContext<ConsentContextValue | null>(null);
 
+const consentListeners = new Set<() => void>();
+
+function subscribeConsentStore(onStoreChange: () => void) {
+  consentListeners.add(onStoreChange);
+  return () => {
+    consentListeners.delete(onStoreChange);
+  };
+}
+
+function emitConsentStoreChange() {
+  for (const listener of consentListeners) {
+    listener();
+  }
+}
+
+const subscribeClientReady = () => () => {};
+
 /** RU: Провайдер згоди + банер. EN: Consent provider and banner shell. */
 export function ConsentProvider({ children }: { children: ReactNode }) {
-  const [consent, setConsent] = useState<ConsentState | null>(null);
-  const [ready, setReady] = useState(false);
-  const [bannerVisible, setBannerVisible] = useState(false);
+  // false during SSR/hydration, true on client — avoids cookie read mismatch.
+  const ready = useSyncExternalStore(subscribeClientReady, () => true, () => false);
+  const stored = useSyncExternalStore(
+    subscribeConsentStore,
+    readConsentFromDocument,
+    () => null,
+  );
+  const consent = isConsentCurrent(stored) ? stored : null;
+  const bannerVisible = ready && !consent;
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
-    const stored = readConsentFromDocument();
-    if (isConsentCurrent(stored)) {
-      setConsent(stored);
-      setBannerVisible(false);
-    } else {
-      setConsent(null);
-      setBannerVisible(true);
-    }
-    setReady(true);
-
     function onOpen() {
       setSettingsOpen(true);
     }
@@ -64,8 +78,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
 
   const apply = useCallback((next: ConsentState) => {
     persistConsent(next);
-    setConsent(next);
-    setBannerVisible(false);
+    emitConsentStoreChange();
     setSettingsOpen(false);
   }, []);
 

@@ -34,6 +34,10 @@ export default async function AdminMediaPage() {
 
   return (
     <AdminShell title="Медіа" pathname="/admin/media">
+      <p className="admin-muted" style={{ marginBottom: 16 }}>
+        Бібліотека файлів для новин: обкладинки, ілюстрації, PDF. Вибір обкладинки — у редакторі
+        новини.
+      </p>
       <MediaLibrary initialItems={initialItems} />
     </AdminShell>
   );

@@ -15,6 +15,34 @@ type PageItem = {
 
 type CatalogRoute = { locale: "uk" | "en"; route: string; fullPath: string };
 
+function cmsStatusUk(status: string): string {
+  if (status === "draft") return "чернетка";
+  if (status === "published") return "опубліковано";
+  if (status === "legacy") return "поки лише на сайті (статична)";
+  return status;
+}
+
+function blockTypeUk(type: string): string {
+  switch (type) {
+    case "hero":
+      return "банер";
+    case "richText":
+      return "текст";
+    case "image":
+      return "зображення";
+    case "cta":
+      return "кнопка";
+    case "cards":
+      return "картки";
+    case "spacer":
+      return "відступ";
+    case "pdfLink":
+      return "PDF";
+    default:
+      return type;
+  }
+}
+
 /** RU: Каталог и редактор CMS-страниц. EN: CMS pages catalog + block editor. */
 export function PagesManager({
   catalog,
@@ -54,7 +82,7 @@ export function PagesManager({
       body: JSON.stringify({
         locale,
         route,
-        title: route === "/" ? "Home" : route,
+        title: route === "/" ? "Головна" : route,
         status: "draft",
         blocks: emptyBlocks(),
       }),
@@ -148,7 +176,7 @@ export function PagesManager({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Path</th>
+                <th>Шлях</th>
                 <th>CMS</th>
                 <th />
               </tr>
@@ -165,7 +193,9 @@ export function PagesManager({
                       <code>{row.fullPath}</code>
                     </td>
                     <td>
-                      <span className="admin-badge">{existing ? existing.status : "legacy"}</span>
+                      <span className="admin-badge">
+                        {cmsStatusUk(existing ? existing.status : "legacy")}
+                      </span>
                     </td>
                     <td>
                       {existing ? (
@@ -174,7 +204,7 @@ export function PagesManager({
                           type="button"
                           onClick={() => setSelected(existing)}
                         >
-                          Edit
+                          Редагувати
                         </button>
                       ) : (
                         <button
@@ -198,53 +228,54 @@ export function PagesManager({
           <div className="admin-panel admin-form admin-stack">
             <h2>
               {selected.locale}
-              {selected.route} <span className="admin-badge">{selected.status}</span>
+              {selected.route}{" "}
+              <span className="admin-badge">{cmsStatusUk(selected.status)}</span>
             </h2>
             <label>
-              Title
+              Заголовок
               <input
                 value={selected.title}
                 onChange={(e) => setSelected({ ...selected, title: e.target.value })}
               />
             </label>
             <label>
-              Status
+              Статус
               <select
                 value={selected.status}
                 onChange={(e) => setSelected({ ...selected, status: e.target.value })}
               >
-                <option value="draft">draft</option>
-                <option value="published">published</option>
+                <option value="draft">чернетка</option>
+                <option value="published">опубліковано</option>
               </select>
             </label>
             <div className="admin-actions">
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("hero")}>
-                + hero
+                + банер
               </button>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("richText")}>
-                + richText
+                + текст
               </button>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("image")}>
-                + image
+                + зображення
               </button>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("cta")}>
-                + cta
+                + кнопка
               </button>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("cards")}>
-                + cards
+                + картки
               </button>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("spacer")}>
-                + spacer
+                + відступ
               </button>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => addBlock("pdfLink")}>
-                + pdf
+                + PDF
               </button>
             </div>
             {selected.blocks.map((block, index) => (
               <div key={block.id} className="admin-block">
                 <div className="admin-block-head">
                   <strong>
-                    #{index + 1} {block.type}
+                    #{index + 1} {blockTypeUk(block.type)}
                   </strong>
                   <button
                     className="admin-btn admin-btn-secondary"
@@ -257,21 +288,21 @@ export function PagesManager({
                 {block.type === "hero" ? (
                   <>
                     <label>
-                      Title
+                      Заголовок
                       <input
                         value={block.title}
                         onChange={(e) => updateBlock(block.id, { title: e.target.value })}
                       />
                     </label>
                     <label>
-                      Accent
+                      Акцент
                       <input
                         value={block.accent || ""}
                         onChange={(e) => updateBlock(block.id, { accent: e.target.value })}
                       />
                     </label>
                     <label>
-                      Lead
+                      Підзаголовок
                       <textarea
                         value={block.lead || ""}
                         onChange={(e) => updateBlock(block.id, { lead: e.target.value })}
@@ -292,14 +323,14 @@ export function PagesManager({
                 {block.type === "image" ? (
                   <>
                     <label>
-                      Src
+                      URL зображення
                       <input
                         value={block.src}
                         onChange={(e) => updateBlock(block.id, { src: e.target.value })}
                       />
                     </label>
                     <label>
-                      Alt
+                      Підпис
                       <input
                         value={block.alt}
                         onChange={(e) => updateBlock(block.id, { alt: e.target.value })}
@@ -310,14 +341,14 @@ export function PagesManager({
                 {block.type === "cta" || block.type === "pdfLink" ? (
                   <>
                     <label>
-                      Label
+                      Текст
                       <input
                         value={block.label}
                         onChange={(e) => updateBlock(block.id, { label: e.target.value })}
                       />
                     </label>
                     <label>
-                      Href
+                      Посилання
                       <input
                         value={block.href}
                         onChange={(e) => updateBlock(block.id, { href: e.target.value })}
@@ -327,22 +358,22 @@ export function PagesManager({
                 ) : null}
                 {block.type === "spacer" ? (
                   <label>
-                    Size
+                    Розмір
                     <select
                       value={block.size}
                       onChange={(e) =>
                         updateBlock(block.id, { size: e.target.value as "s" | "m" | "l" })
                       }
                     >
-                      <option value="s">s</option>
-                      <option value="m">m</option>
-                      <option value="l">l</option>
+                      <option value="s">малий</option>
+                      <option value="m">середній</option>
+                      <option value="l">великий</option>
                     </select>
                   </label>
                 ) : null}
                 {block.type === "cards" ? (
                   <label>
-                    Cards JSON
+                    Картки (JSON)
                     <textarea
                       rows={4}
                       value={JSON.stringify(block.items, null, 2)}
@@ -360,7 +391,7 @@ export function PagesManager({
             ))}
             <div className="admin-actions">
               <button className="admin-btn" type="button" onClick={() => void saveSelected()}>
-                Зберегти / Publish
+                Зберегти
               </button>
               <a
                 className="admin-btn admin-btn-secondary"
@@ -368,7 +399,7 @@ export function PagesManager({
                 target="_blank"
                 rel="noreferrer"
               >
-                Preview
+                Перегляд
               </a>
               <button className="admin-btn admin-btn-secondary" type="button" onClick={() => setSelected(null)}>
                 Закрити

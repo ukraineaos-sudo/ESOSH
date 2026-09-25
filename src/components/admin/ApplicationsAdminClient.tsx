@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AdminConfirmDelete } from "@/components/admin/AdminConfirmDelete";
 import { emitAdminAppsRefresh } from "@/components/admin/AdminNewAppsBadge";
@@ -50,7 +50,10 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const stopPollRef = useRef(false);
   const pendingDeleteRef = useRef(pendingDelete);
-  pendingDeleteRef.current = pendingDelete;
+
+  useLayoutEffect(() => {
+    pendingDeleteRef.current = pendingDelete;
+  }, [pendingDelete]);
 
   const filteredHint = useMemo(() => {
     if (items.length === 0) return "Немає записів за поточними фільтрами";

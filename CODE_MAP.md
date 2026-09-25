@@ -18,7 +18,9 @@
 5. Форма вступу: `/join/apply` → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
 6. Admin: `/admin` shell (sidebar + sticky chrome) → session cookie → `/api/admin/*` → Neon/Blob
    - Live UX: header chip «нові заявки» polls `GET /api/admin/applications?status=new` ~30s (stops on 401); applications list same interval + `esosh:admin-apps-refresh` event
-   - Pages CMS room hidden until separate TZ; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
+   - News CMS (Phase A–C): `/admin/content/news` = **єдиний каталог** новин; public `/news` + homepage = published `news_posts` (`listPublishedCmsNews`). Legacy TSX лишається dual-read fallback для `/news/{slug}` і джерелом `db:import-news`
+   - Import: `npm run db:import-news` (`scripts/import-legacy-news.mjs`, docs `docs/NEWS_IMPORT.md`) — після імпорту всі TSX-статті в адмін-списку (edit/hide/delete як нові)
+   - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`
 8. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — draft pending legal review
 
@@ -44,7 +46,8 @@
 | Concern | Location |
 |---|---|
 | Legacy тело страниц | `src/content/pages/{uk,en}/**` |
-| CMS pages / news | Neon `pages`, `news_posts` |
+| CMS pages / news | Neon `pages`, `news_posts` (public news feed = published `news_posts` only) |
+| Legacy news TSX (article fallback + import source) | `src/content/pages/{uk,en}/news/*.tsx` |
 | Metadata / sitemap inventory | `src/content/page-metadata.json` (+ CMS news in `sitemap.ts`) |
 | Media inventory (legacy) | `src/content/media-manifest.json` |
 | Uploaded media | Vercel Blob + `media_assets` |
@@ -81,7 +84,10 @@
   - Поки `mustChangePassword`: write-API (`POST/PATCH/PUT/DELETE`) → `403 password_change_required`; GET списки дозволені
   - **Не залишати admin/admin у production**
 - Admin bootstrap: якщо `admin_users` порожня — створює користувача з `ADMIN_BOOTSTRAP_USERNAME` / `ADMIN_BOOTSTRAP_PASSWORD` (default `admin` / `admin`, `must_change_password`); **не залишати admin/admin у production**
-- Admin DELETE: `DELETE /api/admin/applications/[id]` і `DELETE /api/admin/members/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх
+- Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх
+- News public feed: `CmsNewsListItems` → `listPublishedCmsNews(locale)` (newest `publishedAt`); без DB / порожня таблиця → порожній список (статті dual-read legacy TSX лишаються)
+- News import: `npm run db:import-news` (+ `--dry-run` / `--upsert`); див. `docs/NEWS_IMPORT.md`; DELETE news = `{ confirm: "так" }`
+- Pages CMS: UI вимкнено — критерії re-enable у `docs/PAGES_CMS.md`
 - Admin members registry: `GET /api/admin/members?q&status&level&industry&oshFunctions&minOshYears` → `{ items, stats, facets }`; статистика рахується по **відфільтрованому** набору; профіль з `members.profile` + fallback з останньої заявки
 - Admin application PATCH: `confirmed`/`confirmed_no_level` → member active; `rejected`/`needs_info` → member знову `candidate` (level null)
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
@@ -99,11 +105,12 @@
 - Нет ложного успеха формы без webhook
 - Нет Webflow runtime-скриптов в HTML
 - Binotel GetCall + chat **не** в DOM без згоди `communications`
-- Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable
+- Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable; **лента /news и блок новостей на главной** при отсутствии DB — пустые (статьи `/news/{slug}` всё ещё dual-read legacy)
 - Honeypot и contact API не ослабляются админкой
 - Contact / enrollment без явної privacy-згоди не приймаються як валідні
 - Sitemap покрывает все записи `page-metadata.json` (+ опционально CMS news)
 - Тексти Privacy/Cookie — draft; не маркетинг «GDPR compliant» до review юриста
+- Після `db:import-news` CMS перекриває legacy для тих самих slug; URL не змінюються
 
 ## Чеклист для юриста ESOSH (після деплою draft)
 1. Підтвердити найменування контролера, адресу, ЄДРПОУ / реєстраційні дані в Privacy.
@@ -113,8 +120,10 @@
 
 ## Известные пробелы (продукт)
 1. Доставка контактної форми не налаштована без `CONTACT_WEBHOOK_URL`
-2. EN-копія UI форми вступу (реліз 1 — українською; маршрут `/en/join/apply` уже є)
-3. Текст питань тесту Кодексу — v1-заглушка; замінити офіційним банком ESOSH
-4. Кастомний домен через Wix — окремо
-5. Brevo Domains для `esosh.net` ще без DKIM/DMARC (deliverability warning у Brevo)
-6. Privacy/Cookie тексти — **draft pending legal review** (див. чеклист вище)
+2. Текст питань тесту Кодексу — v1-заглушка; замінити офіційним банком ESOSH
+3. Кастомний домен через Wix — окремо
+4. Brevo Domains для `esosh.net` ще без DKIM/DMARC (deliverability warning у Brevo)
+5. Privacy/Cookie тексти — **draft pending legal review** (див. чеклист вище)
+6. Security backlog — `docs/SECURITY_PLAN.md` (TOTP admin, rate limit, security tests на виході на ринок)
+7. Pages CMS room прихована — потрібні WYSIWYG + імпорт/стратегія (`docs/PAGES_CMS.md`)
+8. News locale residual: slug `z-dnem-budivelnika` є лише в EN (немає UK TSX у capture) — EN у DB/admin; UK-контент = окрема контентна задача

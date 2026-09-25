@@ -100,17 +100,21 @@ export async function getCmsNews(
   }
 }
 
-/** RU: Список опубликованных CMS-новостей. EN: List published CMS news. */
-export async function listPublishedCmsNews(locale: string): Promise<CmsNewsDoc[]> {
+/** RU: Список опубликованных CMS-новостей (новые сверху). EN: Published CMS news, newest first. */
+export async function listPublishedCmsNews(
+  locale: string,
+  opts?: { limit?: number },
+): Promise<CmsNewsDoc[]> {
   const db = getDb();
   if (!db) return [];
+  const limit = Math.min(Math.max(opts?.limit ?? 100, 1), 500);
   try {
     const rows = await db
       .select()
       .from(newsPosts)
       .where(and(eq(newsPosts.locale, locale), eq(newsPosts.status, "published")))
-      .orderBy(desc(newsPosts.publishedAt))
-      .limit(100);
+      .orderBy(desc(newsPosts.publishedAt), desc(newsPosts.id))
+      .limit(limit);
     return rows.map((row) => ({
       id: row.id,
       locale: row.locale,

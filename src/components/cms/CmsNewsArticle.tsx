@@ -25,7 +25,7 @@ export function CmsNewsArticle({
             fontWeight: 600,
           }}
         >
-          Preview draft news
+          {post.locale === "en" ? "Preview — draft (not on site)" : "Перегляд чернетки (не на сайті)"}
         </div>
       ) : null}
       <section className="section is--section-spacing">

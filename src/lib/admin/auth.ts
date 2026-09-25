@@ -94,6 +94,14 @@ export async function ensureBootstrapAdmin(): Promise<void> {
 
   if (!isValidUsername(username) || !password) return;
 
+  // Production: never create the first admin with a weak default password.
+  if (process.env.NODE_ENV === "production" && isWeakBootstrapPassword(password)) {
+    console.error(
+      "[esosh] Refusing weak ADMIN_BOOTSTRAP_PASSWORD in production. Set a strong bootstrap password (≥8, not «admin»).",
+    );
+    return;
+  }
+
   await db.insert(adminUsers).values({
     username,
     email: null,

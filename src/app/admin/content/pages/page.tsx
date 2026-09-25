@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 
 /**
- * RU: Кімната CMS-сторінок тимчасово вимкнена (прихована з меню).
- * EN: CMS pages room temporarily disabled (hidden from nav).
- * Код редактора: `PagesManager` + цей файл — розкоментувати повернення UI нижче при потребі.
+ * RU: Кімната CMS-сторінок вимкнена (Phase D).
+ * EN: CMS pages room disabled (Phase D).
+ *
+ * Чому / критерії увімкнення: `docs/PAGES_CMS.md`.
+ * Код редактора збережено нижче в коментарі + `PagesManager`.
  */
 export default function AdminPagesPage() {
   redirect("/admin");
@@ -48,7 +50,8 @@ export default async function AdminPagesPageEnabled() {
   return (
     <AdminShell title="Сторінки" pathname="/admin/content/pages">
       <p className="admin-muted" style={{ marginBottom: 16 }}>
-        Dual-read: опублікована CMS-версія замінює legacy TSX на публічному сайті.
+        Опублікована версія з кабінету замінює статичну сторінку на сайті. Чернетка видима лише в
+        попередньому перегляді.
       </p>
       <PagesManager catalog={catalog} initialItems={initialItems} />
     </AdminShell>

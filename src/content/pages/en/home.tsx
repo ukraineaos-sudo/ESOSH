@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CmsNewsListItems } from "@/components/cms/CmsNewsListItems";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -47,51 +48,7 @@ export default function PageContent() {
           </div>
           <div className={"collection-list-wrapper w-dyn-list"}>
             <div role={"list"} className={"collection-list is--grid-3-columns--a-1-column w-dyn-items"}>
-              <div role={"listitem"} className={"collection-item w-dyn-item"}>
-                <a href={"/en/news/z-dnem-nezalezhnosti-ukrayini"} className={"collection-link-wrapper w-inline-block"}>
-                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
-                    <img loading={"lazy"} alt={"Happy Independence Day of Ukraine!"} src={"/images/home/ChatGPT-Image-24-2026-17-32-49-7a506cfa.webp"} className={"collection-image"} width={1672} height={941} decoding="async" />
-                  </div>
-                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
-                    <h3 className={"h3 is--margin-bottom-12"}>
-                      {"Happy Independence Day of Ukraine!"}
-                    </h3>
-                    <div className={"regular-xs is--grey-20"}>
-                      {"24.8.2026"}
-                    </div>
-                  </div>
-                </a>
-              </div>
-              <div role={"listitem"} className={"collection-item w-dyn-item"}>
-                <a href={"/en/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas"} className={"collection-link-wrapper w-inline-block"}>
-                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
-                    <img loading={"lazy"} alt={"Energy worker safety: we want to hear from you"} src={"/images/home/2026-08-14-093325595-2bc23ed4.webp"} className={"collection-image"} width={1920} height={1080} decoding="async" />
-                  </div>
-                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
-                    <h3 className={"h3 is--margin-bottom-12"}>
-                      {"Energy worker safety: we want to hear from you"}
-                    </h3>
-                    <div className={"regular-xs is--grey-20"}>
-                      {"14.8.2026"}
-                    </div>
-                  </div>
-                </a>
-              </div>
-              <div role={"listitem"} className={"collection-item w-dyn-item"}>
-                <a href={"/en/news/z-dnem-budivelnika"} className={"collection-link-wrapper w-inline-block"}>
-                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
-                    <img loading={"lazy"} alt={"Happy Builder's Day!"} src={"/images/home/ChatGPT-Image-9-2026-14-43-21-821d0611.webp"} className={"collection-image"} width={1672} height={941} decoding="async" />
-                  </div>
-                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
-                    <h3 className={"h3 is--margin-bottom-12"}>
-                      {"Happy Builder's Day!"}
-                    </h3>
-                    <div className={"regular-xs is--grey-20"}>
-                      {"9.8.2026"}
-                    </div>
-                  </div>
-                </a>
-              </div>
+              <CmsNewsListItems locale="en" limit={3} />
             </div>
           </div>
         </div>

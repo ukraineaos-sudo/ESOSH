@@ -1315,3 +1315,109 @@
     animation: none;
   }
 }
+
+/* News CMS authoring (Phase A/B) */
+.admin-dialog-wide {
+  max-width: 720px;
+  width: min(720px, 94vw);
+}
+.admin-actions-wrap {
+  flex-wrap: wrap;
+}
+.admin-actions-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.admin-label-text {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.admin-cover-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-cover-preview {
+  max-width: 320px;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--admin-radius-sm);
+  border: 1px solid var(--admin-border);
+}
+.admin-rte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.admin-rte-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+}
+.admin-rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.admin-rte-surface {
+  min-height: 220px;
+  padding: 12px 14px;
+  border-radius: var(--admin-radius-sm);
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel-2);
+  color: var(--admin-text);
+  line-height: 1.5;
+  overflow: auto;
+}
+.admin-rte-surface:focus {
+  outline: 2px solid color-mix(in srgb, var(--admin-accent) 55%, transparent);
+  outline-offset: 1px;
+}
+.admin-rte-surface p {
+  margin: 0 0 0.75em;
+}
+.admin-rte-html {
+  width: 100%;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+}
+.admin-media-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+  margin: 12px 0;
+}
+.admin-media-pick-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--admin-radius-sm);
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel-2);
+  color: var(--admin-text);
+  cursor: pointer;
+  text-align: left;
+}
+.admin-media-pick-item:hover {
+  border-color: var(--admin-accent);
+}
+.admin-media-pick-item img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.admin-media-pick-item span {
+  font-size: 11px;
+  color: var(--admin-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

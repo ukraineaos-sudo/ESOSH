@@ -2,7 +2,7 @@ import Link from "next/link";
 import { count, eq } from "drizzle-orm";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getDb } from "@/db";
-import { applications, members } from "@/db/schema";
+import { applications, members, newsPosts } from "@/db/schema";
 
 type DashCard = {
   href: string;
@@ -23,6 +23,7 @@ export default async function AdminHomePage() {
   let newApplications = 0;
   let totalApplications = 0;
   let totalMembers = 0;
+  let publishedNews = 0;
 
   if (db) {
     try {
@@ -32,9 +33,14 @@ export default async function AdminHomePage() {
         .where(eq(applications.status, "new"));
       const [appsRow] = await db.select({ value: count() }).from(applications);
       const [membersRow] = await db.select({ value: count() }).from(members);
+      const [newsRow] = await db
+        .select({ value: count() })
+        .from(newsPosts)
+        .where(eq(newsPosts.status, "published"));
       newApplications = Number(newRow?.value ?? 0);
       totalApplications = Number(appsRow?.value ?? 0);
       totalMembers = Number(membersRow?.value ?? 0);
+      publishedNews = Number(newsRow?.value ?? 0);
     } catch {
       // keep zeros
     }
@@ -64,16 +70,16 @@ export default async function AdminHomePage() {
     {
       href: "/admin/content/news",
       title: "Новини",
-      description: "Статті українською та англійською з попереднім переглядом.",
+      description:
+        "Єдиний список усіх новин сайту: редагування, публікація, приховування. Звідси заповнюються /news і блок на головній.",
       mark: "✎",
       tone: "content",
-      cta: "Редагувати →",
+      cta: "Керувати новинами →",
     },
-    // CMS «Сторінки» приховано до окремого ТЗ.
     {
       href: "/admin/media",
       title: "Медіа",
-      description: "Зображення для новин і сторінок у сховищі Blob.",
+      description: "Зображення та PDF для обкладинок і матеріалів новин.",
       mark: "▣",
       tone: "content",
       cta: "Відкрити бібліотеку →",
@@ -81,10 +87,10 @@ export default async function AdminHomePage() {
     {
       href: "/admin/settings/contacts",
       title: "Контакти",
-      description: "Телефони, електронна скринька, соцмережі та адреса на сайті.",
+      description: "Телефони, пошта, адреса та соцмережі — як на живому сайті.",
       mark: "☎",
       tone: "settings",
-      cta: "Налаштувати →",
+      cta: "Редагувати контакти →",
     },
   ];
 
@@ -95,10 +101,14 @@ export default async function AdminHomePage() {
   return (
     <AdminShell title="Огляд" pathname="/admin">
       {!dbReady ? (
-        <p className="admin-error">База даних не підключена — задайте DATABASE_URL (Neon Postgres).</p>
+        <p className="admin-error">
+          База даних не підключена — кабінет не може зберегти зміни. Зверніться до технічної
+          підтримки хостингу.
+        </p>
       ) : null}
       <p className="admin-muted admin-lead">
-        Оперативні показники реєстрів і швидкий доступ до розділів. Нові заявки потребують уваги першими.
+        Оперативні показники та швидкий доступ. Нові заявки — першими; новини керуються з розділу
+        «Новини» і одразу відображаються на публічному сайті.
       </p>
       {dbReady ? (
         <div className="admin-metric-grid" aria-label="Оперативні показники">
@@ -121,6 +131,11 @@ export default async function AdminHomePage() {
             <span className="admin-metric__label">Члени</span>
             <strong className="admin-metric__value">{totalMembers}</strong>
             <span className="admin-metric__hint">карток у базі</span>
+          </Link>
+          <Link href="/admin/content/news" className="admin-metric">
+            <span className="admin-metric__label">Новини на сайті</span>
+            <strong className="admin-metric__value">{publishedNews}</strong>
+            <span className="admin-metric__hint">опубліковано (усі мови)</span>
           </Link>
         </div>
       ) : null}

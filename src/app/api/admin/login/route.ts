@@ -3,6 +3,11 @@ import { loginAdmin } from "@/lib/admin/auth";
 
 /** RU: Вход в админку по логіну. EN: Admin login endpoint (username). */
 export async function POST(request: Request) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
+  }
+
   const body = await request.json().catch(() => null);
   const username =
     body && typeof body.username === "string"

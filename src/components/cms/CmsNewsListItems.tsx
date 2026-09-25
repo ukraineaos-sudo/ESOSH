@@ -1,10 +1,29 @@
 import { listPublishedCmsNews } from "@/lib/cms/public";
 
-/** RU: Карточки CMS-новостей поверх legacy-листинга. EN: CMS news cards prepended to legacy listing. */
-export async function CmsNewsListItems({ locale }: { locale: "uk" | "en" }) {
-  const posts = await listPublishedCmsNews(locale);
-  if (posts.length === 0) return null;
+type Props = {
+  locale: "uk" | "en";
+  /** Max cards (homepage usually 3). */
+  limit?: number;
+  /** When true and feed empty — show a short empty hint. */
+  showEmpty?: boolean;
+};
+
+/** RU: Карточки опубликованных CMS-новостей. EN: Published CMS news cards. */
+export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Props) {
+  const posts = await listPublishedCmsNews(locale, { limit });
   const prefix = locale === "en" ? "/en" : "";
+
+  if (posts.length === 0) {
+    if (!showEmpty) return null;
+    return (
+      <div role="listitem" className="collection-item w-dyn-item">
+        <p className="regular-m is--grey-20">
+          {locale === "en" ? "No published news yet." : "Поки немає опублікованих новин."}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       {posts.map((post) => (

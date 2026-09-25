@@ -30,6 +30,10 @@ export default async function AdminUsersPage() {
 
   return (
     <AdminShell title="Користувачі" pathname="/admin/users">
+      <p className="admin-muted" style={{ marginBottom: 16 }}>
+        Облікові записи співробітників кабінету ESOSH. Вимкнений доступ не дає увійти, але не
+        видаляє історію дій.
+      </p>
       <UsersManager initialItems={initialItems} />
     </AdminShell>
   );

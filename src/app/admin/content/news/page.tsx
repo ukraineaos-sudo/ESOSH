@@ -17,6 +17,7 @@ export default async function AdminNewsPage() {
     coverUrl: string | null;
     body: CmsBlock[];
     status: string;
+    publishedAt: Date | null;
   }[] = [];
   if (db) {
     try {
@@ -30,6 +31,7 @@ export default async function AdminNewsPage() {
         coverUrl: row.coverUrl,
         body: Array.isArray(row.body) ? (row.body as CmsBlock[]) : [],
         status: row.status,
+        publishedAt: row.publishedAt,
       }));
     } catch {
       initialItems = [];
@@ -38,6 +40,11 @@ export default async function AdminNewsPage() {
 
   return (
     <AdminShell title="Новини" pathname="/admin/content/news">
+      <p className="admin-muted" style={{ marginBottom: 16 }}>
+        Єдиний список усіх новин сайту (українською та англійською). Опубліковані зʼявляються на
+        /news і на головній (нові зверху). Приховані лишаються тут як чернетки — їх можна знову
+        вивести на сайт або видалити.
+      </p>
       <NewsManager initialItems={initialItems} />
     </AdminShell>
   );

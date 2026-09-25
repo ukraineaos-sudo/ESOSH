@@ -226,7 +226,7 @@ export function MembersAdminClient({
       <div className="admin-toolbar">
         <input
           className="admin-input"
-          placeholder="Пошук: ПІБ, email, посада, організація, галузь…"
+          placeholder="Пошук: ПІБ, скринька, посада, організація, галузь…"
           value={filters.q}
           onChange={(e) => setFilters((prev) => ({ ...prev, q: e.target.value }))}
           onKeyDown={(e) => {

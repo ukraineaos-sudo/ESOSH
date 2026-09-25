@@ -14,6 +14,33 @@
   padding-top: 40px;
 }
 
+.enrollment-prep {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--light-blue, #c5d4e8);
+  background: color-mix(in srgb, var(--accent, #1e4f91) 5%, white);
+}
+.enrollment-prep__title {
+  margin: 0 0 10px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.enrollment-prep__list {
+  margin: 0 0 10px;
+  padding-left: 1.25rem;
+}
+.enrollment-prep__list li {
+  margin-bottom: 4px;
+  line-height: 1.45;
+}
+.enrollment-prep__note {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
 .enrollment-progress {
   display: flex;
   gap: 8px;
@@ -189,6 +216,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.enrollment-consents > legend {
+  padding: 0;
+  margin-bottom: 4px;
 }
 .enrollment-consent-card {
   display: flex;

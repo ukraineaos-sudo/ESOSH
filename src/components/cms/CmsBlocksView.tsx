@@ -1,4 +1,5 @@
 import type { CmsBlock } from "@/lib/cms/blocks";
+import { sanitizeCmsHtml } from "@/lib/cms/sanitize-html";
 
 /** RU: Рендер CMS-блоков публичными reference-классами. EN: Render CMS blocks with reference CSS classes. */
 export function CmsBlocksView({ blocks }: { blocks: CmsBlock[] }) {
@@ -27,7 +28,10 @@ export function CmsBlocksView({ blocks }: { blocks: CmsBlock[] }) {
             return (
               <section key={block.id} className="section is--section-spacing">
                 <div className="w-layout-blockcontainer container w-container">
-                  <div className="regular-l" dangerouslySetInnerHTML={{ __html: block.html }} />
+                  <div
+                    className="regular-l"
+                    dangerouslySetInnerHTML={{ __html: sanitizeCmsHtml(block.html) }}
+                  />
                 </div>
               </section>
             );

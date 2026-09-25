@@ -11,7 +11,15 @@ type RefreshDetail = { newCount?: number };
 
 /** RU: Живий лічильник нових заявок у шапці. EN: Live new-applications header chip. */
 export function AdminNewAppsBadge({ initialCount = 0 }: { initialCount?: number }) {
-  const [count, setCount] = useState(Math.max(0, initialCount));
+  const normalizedInitial = Math.max(0, initialCount);
+  const [count, setCount] = useState(normalizedInitial);
+  // Adjust when server prop changes (React: store previous props, not an effect).
+  const [prevInitialCount, setPrevInitialCount] = useState(normalizedInitial);
+  if (normalizedInitial !== prevInitialCount) {
+    setPrevInitialCount(normalizedInitial);
+    setCount(normalizedInitial);
+  }
+
   const stopRef = useRef(false);
 
   const applyCount = useCallback((next: number) => {
@@ -33,10 +41,6 @@ export function AdminNewAppsBadge({ initialCount = 0 }: { initialCount?: number 
       // keep last known count
     }
   }, [applyCount]);
-
-  useEffect(() => {
-    applyCount(initialCount);
-  }, [initialCount, applyCount]);
 
   useEffect(() => {
     stopRef.current = false;

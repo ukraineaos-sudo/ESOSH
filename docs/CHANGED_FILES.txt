@@ -206,3 +206,14 @@ src/content/pages/en/cookie-policy.tsx
 tests/consent-parse.test.mjs
 .cursor/rules/10-architecture-contracts.mdc
 .cursor/rules/00-project-context.mdc
+docs/SECURITY_PLAN.md
+src/lib/cms/sanitize-html.ts
+src/components/cms/CmsBlocksView.tsx
+src/lib/enrollment/files.ts
+docs/NEWS_IMPORT.md
+docs/PAGES_CMS.md
+scripts/import-legacy-news.mjs
+src/lib/cms/slugify.ts
+src/components/admin/AdminRichTextEditor.tsx
+src/components/admin/AdminMediaPicker.tsx
+src/app/api/admin/news/[id]/route.ts

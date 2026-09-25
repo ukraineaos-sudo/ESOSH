@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CmsNewsListItems } from "@/components/cms/CmsNewsListItems";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -48,51 +49,7 @@ export default function PageContent() {
           </div>
           <div className={"collection-list-wrapper w-dyn-list"}>
             <div role={"list"} className={"collection-list is--grid-3-columns--a-1-column w-dyn-items"}>
-              <div role={"listitem"} className={"collection-item w-dyn-item"}>
-                <a href={"/news/z-dnem-nezalezhnosti-ukrayini"} className={"collection-link-wrapper w-inline-block"}>
-                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
-                    <img loading={"lazy"} alt={"З Днем Незалежності України!"} src={"/images/home/ChatGPT-Image-24-2026-17-32-49-7a506cfa.webp"} className={"collection-image"} width={1672} height={941} decoding="async" />
-                  </div>
-                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
-                    <h3 className={"h3 is--margin-bottom-12"}>
-                      {"З Днем Незалежності України!"}
-                    </h3>
-                    <div className={"regular-xs is--grey-20"}>
-                      {"24.8.2026"}
-                    </div>
-                  </div>
-                </a>
-              </div>
-              <div role={"listitem"} className={"collection-item w-dyn-item"}>
-                <a href={"/news/bezpeka-pracivnikiv-energetiki-nam-vazhlivo-pochuti-vas"} className={"collection-link-wrapper w-inline-block"}>
-                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
-                    <img loading={"lazy"} alt={"Безпека працівників енергетики: нам важливо почути вас"} src={"/images/home/2026-08-14-093325595-2bc23ed4.webp"} className={"collection-image"} width={1920} height={1080} decoding="async" />
-                  </div>
-                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
-                    <h3 className={"h3 is--margin-bottom-12"}>
-                      {"Безпека працівників енергетики: нам важливо почути вас"}
-                    </h3>
-                    <div className={"regular-xs is--grey-20"}>
-                      {"14.8.2026"}
-                    </div>
-                  </div>
-                </a>
-              </div>
-              <div role={"listitem"} className={"collection-item w-dyn-item"}>
-                <a href={"/news/zaproshuiemo-na-vebinar-vigorannya-kolektiviv-chomu-kompaniyi-vtrachayut-lyudey"} className={"collection-link-wrapper w-inline-block"}>
-                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
-                    <img loading={"lazy"} alt={"Запрошуємо на вебінар:  🎓 «Вигорання колективів: чому компанії втрачають людей»"} src={"/images/home/2026-07-29-134120988-150e8eca.webp"} className={"collection-image"} width={1484} height={1060} decoding="async" />
-                  </div>
-                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
-                    <h3 className={"h3 is--margin-bottom-12"}>
-                      {"Запрошуємо на вебінар:  🎓 «Вигорання колективів: чому компанії втрачають людей»"}
-                    </h3>
-                    <div className={"regular-xs is--grey-20"}>
-                      {"29.7.2026"}
-                    </div>
-                  </div>
-                </a>
-              </div>
+              <CmsNewsListItems locale="uk" limit={3} />
             </div>
           </div>
         </div>

@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useState,
+  type FormEvent,
+  type ReactElement,
+  type ReactNode,
+} from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type {
   CompanySize,
@@ -10,7 +20,7 @@ import type {
   EnrollmentCourseInput,
 } from "@/lib/enrollment/classify";
 import type { ClassifyResult } from "@/lib/enrollment/classify";
-import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS } from "@/lib/enrollment/levels";
+import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "@/lib/enrollment/levels";
 import { CODEX_QUESTIONS_PUBLIC } from "@/lib/enrollment/quiz";
 
 type CourseDraft = EnrollmentCourseInput & {
@@ -67,6 +77,28 @@ type Draft = {
 const STORAGE_KEY = "esosh-enrollment-draft-v1";
 const STEPS = 7;
 
+const COURSE_TYPES: CourseType[] = [
+  "esosh_21",
+  "iosh_ms",
+  "nebosh_award",
+  "esosh_130",
+  "nebosh_igc",
+  "esosh_15y",
+  "nebosh_diploma",
+  "nvq5",
+  "other",
+];
+
+const CPD_ACTIVITY_VALUES = [
+  "навчання",
+  "конференції",
+  "тренерство",
+  "виступи",
+  "публікації",
+  "робочі групи",
+  "інше",
+] as const;
+
 const emptyCourse = (): CourseDraft => ({
   courseType: "esosh_21",
   courseName: "",
@@ -77,81 +109,61 @@ const emptyCourse = (): CourseDraft => ({
   certFiles: [],
 });
 
-const initialDraft = (): Draft => ({
-  lastName: "",
-  firstName: "",
-  middleName: "",
-  birthDate: "",
-  country: "Україна",
-  city: "",
-  phone: "",
-  email: "",
-  secondaryEmail: "",
-  profileUrl: "",
-  photo: null,
-  jobTitle: "",
-  organization: "",
-  industry: "",
-  companySize: "",
-  oshFunctions: null,
-  totalYears: "",
-  oshYears: "",
-  responsibilities: "",
-  experienceFiles: [],
-  educationLevel: "",
-  profileEducation: null,
-  institution: "",
-  speciality: "",
-  graduationYear: "",
-  diplomaFiles: [],
-  courses: [],
-  cpdStatus: "",
-  cpdActivities: [],
-  cpdDescription: "",
-  codeRead: false,
-  testAnswers: {},
-  truthConfirm: false,
-  codeAccept: false,
-  privacyConsent: false,
-  serviceMessages: false,
-  marketingConsent: false,
-});
-
-const COURSE_LABELS: Record<CourseType, string> = {
-  esosh_21: "ESOSH 21 год",
-  iosh_ms: "IOSH Managing Safely",
-  nebosh_award: "NEBOSH Award",
-  esosh_130: "ESOSH 130 год",
-  nebosh_igc: "NEBOSH IGC (International General Certificate)",
-  esosh_15y: "ESOSH ≥1,5 року",
-  nebosh_diploma: "NEBOSH Diploma",
-  nvq5: "NVQ5 (National Vocational Qualification, рівень 5)",
-  other: "Інша / еквівалент",
-};
-
-const CPD_ACTIVITY_OPTIONS = [
-  "навчання",
-  "конференції",
-  "тренерство",
-  "виступи",
-  "публікації",
-  "робочі групи",
-  "інше",
-];
+function initialDraft(defaultCountry: string): Draft {
+  return {
+    lastName: "",
+    firstName: "",
+    middleName: "",
+    birthDate: "",
+    country: defaultCountry,
+    city: "",
+    phone: "",
+    email: "",
+    secondaryEmail: "",
+    profileUrl: "",
+    photo: null,
+    jobTitle: "",
+    organization: "",
+    industry: "",
+    companySize: "",
+    oshFunctions: null,
+    totalYears: "",
+    oshYears: "",
+    responsibilities: "",
+    experienceFiles: [],
+    educationLevel: "",
+    profileEducation: null,
+    institution: "",
+    speciality: "",
+    graduationYear: "",
+    diplomaFiles: [],
+    courses: [],
+    cpdStatus: "",
+    cpdActivities: [],
+    cpdDescription: "",
+    codeRead: false,
+    testAnswers: {},
+    truthConfirm: false,
+    codeAccept: false,
+    privacyConsent: false,
+    serviceMessages: false,
+    marketingConsent: false,
+  };
+}
 
 function newIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
   return `k-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function readStoredDraft(): { draft: Draft; step: number } {
-  if (typeof window === "undefined") return { draft: initialDraft(), step: 1 };
+function readStoredDraft(defaultCountry: string): { draft: Draft; step: number } {
+  if (typeof window === "undefined") return { draft: initialDraft(defaultCountry), step: 1 };
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return { draft: initialDraft(), step: 1 };
+    if (!raw) return { draft: initialDraft(defaultCountry), step: 1 };
     const parsed = JSON.parse(raw) as Partial<Draft> & { step?: number };
     const draft: Draft = {
-      ...initialDraft(),
+      ...initialDraft(defaultCountry),
       ...parsed,
       photo: null,
       experienceFiles: [],
@@ -164,7 +176,7 @@ function readStoredDraft(): { draft: Draft; step: number } {
       parsed.step && parsed.step >= 1 && parsed.step <= STEPS ? parsed.step : 1;
     return { draft, step };
   } catch {
-    return { draft: initialDraft(), step: 1 };
+    return { draft: initialDraft(defaultCountry), step: 1 };
   }
 }
 
@@ -176,9 +188,35 @@ function omitCertFiles(courses: CourseDraft[]) {
   });
 }
 
+function injectControlProps(
+  children: ReactNode,
+  props: { id: string; "aria-invalid"?: boolean; "aria-describedby"?: string },
+): ReactNode {
+  return Children.map(children, (child) => {
+    if (!isValidElement(child)) return child;
+    const el = child as ReactElement<{
+      id?: string;
+      "aria-describedby"?: string;
+      "aria-invalid"?: boolean | "true" | "false";
+    }>;
+    const tag = typeof el.type === "string" ? el.type : null;
+    if (tag === "input" || tag === "select" || tag === "textarea") {
+      return cloneElement(el, {
+        id: el.props.id ?? props.id,
+        "aria-invalid": props["aria-invalid"] ? true : el.props["aria-invalid"],
+        "aria-describedby": props["aria-describedby"] ?? el.props["aria-describedby"],
+      });
+    }
+    return child;
+  });
+}
+
 /** RU: 7-крокова форма вступу за ТЗ. EN: Multi-step enrollment form. */
 export function EnrollmentForm() {
-  const stored = useState(readStoredDraft)[0];
+  const t = useTranslations("enrollment");
+  const locale = useLocale() === "en" ? "en" : "uk";
+  const defaultCountry = t("defaultCountry");
+  const stored = useState(() => readStoredDraft(defaultCountry))[0];
   const [step, setStep] = useState(stored.step);
   const [draft, setDraft] = useState<Draft>(stored.draft);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -188,12 +226,28 @@ export function EnrollmentForm() {
   const [result, setResult] = useState<{
     kind: "ok" | "duplicate" | "honeypot";
     applicationPublicId?: string;
-    autoLevelLabelUk?: string;
+    autoLevelLabel?: string;
     memberPublicId?: string;
   } | null>(null);
   const [idempotencyKey] = useState(newIdempotencyKey);
   const [liveClassify, setLiveClassify] = useState<ClassifyResult | null>(null);
   const [previewUnavailable, setPreviewUnavailable] = useState(false);
+
+  function levelLabel(code: string | undefined, fallbackUk?: string): string {
+    if (!code) return fallbackUk || "";
+    if (code in LEVEL_LABELS_UK) {
+      return t(`levels.${code as LevelCode}`);
+    }
+    return fallbackUk || code;
+  }
+
+  function quizPrompt(q: (typeof CODEX_QUESTIONS_PUBLIC)[number]): string {
+    return locale === "en" ? q.promptEn : q.promptUk;
+  }
+
+  function quizOptionLabel(opt: { labelUk: string; labelEn: string }): string {
+    return locale === "en" ? opt.labelEn : opt.labelUk;
+  }
 
   useEffect(() => {
     const { photo, experienceFiles, diplomaFiles, courses, ...rest } = draft;
@@ -278,54 +332,73 @@ export function EnrollmentForm() {
       issues.push({ fieldId, step: current, message, label });
     };
     if (current === 1) {
-      if (draft.lastName.trim().length < 2) add("lastName", "Вкажіть прізвище (2–80)", "Прізвище");
-      if (draft.firstName.trim().length < 2) add("firstName", "Вкажіть ім’я (2–80)", "Ім’я");
-      if (!draft.country.trim()) add("country", "Вкажіть країну", "Країна");
-      if (!draft.city.trim()) add("city", "Вкажіть місто", "Місто");
-      if (!/^\+?[0-9()\-\s]{8,32}$/.test(draft.phone.trim())) add("phone", "Міжнародний формат телефону", "Телефон");
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) add("email", "Некоректний email", "Email");
+      if (draft.lastName.trim().length < 2) add("lastName", t("errors.lastName"), t("fields.lastName"));
+      if (draft.firstName.trim().length < 2) add("firstName", t("errors.firstName"), t("fields.firstName"));
+      if (!draft.country.trim()) add("country", t("errors.country"), t("fields.country"));
+      if (!draft.city.trim()) add("city", t("errors.city"), t("fields.city"));
+      if (!/^\+?[0-9()\-\s]{8,32}$/.test(draft.phone.trim())) add("phone", t("errors.phone"), t("fields.phone"));
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) add("email", t("errors.email"), t("fields.email"));
     }
     if (current === 2) {
-      if (!draft.jobTitle.trim()) add("jobTitle", "Вкажіть посаду", "Посада");
-      if (!draft.industry.trim()) add("industry", "Вкажіть галузь", "Галузь");
-      if (!draft.companySize) add("companySize", "Оберіть розмір організації", "Розмір організації");
-      if (draft.oshFunctions === null) add("oshFunctions", "Оберіть Так або Ні", "Функції з БЗР");
-      if (draft.oshYears === "" || Number.isNaN(Number(draft.oshYears))) add("oshYears", "Вкажіть стаж БЗР", "Стаж у сфері БЗР");
-      if (!draft.responsibilities.trim()) add("responsibilities", "Опишіть обов’язки", "Обов’язки");
-      if (draft.responsibilities.length > 1500) add("responsibilities", "Максимум 1500 символів", "Обов’язки");
+      if (!draft.jobTitle.trim()) add("jobTitle", t("errors.jobTitle"), t("fields.jobTitle"));
+      if (!draft.industry.trim()) add("industry", t("errors.industry"), t("fields.industry"));
+      if (!draft.companySize) add("companySize", t("errors.companySize"), t("fields.companySize"));
+      if (draft.oshFunctions === null) add("oshFunctions", t("errors.yesNo"), t("fields.oshFunctions"));
+      if (draft.oshYears === "" || Number.isNaN(Number(draft.oshYears))) {
+        add("oshYears", t("errors.oshYears"), t("fields.oshYears"));
+      }
+      if (!draft.responsibilities.trim()) add("responsibilities", t("errors.responsibilities"), t("fields.responsibilities"));
+      if (draft.responsibilities.length > 1500) {
+        add("responsibilities", t("errors.responsibilitiesMax"), t("fields.responsibilities"));
+      }
     }
     if (current === 3) {
-      if (!draft.educationLevel) add("educationLevel", "Оберіть рівень освіти", "Рівень освіти");
-      if (draft.profileEducation === null) add("profileEducation", "Оберіть Так або Ні", "Профільна освіта");
+      if (!draft.educationLevel) add("educationLevel", t("errors.educationLevel"), t("fields.educationLevel"));
+      if (draft.profileEducation === null) {
+        add("profileEducation", t("errors.yesNo"), t("fields.profileEducation"));
+      }
       if (draft.educationLevel && draft.educationLevel !== "other") {
-        if (!draft.institution.trim()) add("institution", "Вкажіть заклад", "Навчальний заклад");
-        if (!draft.speciality.trim()) add("speciality", "Вкажіть спеціальність", "Спеціальність");
-        if (!draft.graduationYear.trim()) add("graduationYear", "Вкажіть рік", "Рік закінчення");
+        if (!draft.institution.trim()) add("institution", t("errors.institution"), t("fields.institution"));
+        if (!draft.speciality.trim()) add("speciality", t("errors.speciality"), t("fields.speciality"));
+        if (!draft.graduationYear.trim()) add("graduationYear", t("errors.graduationYear"), t("fields.graduationYear"));
       }
     }
     if (current === 4) {
       draft.courses.forEach((c, i) => {
-        if (!c.courseName.trim()) add(`courseName_${i}`, "Назва курсу", `Курс ${i + 1}: назва`);
-        if (!c.provider.trim()) add(`provider_${i}`, "Організація", `Курс ${i + 1}: організація`);
+        if (!c.courseName.trim()) {
+          add(`courseName_${i}`, t("errors.courseName"), t("courseNameLabel", { n: i + 1 }));
+        }
+        if (!c.provider.trim()) {
+          add(`provider_${i}`, t("errors.provider"), t("courseProviderLabel", { n: i + 1 }));
+        }
         if (c.courseType !== "other" && c.certFiles.length === 0) {
-          add(`certificate_${i}`, "Додайте сертифікат (файли не зберігаються між сесіями — завантажте знову)", `Курс ${i + 1}: сертифікат`);
+          add(`certificate_${i}`, t("errors.certificate"), t("courseCertLabel", { n: i + 1 }));
         }
       });
     }
     if (current === 5) {
-      if (!draft.cpdStatus) add("cpdStatus", "Оберіть варіант", "Участь у БПР");
+      if (!draft.cpdStatus) add("cpdStatus", t("errors.cpdStatus"), t("fields.cpdStatus"));
     }
     if (current === 6) {
-      if (!draft.codeRead) add("codeRead", "Підтвердіть ознайомлення", "Згода з Кодексом");
+      if (!draft.codeRead) add("codeRead", t("errors.codeRead"), t("fields.codeRead"));
       for (const q of CODEX_QUESTIONS_PUBLIC) {
-        if (!draft.testAnswers[q.id]) add(`test_${q.id}`, "Оберіть відповідь", `Тест: ${q.promptUk.slice(0, 48)}…`);
+        if (!draft.testAnswers[q.id]) {
+          const prompt = quizPrompt(q);
+          add(
+            `test_${q.id}`,
+            t("errors.testAnswer"),
+            t("testIssueLabel", { prompt: prompt.slice(0, 48) }),
+          );
+        }
       }
     }
     if (current === 7) {
-      if (!draft.truthConfirm) add("truthConfirm", "Потрібне підтвердження", "Достовірність даних");
-      if (!draft.codeAccept) add("codeAccept", "Потрібна згода", "Кодекс поведінки");
-      if (!draft.privacyConsent) add("privacyConsent", "Потрібна згода", "Обробка персональних даних");
-      if (!draft.serviceMessages) add("serviceMessages", "Потрібна згода", "Службові повідомлення");
+      if (!draft.truthConfirm) add("truthConfirm", t("errors.truthRequired"), t("fields.truthConfirm"));
+      if (!draft.codeAccept) add("codeAccept", t("errors.consentRequired"), t("fields.codeAccept"));
+      if (!draft.privacyConsent) add("privacyConsent", t("errors.consentRequired"), t("fields.privacyConsent"));
+      if (!draft.serviceMessages) {
+        add("serviceMessages", t("errors.consentRequired"), t("fields.serviceMessages"));
+      }
     }
     return issues;
   }
@@ -354,6 +427,10 @@ export function EnrollmentForm() {
     setTimeout(() => {
       const el = document.getElementById(`enrollment-field-${issue.fieldId}`);
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const control = document.getElementById(`enrollment-control-${issue.fieldId}`);
+      if (control && "focus" in control) {
+        (control as HTMLElement).focus({ preventScroll: true });
+      }
     }, 50);
   }
 
@@ -419,7 +496,7 @@ export function EnrollmentForm() {
         privacyConsent: true as const,
         serviceMessages: true as const,
         marketingConsent: draft.marketingConsent,
-        locale: "uk" as const,
+        locale,
         idempotencyKey,
         company: "",
       };
@@ -437,36 +514,37 @@ export function EnrollmentForm() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (data.error === "unavailable" || data.error === "blob_unavailable") {
-          setSubmitError("Форма тимчасово недоступна (немає DATABASE_URL або Blob). Напишіть на office@esosh.net");
+          setSubmitError(t("submitErrors.unavailable"));
         } else if (data.error === "email_conflict") {
-          setSubmitError("Ці email вже пов’язані з різними картками. Зверніться до адміністратора.");
+          setSubmitError(t("submitErrors.emailConflict"));
         } else if (data.error === "certificate_required") {
           const idx = typeof data.courseIndex === "number" ? data.courseIndex : 0;
           const issue: FormIssue = {
             fieldId: `certificate_${idx}`,
             step: 4,
-            message: "Додайте сертифікат",
-            label: `Курс ${idx + 1}: сертифікат`,
+            message: t("submitErrors.certificateRequiredShort"),
+            label: t("courseCertLabel", { n: idx + 1 }),
           };
           setBlockingIssues([issue]);
-          setSubmitError("Для заявленого курсу потрібен файл сертифіката.");
+          setSubmitError(t("submitErrors.certificateRequired"));
           jumpToIssue(issue);
         } else if (data.error === "invalid_fields" && Array.isArray(data.issues)) {
-          const mapped: FormIssue[] = data.issues.map((issue: { path?: (string | number)[]; message?: string }) => {
-            const key = String(issue.path?.[0] || "payload");
-            return {
-              fieldId: key,
-              step: 1,
-              message: issue.message || "Перевірте поле",
-              label: key,
-            };
-          });
-          setBlockingIssues(mapped);
-          setSubmitError("Сервер відхилив частину полів. Відкрийте пункт зі списку нижче.");
-        } else {
-          setSubmitError(
-            `Не вдалося надіслати заявку${data.error ? ` (${data.error})` : ""}. Перевірте поля та спробуйте ще раз.`,
+          const mapped: FormIssue[] = data.issues.map(
+            (issue: { path?: (string | number)[]; message?: string }) => {
+              const key = String(issue.path?.[0] || "payload");
+              return {
+                fieldId: key,
+                step: 1,
+                message: issue.message || t("errors.checkField"),
+                label: key,
+              };
+            },
           );
+          setBlockingIssues(mapped);
+          setSubmitError(t("submitErrors.invalidFields"));
+        } else {
+          const detail = data.error ? ` (${data.error})` : "";
+          setSubmitError(t("submitErrors.generic", { detail }));
         }
         return;
       }
@@ -479,8 +557,8 @@ export function EnrollmentForm() {
         setResult({
           kind: "duplicate",
           applicationPublicId: data.applicationPublicId,
-          autoLevelLabelUk:
-            data.autoLevelLabelUk ||
+          autoLevelLabel:
+            levelLabel(data.autoLevel, data.autoLevelLabelUk) ||
             LEVEL_LABELS_UK[data.autoLevel as keyof typeof LEVEL_LABELS_UK] ||
             "",
         });
@@ -489,12 +567,14 @@ export function EnrollmentForm() {
       setResult({
         kind: "ok",
         applicationPublicId: data.applicationPublicId,
-        autoLevelLabelUk:
-          data.autoLevelLabelUk || LEVEL_LABELS_UK[data.autoLevel as keyof typeof LEVEL_LABELS_UK] || "",
+        autoLevelLabel:
+          levelLabel(data.autoLevel, data.autoLevelLabelUk) ||
+          LEVEL_LABELS_UK[data.autoLevel as keyof typeof LEVEL_LABELS_UK] ||
+          "",
         memberPublicId: data.memberPublicId,
       });
     } catch {
-      setSubmitError("Помилка мережі. Спробуйте ще раз.");
+      setSubmitError(t("submitErrors.network"));
     } finally {
       setSubmitting(false);
     }
@@ -504,49 +584,51 @@ export function EnrollmentForm() {
     if (result.kind === "honeypot") {
       return (
         <div className="enrollment-success" role="status">
-          <h2 className="h2 is--margin-bottom-16">Дякуємо!</h2>
-          <p className="regular-l">Ваше повідомлення отримано.</p>
+          <h2 className="h2 is--margin-bottom-16">{t("success.thanks")}</h2>
+          <p className="regular-l">{t("success.honeypot")}</p>
         </div>
       );
     }
     return (
       <div className="enrollment-success" role="status">
         <h2 className="h2 is--margin-bottom-16">
-          {result.kind === "duplicate" ? "Заявку вже отримано раніше" : "Дякуємо! Заявку отримано"}
+          {result.kind === "duplicate" ? t("success.duplicate") : t("success.received")}
         </h2>
         {result.applicationPublicId ? (
           <p className="regular-l is--margin-bottom-12">
-            Номер заявки: <strong>{result.applicationPublicId}</strong>
+            {t("success.applicationId")} <strong>{result.applicationPublicId}</strong>
           </p>
         ) : null}
         {result.kind === "ok" && result.memberPublicId ? (
           <p className="regular-l is--margin-bottom-12">
-            ID учасника: <strong>{result.memberPublicId}</strong>
+            {t("success.memberId")} <strong>{result.memberPublicId}</strong>
           </p>
         ) : null}
-        {result.autoLevelLabelUk ? (
+        {result.autoLevelLabel ? (
           <p className="regular-l is--margin-bottom-12">
-            Попередній рівень: «{result.autoLevelLabelUk}». Остаточний рівень визначить адміністратор
-            при розгляді (орієнтовно {REVIEW_BUSINESS_DAYS} робочих днів).
+            {t("success.levelPreview", { level: result.autoLevelLabel, days: REVIEW_BUSINESS_DAYS })}
           </p>
         ) : (
           <p className="regular-l is--margin-bottom-12">
-            Остаточний рівень визначить адміністратор при розгляді (орієнтовно {REVIEW_BUSINESS_DAYS}{" "}
-            робочих днів).
+            {t("success.levelPending", { days: REVIEW_BUSINESS_DAYS })}
           </p>
         )}
         {result.kind === "duplicate" ? (
-          <p className="regular-l">Повторне надсилання не створило нову заявку — використано вже збережений запис.</p>
+          <p className="regular-l">{t("success.duplicateNote")}</p>
         ) : (
-          <p className="regular-l">Підтвердження також надішлемо на вашу електронну скриньку (якщо налаштовано доставку).</p>
+          <p className="regular-l">{t("success.emailNote")}</p>
         )}
       </div>
     );
   }
 
+  const liveLevel = liveClassify
+    ? levelLabel(liveClassify.level, liveClassify.labelUk)
+    : "";
+
   return (
     <div className="enrollment-form-wrap">
-      <div className="enrollment-progress" aria-label="Прогрес форми">
+      <div className="enrollment-progress" aria-label={t("progressAria")}>
         {Array.from({ length: STEPS }, (_, i) => (
           <div
             key={i}
@@ -556,34 +638,32 @@ export function EnrollmentForm() {
           </div>
         ))}
       </div>
-      <p className="regular-s enrollment-step-label">Крок {step} з {STEPS}</p>
+      <p className="regular-s enrollment-step-label">{t("stepLabel", { step, total: STEPS })}</p>
       <p className="enrollment-required-legend">
-        Поля з <span className="enrollment-req">*</span> обов’язкові
+        {t("requiredLegendBefore")}
+        <span className="enrollment-req">{t("requiredMark")}</span>
+        {t("requiredLegendAfter")}
       </p>
 
       {liveClassify && step >= 2 ? (
         <div className="enrollment-level-box" role="status">
-          <p className="enrollment-level-box__title">
-            Попередній рівень: {liveClassify.labelUk}
-          </p>
-          <p className="enrollment-level-box__text">
-            Остаточний рівень визначить адміністратор при розгляді.
-          </p>
+          <p className="enrollment-level-box__title">{t("previewLevel", { level: liveLevel })}</p>
+          <p className="enrollment-level-box__text">{t("previewFinalNote")}</p>
         </div>
       ) : previewUnavailable && step >= 2 ? (
-        <p className="enrollment-hint" role="status">
-          Попередній рівень тимчасово недоступний — заявку все одно можна подати.
+        <p className="enrollment-hint enrollment-warn" role="status">
+          {t("previewUnavailable")}
         </p>
       ) : null}
 
       {blockingIssues.length > 0 ? (
         <div className="enrollment-issues" role="alert">
-          <p className="enrollment-issues__title">Щоб продовжити, виправте:</p>
+          <p className="enrollment-issues__title">{t("issuesTitle")}</p>
           <ul className="enrollment-issues__list">
             {blockingIssues.map((issue) => (
               <li key={`${issue.step}-${issue.fieldId}`}>
                 <button type="button" className="enrollment-issues__link" onClick={() => jumpToIssue(issue)}>
-                  Крок {issue.step}: {issue.label}
+                  {t("issueStep", { step: issue.step, label: issue.label })}
                 </button>
                 <span className="enrollment-issues__msg"> — {issue.message}</span>
               </li>
@@ -600,165 +680,328 @@ export function EnrollmentForm() {
 
         {step === 1 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Особисті та контактні дані</legend>
-            <Field id="lastName" label="Прізвище" required error={errors.lastName}>
-              <input className="form-input text-field w-input" value={draft.lastName} onChange={(e) => update("lastName", e.target.value)} required />
+            <legend className="h3">{t("stepTitles.1")}</legend>
+            <Field id="lastName" label={t("fields.lastName")} required error={errors.lastName}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.lastName}
+                onChange={(e) => update("lastName", e.target.value)}
+                required
+              />
             </Field>
-            <Field id="firstName" label="Ім’я" required error={errors.firstName}>
-              <input className="form-input text-field w-input" value={draft.firstName} onChange={(e) => update("firstName", e.target.value)} required />
+            <Field id="firstName" label={t("fields.firstName")} required error={errors.firstName}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.firstName}
+                onChange={(e) => update("firstName", e.target.value)}
+                required
+              />
             </Field>
-            <Field id="middleName" label="По батькові">
-              <input className="form-input text-field w-input" value={draft.middleName} onChange={(e) => update("middleName", e.target.value)} />
+            <Field id="middleName" label={t("fields.middleName")}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.middleName}
+                onChange={(e) => update("middleName", e.target.value)}
+              />
             </Field>
-            <Field id="birthDate" label="Дата народження">
-              <input className="form-input text-field w-input" type="date" value={draft.birthDate} onChange={(e) => update("birthDate", e.target.value)} />
+            <Field id="birthDate" label={t("fields.birthDate")}>
+              <input
+                className="form-input text-field w-input"
+                type="date"
+                value={draft.birthDate}
+                onChange={(e) => update("birthDate", e.target.value)}
+              />
             </Field>
-            <Field id="country" label="Країна" required error={errors.country}>
-              <input className="form-input text-field w-input" value={draft.country} onChange={(e) => update("country", e.target.value)} />
+            <Field id="country" label={t("fields.country")} required error={errors.country}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.country}
+                onChange={(e) => update("country", e.target.value)}
+              />
             </Field>
-            <Field id="city" label="Місто" required error={errors.city}>
-              <input className="form-input text-field w-input" value={draft.city} onChange={(e) => update("city", e.target.value)} />
+            <Field id="city" label={t("fields.city")} required error={errors.city}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.city}
+                onChange={(e) => update("city", e.target.value)}
+              />
             </Field>
-            <Field id="phone" label="Телефон" required error={errors.phone} hint="Міжнародний формат, наприклад +380…">
-              <input className="form-input text-field w-input" value={draft.phone} onChange={(e) => update("phone", e.target.value)} />
+            <Field id="phone" label={t("fields.phone")} required error={errors.phone} hint={t("phoneHint")}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.phone}
+                onChange={(e) => update("phone", e.target.value)}
+              />
             </Field>
-            <Field id="email" label="Email" required error={errors.email}>
-              <input className="form-input text-field w-input" type="email" value={draft.email} onChange={(e) => update("email", e.target.value)} />
+            <Field id="email" label={t("fields.email")} required error={errors.email}>
+              <input
+                className="form-input text-field w-input"
+                type="email"
+                value={draft.email}
+                onChange={(e) => update("email", e.target.value)}
+              />
             </Field>
-            <Field id="secondaryEmail" label="Додатковий email">
-              <input className="form-input text-field w-input" type="email" value={draft.secondaryEmail} onChange={(e) => update("secondaryEmail", e.target.value)} />
+            <Field id="secondaryEmail" label={t("fields.secondaryEmail")}>
+              <input
+                className="form-input text-field w-input"
+                type="email"
+                value={draft.secondaryEmail}
+                onChange={(e) => update("secondaryEmail", e.target.value)}
+              />
             </Field>
-            <Field id="profileUrl" label="LinkedIn / профіль">
-              <input className="form-input text-field w-input" type="url" value={draft.profileUrl} onChange={(e) => update("profileUrl", e.target.value)} />
+            <Field id="profileUrl" label={t("fields.profileUrl")}>
+              <input
+                className="form-input text-field w-input"
+                type="url"
+                value={draft.profileUrl}
+                onChange={(e) => update("profileUrl", e.target.value)}
+              />
             </Field>
-            <Field id="photo" label="Фото (JPG/PNG, до 5 МБ)">
-              <input type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={(e) => update("photo", e.target.files?.[0] || null)} />
+            <Field
+              id="photo"
+              label={t("fields.photo")}
+              hint={t("fileNotRestored")}
+            >
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                onChange={(e) => update("photo", e.target.files?.[0] || null)}
+              />
             </Field>
           </fieldset>
         ) : null}
 
         {step === 2 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Професійна діяльність</legend>
-            <Field id="jobTitle" label="Посада" required error={errors.jobTitle}>
-              <input className="form-input text-field w-input" value={draft.jobTitle} onChange={(e) => update("jobTitle", e.target.value)} />
+            <legend className="h3">{t("stepTitles.2")}</legend>
+            <Field id="jobTitle" label={t("fields.jobTitle")} required error={errors.jobTitle}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.jobTitle}
+                onChange={(e) => update("jobTitle", e.target.value)}
+              />
             </Field>
-            <Field id="organization" label="Організація">
-              <input className="form-input text-field w-input" value={draft.organization} onChange={(e) => update("organization", e.target.value)} />
+            <Field id="organization" label={t("fields.organization")}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.organization}
+                onChange={(e) => update("organization", e.target.value)}
+              />
             </Field>
-            <Field id="industry" label="Галузь" required error={errors.industry}>
-              <input className="form-input text-field w-input" value={draft.industry} onChange={(e) => update("industry", e.target.value)} />
+            <Field id="industry" label={t("fields.industry")} required error={errors.industry}>
+              <input
+                className="form-input text-field w-input"
+                value={draft.industry}
+                onChange={(e) => update("industry", e.target.value)}
+              />
             </Field>
-            <Field id="companySize" label="Розмір організації (де набуто досвід)" required error={errors.companySize}>
-              <select className="form-input text-field w-select" value={draft.companySize} onChange={(e) => update("companySize", e.target.value as CompanySize | "")}>
-                <option value="">Оберіть…</option>
-                <option value="le20">до 20</option>
-                <option value="21_50">21–50</option>
-                <option value="gt50">понад 50</option>
+            <Field id="companySize" label={t("fields.companySize")} required error={errors.companySize}>
+              <select
+                className="form-input text-field w-select"
+                value={draft.companySize}
+                onChange={(e) => update("companySize", e.target.value as CompanySize | "")}
+              >
+                <option value="">{t("choose")}</option>
+                <option value="le20">{t("companySizeOptions.le20")}</option>
+                <option value="21_50">{t("companySizeOptions.21_50")}</option>
+                <option value="gt50">{t("companySizeOptions.gt50")}</option>
               </select>
             </Field>
-            <Field
+            <ChoiceGroup
               id="oshFunctions"
-              label="Чи виконуєте або виконували функції з БЗР?"
-              expand="безпека та здоров’я на роботі"
+              label={t("fields.oshFunctions")}
+              expand={t("oshExpand")}
               required
               error={errors.oshFunctions}
             >
-              <div className="enrollment-radios">
-                <label><input type="radio" checked={draft.oshFunctions === true} onChange={() => update("oshFunctions", true)} /> Так</label>
-                <label><input type="radio" checked={draft.oshFunctions === false} onChange={() => update("oshFunctions", false)} /> Ні</label>
-              </div>
-            </Field>
-            <Field id="totalYears" label="Загальний стаж (роки)">
-              <input className="form-input text-field w-input" type="number" min={0} max={60} step={0.5} value={draft.totalYears} onChange={(e) => update("totalYears", e.target.value)} />
+              <label>
+                <input
+                  type="radio"
+                  name="oshFunctions"
+                  checked={draft.oshFunctions === true}
+                  onChange={() => update("oshFunctions", true)}
+                />{" "}
+                {t("yes")}
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="oshFunctions"
+                  checked={draft.oshFunctions === false}
+                  onChange={() => update("oshFunctions", false)}
+                />{" "}
+                {t("no")}
+              </label>
+            </ChoiceGroup>
+            <Field id="totalYears" label={t("fields.totalYears")}>
+              <input
+                className="form-input text-field w-input"
+                type="number"
+                min={0}
+                max={60}
+                step={0.5}
+                value={draft.totalYears}
+                onChange={(e) => update("totalYears", e.target.value)}
+              />
             </Field>
             <Field
               id="oshYears"
-              label="Стаж у сфері БЗР (роки)"
-              expand="безпека та здоров’я на роботі"
+              label={t("fields.oshYears")}
+              expand={t("oshExpand")}
               required
               error={errors.oshYears}
             >
-              <input className="form-input text-field w-input" type="number" min={0} max={60} step={0.5} value={draft.oshYears} onChange={(e) => update("oshYears", e.target.value)} />
+              <input
+                className="form-input text-field w-input"
+                type="number"
+                min={0}
+                max={60}
+                step={0.5}
+                value={draft.oshYears}
+                onChange={(e) => update("oshYears", e.target.value)}
+              />
             </Field>
-            <Field id="responsibilities" label="Основні обов’язки" required error={errors.responsibilities} hint={`${draft.responsibilities.length}/1500`}>
-              <textarea className="form-input text-field w-input" rows={5} maxLength={1500} value={draft.responsibilities} onChange={(e) => update("responsibilities", e.target.value)} />
+            <Field
+              id="responsibilities"
+              label={t("fields.responsibilities")}
+              required
+              error={errors.responsibilities}
+              hint={t("charCount", { count: draft.responsibilities.length })}
+            >
+              <textarea
+                className="form-input text-field w-input"
+                rows={5}
+                maxLength={1500}
+                value={draft.responsibilities}
+                onChange={(e) => update("responsibilities", e.target.value)}
+              />
             </Field>
-            <Field id="experienceFiles" label="Підтвердження стажу (PDF/JPG/PNG, до 10 МБ)">
-              <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => update("experienceFiles", Array.from(e.target.files || []))} />
+            <Field
+              id="experienceFiles"
+              label={t("fields.experienceFiles")}
+              hint={t("fileNotRestored")}
+            >
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => update("experienceFiles", Array.from(e.target.files || []))}
+              />
             </Field>
           </fieldset>
         ) : null}
 
         {step === 3 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Освіта</legend>
-            <Field id="educationLevel" label="Найвищий рівень освіти" required error={errors.educationLevel}>
-              <select className="form-input text-field w-select" value={draft.educationLevel} onChange={(e) => update("educationLevel", e.target.value as EducationLevel | "")}>
-                <option value="">Оберіть…</option>
-                <option value="vocational">профтех</option>
-                <option value="junior_bachelor">молодший бакалавр</option>
-                <option value="bachelor">бакалавр</option>
-                <option value="master">магістр</option>
-                <option value="phd">PhD (доктор філософії)</option>
-                <option value="doctor">доктор наук</option>
-                <option value="other">інше</option>
+            <legend className="h3">{t("stepTitles.3")}</legend>
+            <Field id="educationLevel" label={t("fields.educationLevel")} required error={errors.educationLevel}>
+              <select
+                className="form-input text-field w-select"
+                value={draft.educationLevel}
+                onChange={(e) => update("educationLevel", e.target.value as EducationLevel | "")}
+              >
+                <option value="">{t("choose")}</option>
+                <option value="vocational">{t("educationOptions.vocational")}</option>
+                <option value="junior_bachelor">{t("educationOptions.junior_bachelor")}</option>
+                <option value="bachelor">{t("educationOptions.bachelor")}</option>
+                <option value="master">{t("educationOptions.master")}</option>
+                <option value="phd">{t("educationOptions.phd")}</option>
+                <option value="doctor">{t("educationOptions.doctor")}</option>
+                <option value="other">{t("educationOptions.other")}</option>
               </select>
             </Field>
-            <Field
+            <ChoiceGroup
               id="profileEducation"
-              label="Чи є освіта профільною для БЗР?"
-              expand="безпека та здоров’я на роботі"
+              label={t("fields.profileEducation")}
+              expand={t("oshExpand")}
               required
               error={errors.profileEducation}
             >
-              <div className="enrollment-radios">
-                <label><input type="radio" checked={draft.profileEducation === true} onChange={() => update("profileEducation", true)} /> Так</label>
-                <label><input type="radio" checked={draft.profileEducation === false} onChange={() => update("profileEducation", false)} /> Ні</label>
-              </div>
-            </Field>
+              <label>
+                <input
+                  type="radio"
+                  name="profileEducation"
+                  checked={draft.profileEducation === true}
+                  onChange={() => update("profileEducation", true)}
+                />{" "}
+                {t("yes")}
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="profileEducation"
+                  checked={draft.profileEducation === false}
+                  onChange={() => update("profileEducation", false)}
+                />{" "}
+                {t("no")}
+              </label>
+            </ChoiceGroup>
             <Field
               id="institution"
-              label="Навчальний заклад"
+              label={t("fields.institution")}
               required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
               error={errors.institution}
             >
-              <input className="form-input text-field w-input" value={draft.institution} onChange={(e) => update("institution", e.target.value)} />
+              <input
+                className="form-input text-field w-input"
+                value={draft.institution}
+                onChange={(e) => update("institution", e.target.value)}
+              />
             </Field>
             <Field
               id="speciality"
-              label="Спеціальність"
+              label={t("fields.speciality")}
               required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
               error={errors.speciality}
             >
-              <input className="form-input text-field w-input" value={draft.speciality} onChange={(e) => update("speciality", e.target.value)} />
+              <input
+                className="form-input text-field w-input"
+                value={draft.speciality}
+                onChange={(e) => update("speciality", e.target.value)}
+              />
             </Field>
             <Field
               id="graduationYear"
-              label="Рік закінчення"
+              label={t("fields.graduationYear")}
               required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
               error={errors.graduationYear}
             >
-              <input className="form-input text-field w-input" type="number" min={1950} max={new Date().getFullYear()} value={draft.graduationYear} onChange={(e) => update("graduationYear", e.target.value)} />
+              <input
+                className="form-input text-field w-input"
+                type="number"
+                min={1950}
+                max={new Date().getFullYear()}
+                value={draft.graduationYear}
+                onChange={(e) => update("graduationYear", e.target.value)}
+              />
             </Field>
-            <Field id="diplomaFiles" label="Диплом (файли)">
-              <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => update("diplomaFiles", Array.from(e.target.files || []))} />
+            <Field id="diplomaFiles" label={t("fields.diplomaFiles")} hint={t("fileNotRestored")}>
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => update("diplomaFiles", Array.from(e.target.files || []))}
+              />
             </Field>
           </fieldset>
         ) : null}
 
         {step === 4 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Курси та кваліфікації</legend>
+            <legend className="h3">{t("stepTitles.4")}</legend>
             {draft.courses.map((course, index) => (
               <div key={index} className="enrollment-course">
                 <div className="enrollment-course__head">
-                  <strong>Курс {index + 1}</strong>
-                  <button type="button" className="btn is--secondary w-button" onClick={() => update("courses", draft.courses.filter((_, i) => i !== index))}>
-                    Видалити
+                  <strong>{t("courseHeading", { n: index + 1 })}</strong>
+                  <button
+                    type="button"
+                    className="btn is--secondary w-button"
+                    onClick={() => update("courses", draft.courses.filter((_, i) => i !== index))}
+                  >
+                    {t("courseRemove")}
                   </button>
                 </div>
-                <Field id={`courseType_${index}`} label="Тип програми">
+                <Field id={`courseType_${index}`} label={t("fields.courseType")}>
                   <select
                     className="form-input text-field w-select"
                     value={course.courseType}
@@ -768,218 +1011,377 @@ export function EnrollmentForm() {
                       update("courses", courses);
                     }}
                   >
-                    {Object.entries(COURSE_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
+                    {COURSE_TYPES.map((value) => (
+                      <option key={value} value={value}>
+                        {t(`courseTypes.${value}`)}
+                      </option>
                     ))}
                   </select>
                 </Field>
-                <Field id={`courseName_${index}`} label="Назва" required error={errors[`courseName_${index}`]}>
-                  <input className="form-input text-field w-input" value={course.courseName} onChange={(e) => {
-                    const courses = [...draft.courses];
-                    courses[index] = { ...course, courseName: e.target.value };
-                    update("courses", courses);
-                  }} />
+                <Field
+                  id={`courseName_${index}`}
+                  label={t("fields.courseName")}
+                  required
+                  error={errors[`courseName_${index}`]}
+                >
+                  <input
+                    className="form-input text-field w-input"
+                    value={course.courseName}
+                    onChange={(e) => {
+                      const courses = [...draft.courses];
+                      courses[index] = { ...course, courseName: e.target.value };
+                      update("courses", courses);
+                    }}
+                  />
                 </Field>
-                <Field id={`provider_${index}`} label="Організація" required error={errors[`provider_${index}`]}>
-                  <input className="form-input text-field w-input" value={course.provider} onChange={(e) => {
-                    const courses = [...draft.courses];
-                    courses[index] = { ...course, provider: e.target.value };
-                    update("courses", courses);
-                  }} />
+                <Field
+                  id={`provider_${index}`}
+                  label={t("fields.provider")}
+                  required
+                  error={errors[`provider_${index}`]}
+                >
+                  <input
+                    className="form-input text-field w-input"
+                    value={course.provider}
+                    onChange={(e) => {
+                      const courses = [...draft.courses];
+                      courses[index] = { ...course, provider: e.target.value };
+                      update("courses", courses);
+                    }}
+                  />
                 </Field>
-                <Field id={`courseYear_${index}`} label="Рік">
-                  <input className="form-input text-field w-input" type="number" value={course.courseYear} onChange={(e) => {
-                    const courses = [...draft.courses];
-                    courses[index] = { ...course, courseYear: Number(e.target.value) };
-                    update("courses", courses);
-                  }} />
+                <Field id={`courseYear_${index}`} label={t("fields.courseYear")}>
+                  <input
+                    className="form-input text-field w-input"
+                    type="number"
+                    value={course.courseYear}
+                    onChange={(e) => {
+                      const courses = [...draft.courses];
+                      courses[index] = { ...course, courseYear: Number(e.target.value) };
+                      update("courses", courses);
+                    }}
+                  />
                 </Field>
-                <Field id={`hours_${index}`} label="Години">
-                  <input className="form-input text-field w-input" type="number" value={course.hours ?? ""} onChange={(e) => {
-                    const courses = [...draft.courses];
-                    courses[index] = { ...course, hours: e.target.value === "" ? null : Number(e.target.value) };
-                    update("courses", courses);
-                  }} />
+                <Field id={`hours_${index}`} label={t("fields.hours")}>
+                  <input
+                    className="form-input text-field w-input"
+                    type="number"
+                    value={course.hours ?? ""}
+                    onChange={(e) => {
+                      const courses = [...draft.courses];
+                      courses[index] = {
+                        ...course,
+                        hours: e.target.value === "" ? null : Number(e.target.value),
+                      };
+                      update("courses", courses);
+                    }}
+                  />
                 </Field>
-                <Field id={`certificateNo_${index}`} label="Номер сертифіката">
-                  <input className="form-input text-field w-input" value={course.certificateNo || ""} onChange={(e) => {
-                    const courses = [...draft.courses];
-                    courses[index] = { ...course, certificateNo: e.target.value };
-                    update("courses", courses);
-                  }} />
+                <Field id={`certificateNo_${index}`} label={t("fields.certificateNo")}>
+                  <input
+                    className="form-input text-field w-input"
+                    value={course.certificateNo || ""}
+                    onChange={(e) => {
+                      const courses = [...draft.courses];
+                      courses[index] = { ...course, certificateNo: e.target.value };
+                      update("courses", courses);
+                    }}
+                  />
                 </Field>
-                <Field id={`certificate_${index}`} label="Сертифікат" required error={errors[`certificate_${index}`]}>
-                  <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => {
-                    const courses = [...draft.courses];
-                    courses[index] = { ...course, certFiles: Array.from(e.target.files || []) };
-                    update("courses", courses);
-                  }} />
+                <Field
+                  id={`certificate_${index}`}
+                  label={t("fields.certificate")}
+                  required
+                  error={errors[`certificate_${index}`]}
+                  hint={t("fileNotRestored")}
+                >
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => {
+                      const courses = [...draft.courses];
+                      courses[index] = { ...course, certFiles: Array.from(e.target.files || []) };
+                      update("courses", courses);
+                    }}
+                  />
                 </Field>
               </div>
             ))}
-            <button type="button" className="btn is--secondary w-button" onClick={() => update("courses", [...draft.courses, emptyCourse()])}>
-              Додати ще один курс
+            <button
+              type="button"
+              className="btn is--secondary w-button"
+              onClick={() => update("courses", [...draft.courses, emptyCourse()])}
+            >
+              {t("courseAdd")}
             </button>
           </fieldset>
         ) : null}
 
         {step === 5 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Безперервний професійний розвиток</legend>
+            <legend className="h3">{t("stepTitles.5")}</legend>
             <Field
               id="cpdStatus"
-              label="Участь у БПР ESOSH"
-              expand="безперервний професійний розвиток"
+              label={t("fields.cpdStatus")}
+              expand={t("cpdExpand")}
               required
               error={errors.cpdStatus}
             >
-              <select className="form-input text-field w-select" value={draft.cpdStatus} onChange={(e) => update("cpdStatus", e.target.value as CpdStatus | "")}>
-                <option value="">Оберіть…</option>
-                <option value="participating">беру участь</option>
-                <option value="ready">готовий(-а) долучитися</option>
-                <option value="want_info">хочу інформацію</option>
-                <option value="not_ready">поки не готовий(-а)</option>
+              <select
+                className="form-input text-field w-select"
+                value={draft.cpdStatus}
+                onChange={(e) => update("cpdStatus", e.target.value as CpdStatus | "")}
+              >
+                <option value="">{t("choose")}</option>
+                <option value="participating">{t("cpdStatusOptions.participating")}</option>
+                <option value="ready">{t("cpdStatusOptions.ready")}</option>
+                <option value="want_info">{t("cpdStatusOptions.want_info")}</option>
+                <option value="not_ready">{t("cpdStatusOptions.not_ready")}</option>
               </select>
             </Field>
-            <Field id="cpdActivities" label="Активності за останні 2 роки">
-              <div className="enrollment-checks">
-                {CPD_ACTIVITY_OPTIONS.map((item) => (
-                  <label key={item}>
-                    <input
-                      type="checkbox"
-                      checked={draft.cpdActivities.includes(item)}
-                      onChange={(e) => {
-                        update(
-                          "cpdActivities",
-                          e.target.checked
-                            ? [...draft.cpdActivities, item]
-                            : draft.cpdActivities.filter((x) => x !== item),
-                        );
-                      }}
-                    />{" "}
-                    {item}
-                  </label>
-                ))}
-              </div>
-            </Field>
-            <Field id="cpdDescription" label="Опис / плани" hint={`${draft.cpdDescription.length}/1500`}>
-              <textarea className="form-input text-field w-input" rows={4} maxLength={1500} value={draft.cpdDescription} onChange={(e) => update("cpdDescription", e.target.value)} />
+            <ChoiceGroup
+              id="cpdActivities"
+              label={t("fields.cpdActivities")}
+              role="group"
+              className="enrollment-checks"
+            >
+              {CPD_ACTIVITY_VALUES.map((item) => (
+                <label key={item}>
+                  <input
+                    type="checkbox"
+                    checked={draft.cpdActivities.includes(item)}
+                    onChange={(e) => {
+                      update(
+                        "cpdActivities",
+                        e.target.checked
+                          ? [...draft.cpdActivities, item]
+                          : draft.cpdActivities.filter((x) => x !== item),
+                      );
+                    }}
+                  />{" "}
+                  {t(`cpdActivities.${item}`)}
+                </label>
+              ))}
+            </ChoiceGroup>
+            <Field
+              id="cpdDescription"
+              label={t("fields.cpdDescription")}
+              hint={t("charCount", { count: draft.cpdDescription.length })}
+            >
+              <textarea
+                className="form-input text-field w-input"
+                rows={4}
+                maxLength={1500}
+                value={draft.cpdDescription}
+                onChange={(e) => update("cpdDescription", e.target.value)}
+              />
             </Field>
           </fieldset>
         ) : null}
 
         {step === 6 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Кодекс поведінки</legend>
+            <legend className="h3">{t("stepTitles.6")}</legend>
             <p className="regular-l is--margin-bottom-16">
-              Для проходження тесту рекомендуємо ознайомитися з{" "}
+              {t("codexIntro")}{" "}
               <Link href="/join/codex" target="_blank" className="is--link">
-                Кодексом поведінки
+                {t("codexLink")}
               </Link>
               .
             </p>
-            <Field id="codeRead" label="" error={errors.codeRead}>
-              <label className="enrollment-consent-card">
-                <input type="checkbox" checked={draft.codeRead} onChange={(e) => update("codeRead", e.target.checked)} />
+            <div className="enrollment-field" id="enrollment-field-codeRead">
+              <label className="enrollment-consent-card" htmlFor="enrollment-control-codeRead">
+                <input
+                  id="enrollment-control-codeRead"
+                  type="checkbox"
+                  checked={draft.codeRead}
+                  onChange={(e) => update("codeRead", e.target.checked)}
+                  aria-invalid={Boolean(errors.codeRead)}
+                  aria-describedby={errors.codeRead ? "enrollment-error-codeRead" : undefined}
+                />
                 <span>
-                  Ознайомився(-лася) та погоджуюся з Кодексом поведінки ESOSH
-                  <span className="enrollment-req"> *</span>
+                  {t("codexReadLabel")}
+                  <span className="enrollment-req"> {t("requiredMark")}</span>
                 </span>
               </label>
-            </Field>
+              {errors.codeRead ? (
+                <p className="site-form-error" id="enrollment-error-codeRead" role="alert">
+                  {errors.codeRead}
+                </p>
+              ) : null}
+            </div>
             {CODEX_QUESTIONS_PUBLIC.map((q) => (
-              <Field key={q.id} id={`test_${q.id}`} label={q.promptUk} required error={errors[`test_${q.id}`]}>
-                <div className="enrollment-radios enrollment-radios--stack">
-                  {q.options.map((opt) => (
-                    <label key={opt.id}>
-                      <input
-                        type="radio"
-                        name={q.id}
-                        checked={draft.testAnswers[q.id] === opt.id}
-                        onChange={() => update("testAnswers", { ...draft.testAnswers, [q.id]: opt.id })}
-                      />{" "}
-                      {opt.labelUk}
-                    </label>
-                  ))}
-                </div>
-              </Field>
+              <ChoiceGroup
+                key={q.id}
+                id={`test_${q.id}`}
+                label={quizPrompt(q)}
+                required
+                error={errors[`test_${q.id}`]}
+                className="enrollment-radios enrollment-radios--stack"
+              >
+                {q.options.map((opt) => (
+                  <label key={opt.id}>
+                    <input
+                      type="radio"
+                      name={q.id}
+                      checked={draft.testAnswers[q.id] === opt.id}
+                      onChange={() =>
+                        update("testAnswers", { ...draft.testAnswers, [q.id]: opt.id })
+                      }
+                    />{" "}
+                    {quizOptionLabel(opt)}
+                  </label>
+                ))}
+              </ChoiceGroup>
             ))}
-            <p className="regular-s">Для рівня «Фахівець» потрібен результат тесту 100%.</p>
+            <p className="regular-s">{t("codexSpecialistNote")}</p>
           </fieldset>
         ) : null}
 
         {step === 7 ? (
           <fieldset className="enrollment-fieldset">
-            <legend className="h3">Підтвердження і подання</legend>
+            <legend className="h3">{t("stepTitles.7")}</legend>
             {liveClassify ? (
               <div className="enrollment-summary">
-                <p className="bold-l is--margin-bottom-8">Зведення</p>
-                <p className="regular-l">{draft.lastName} {draft.firstName}, {draft.email}</p>
-                <p className="regular-l">{draft.jobTitle}{draft.organization ? `, ${draft.organization}` : ""}</p>
+                <p className="bold-l is--margin-bottom-8">{t("summaryTitle")}</p>
+                <p className="regular-l">
+                  {draft.lastName} {draft.firstName}, {draft.email}
+                </p>
+                <p className="regular-l">
+                  {draft.jobTitle}
+                  {draft.organization ? `, ${draft.organization}` : ""}
+                </p>
                 <p className="regular-l is--margin-top-12">
-                  Попередній рівень: <strong>{liveClassify.labelUk}</strong>
+                  {t("summaryLevel")} <strong>{liveLevel}</strong>
                 </p>
-                <p className="regular-s is--margin-top-8">
-                  Остаточний рівень визначить адміністратор при розгляді.
-                </p>
+                <p className="regular-s is--margin-top-8">{t("previewFinalNote")}</p>
               </div>
+            ) : previewUnavailable ? (
+              <p className="enrollment-hint enrollment-warn" role="status">
+                {t("previewUnavailable")}
+              </p>
             ) : null}
-            <div className="enrollment-consents">
-              <p className="enrollment-question">Підтвердження</p>
-              <label id="enrollment-field-truthConfirm" className="enrollment-consent-card">
-                <input type="checkbox" checked={draft.truthConfirm} onChange={(e) => update("truthConfirm", e.target.checked)} />
-                <span>Підтверджую достовірність наданої інформації<span className="enrollment-req"> *</span></span>
-              </label>
-              <label id="enrollment-field-codeAccept" className="enrollment-consent-card">
-                <input type="checkbox" checked={draft.codeAccept} onChange={(e) => update("codeAccept", e.target.checked)} />
-                <span>Погоджуюся з Кодексом поведінки ESOSH<span className="enrollment-req"> *</span></span>
-              </label>
-              <label id="enrollment-field-privacyConsent" className="enrollment-consent-card">
-                <input type="checkbox" checked={draft.privacyConsent} onChange={(e) => update("privacyConsent", e.target.checked)} />
+            <fieldset className="enrollment-consents">
+              <legend className="enrollment-question">{t("consentsLegend")}</legend>
+              <p className="regular-s is--margin-bottom-8">{t("consentsLead")}</p>
+              <label
+                id="enrollment-field-truthConfirm"
+                className="enrollment-consent-card"
+                htmlFor="enrollment-control-truthConfirm"
+              >
+                <input
+                  id="enrollment-control-truthConfirm"
+                  type="checkbox"
+                  checked={draft.truthConfirm}
+                  onChange={(e) => update("truthConfirm", e.target.checked)}
+                />
                 <span>
-                  Надаю згоду на обробку персональних даних для розгляду заявки, ведення реєстру членів і зберігання у
-                  міжнародних хмарних сервісах (хостинг, файли, email) відповідно до{" "}
-                  <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
-                    Політики конфіденційності
-                  </a>{" "}
-                  та{" "}
-                  <a href="/cookie-policy" target="_blank" rel="noopener noreferrer">
-                    Політики cookies
-                  </a>
-                  <span className="enrollment-req"> *</span>
+                  {t("truthConfirm")}
+                  <span className="enrollment-req"> {t("requiredMark")}</span>
                 </span>
               </label>
-              <label id="enrollment-field-serviceMessages" className="enrollment-consent-card">
-                <input type="checkbox" checked={draft.serviceMessages} onChange={(e) => update("serviceMessages", e.target.checked)} />
-                <span>Погоджуюся отримувати повідомлення щодо заявки та участі в ESOSH<span className="enrollment-req"> *</span></span>
+              <label
+                id="enrollment-field-codeAccept"
+                className="enrollment-consent-card"
+                htmlFor="enrollment-control-codeAccept"
+              >
+                <input
+                  id="enrollment-control-codeAccept"
+                  type="checkbox"
+                  checked={draft.codeAccept}
+                  onChange={(e) => update("codeAccept", e.target.checked)}
+                />
+                <span>
+                  {t("codeAccept")}
+                  <span className="enrollment-req"> {t("requiredMark")}</span>
+                </span>
               </label>
-              <label className="enrollment-consent-card enrollment-consent-card--optional">
-                <input type="checkbox" checked={draft.marketingConsent} onChange={(e) => update("marketingConsent", e.target.checked)} />
-                <span>Хочу отримувати новини, запрошення та інформацію про навчання <em>(необов’язково)</em></span>
+              <label
+                id="enrollment-field-privacyConsent"
+                className="enrollment-consent-card"
+                htmlFor="enrollment-control-privacyConsent"
+              >
+                <input
+                  id="enrollment-control-privacyConsent"
+                  type="checkbox"
+                  checked={draft.privacyConsent}
+                  onChange={(e) => update("privacyConsent", e.target.checked)}
+                />
+                <span>
+                  {t("privacyConsent")}{" "}
+                  <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">
+                    {t("privacyLink")}
+                  </Link>{" "}
+                  {t("and")}{" "}
+                  <Link href="/cookie-policy" target="_blank" rel="noopener noreferrer">
+                    {t("cookieLink")}
+                  </Link>
+                  <span className="enrollment-req"> {t("requiredMark")}</span>
+                </span>
               </label>
-              {errors.truthConfirm || errors.codeAccept || errors.privacyConsent || errors.serviceMessages ? (
-                <p className="site-form-error" role="alert">Потрібні всі обов’язкові згоди</p>
+              <label
+                id="enrollment-field-serviceMessages"
+                className="enrollment-consent-card"
+                htmlFor="enrollment-control-serviceMessages"
+              >
+                <input
+                  id="enrollment-control-serviceMessages"
+                  type="checkbox"
+                  checked={draft.serviceMessages}
+                  onChange={(e) => update("serviceMessages", e.target.checked)}
+                />
+                <span>
+                  {t("serviceMessages")}
+                  <span className="enrollment-req"> {t("requiredMark")}</span>
+                </span>
+              </label>
+              <label
+                className="enrollment-consent-card enrollment-consent-card--optional"
+                htmlFor="enrollment-control-marketingConsent"
+              >
+                <input
+                  id="enrollment-control-marketingConsent"
+                  type="checkbox"
+                  checked={draft.marketingConsent}
+                  onChange={(e) => update("marketingConsent", e.target.checked)}
+                />
+                <span>
+                  {t("marketingConsent")} <em>{t("optional")}</em>
+                </span>
+              </label>
+              {errors.truthConfirm ||
+              errors.codeAccept ||
+              errors.privacyConsent ||
+              errors.serviceMessages ? (
+                <p className="site-form-error" role="alert">
+                  {t("consentsError")}
+                </p>
               ) : null}
-            </div>
-            {submitError ? <p className="site-form-error" role="alert">{submitError}</p> : null}
+            </fieldset>
+            {submitError ? (
+              <p className="site-form-error" role="alert">
+                {submitError}
+              </p>
+            ) : null}
           </fieldset>
         ) : null}
 
         <div className="enrollment-actions">
           {step > 1 ? (
             <button type="button" className="btn is--secondary w-button" onClick={goBack}>
-              Назад
+              {t("back")}
             </button>
           ) : (
             <span />
           )}
           {step < STEPS ? (
             <button type="button" className="btn is--primary w-button" onClick={goNext}>
-              Далі
+              {t("next")}
             </button>
           ) : (
             <button type="submit" className="btn is--primary w-button" disabled={submitting}>
-              {submitting ? "Надсилаємо…" : "Подати заявку"}
+              {submitting ? t("submitting") : t("submit")}
             </button>
           )}
         </div>
@@ -997,7 +1399,7 @@ function Field({
   hint,
   children,
 }: {
-  id?: string;
+  id: string;
   label: string;
   expand?: string;
   required?: boolean;
@@ -1005,18 +1407,92 @@ function Field({
   hint?: string;
   children: ReactNode;
 }) {
+  const controlId = `enrollment-control-${id}`;
+  const labelId = `enrollment-label-${id}`;
+  const errorId = `enrollment-error-${id}`;
+  const hintId = `enrollment-hint-${id}`;
+  const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined;
+
   return (
-    <div className="enrollment-field" id={id ? `enrollment-field-${id}` : undefined}>
-      {label ? (
-        <label className="enrollment-question">
-          {label}
-          {expand ? <span className="enrollment-expand"> ({expand})</span> : null}
-          {required ? <span className="enrollment-req" aria-hidden="true"> *</span> : null}
-        </label>
+    <div className="enrollment-field" id={`enrollment-field-${id}`}>
+      <label className="enrollment-question" htmlFor={controlId} id={labelId}>
+        {label}
+        {expand ? <span className="enrollment-expand"> ({expand})</span> : null}
+        {required ? (
+          <span className="enrollment-req" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        ) : null}
+      </label>
+      {injectControlProps(children, {
+        id: controlId,
+        "aria-invalid": Boolean(error),
+        "aria-describedby": describedBy,
+      })}
+      {hint ? (
+        <p className="enrollment-hint" id={hintId}>
+          {hint}
+        </p>
       ) : null}
-      {children}
-      {hint ? <p className="enrollment-hint">{hint}</p> : null}
-      {error ? <p className="site-form-error" role="alert">{error}</p> : null}
+      {error ? (
+        <p className="site-form-error" id={errorId} role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ChoiceGroup({
+  id,
+  label,
+  expand,
+  required,
+  error,
+  children,
+  role = "radiogroup",
+  className = "enrollment-radios",
+}: {
+  id: string;
+  label: string;
+  expand?: string;
+  required?: boolean;
+  error?: string;
+  children: ReactNode;
+  role?: "radiogroup" | "group";
+  className?: string;
+}) {
+  const labelId = `enrollment-label-${id}`;
+  const errorId = `enrollment-error-${id}`;
+
+  return (
+    <div className="enrollment-field" id={`enrollment-field-${id}`}>
+      <p className="enrollment-question" id={labelId}>
+        {label}
+        {expand ? <span className="enrollment-expand"> ({expand})</span> : null}
+        {required ? (
+          <span className="enrollment-req" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        ) : null}
+      </p>
+      <div
+        role={role}
+        aria-labelledby={labelId}
+        aria-required={required || undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
+        className={className}
+      >
+        {children}
+      </div>
+      {error ? (
+        <p className="site-form-error" id={errorId} role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

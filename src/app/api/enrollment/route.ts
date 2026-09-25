@@ -10,7 +10,8 @@ import { classifyEnrollment } from "@/lib/enrollment/classify";
 import {
   deleteEnrollmentBlobs,
   putEnrollmentBlob,
-  validateEnrollmentFile,
+  validateEnrollmentFileBatch,
+  validateEnrollmentFileStrict,
 } from "@/lib/enrollment/files";
 import { createPublicId } from "@/lib/enrollment/ids";
 import { CONSENT_VERSION, LEVEL_LABELS_UK, type LevelCode } from "@/lib/enrollment/levels";
@@ -139,10 +140,15 @@ export async function POST(request: Request) {
   }
 
   for (const item of pending) {
-    const err = validateEnrollmentFile(item.file, item.kind);
+    const err = await validateEnrollmentFileStrict(item.file, item.kind);
     if (err) {
       return NextResponse.json({ ok: false, error: err, field: item.key }, { status: 400 });
     }
+  }
+
+  const batchErr = validateEnrollmentFileBatch(pending.map((p) => p.file));
+  if (batchErr) {
+    return NextResponse.json({ ok: false, error: batchErr }, { status: 400 });
   }
 
   for (let i = 0; i < parsed.data.courses.length; i++) {
