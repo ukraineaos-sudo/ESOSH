@@ -103,26 +103,34 @@ export function parseConsent(raw: string | null | undefined): ConsentState | nul
   }
 }
 
-export function readConsentFromDocument(): ConsentState | null {
+/**
+ * Cache for useSyncExternalStore getSnapshot — must return a stable
+ * reference when storage contents are unchanged (React error #185).
+ */
+let consentSnapshotRaw: string | null | undefined;
+let consentSnapshot: ConsentState | null = null;
+
+function readConsentRawFromDocument(): string | null {
   if (typeof document === "undefined") return null;
-  const fromCookie = readConsentCookie();
-  if (fromCookie) return fromCookie;
+  const parts = document.cookie.split(";").map((p) => p.trim());
+  for (const part of parts) {
+    if (!part.startsWith(`${CONSENT_COOKIE_NAME}=`)) continue;
+    return decodeURIComponent(part.slice(CONSENT_COOKIE_NAME.length + 1));
+  }
   try {
-    return parseConsent(window.localStorage.getItem(CONSENT_STORAGE_KEY));
+    return window.localStorage.getItem(CONSENT_STORAGE_KEY);
   } catch {
     return null;
   }
 }
 
-function readConsentCookie(): ConsentState | null {
-  if (typeof document === "undefined") return null;
-  const parts = document.cookie.split(";").map((p) => p.trim());
-  for (const part of parts) {
-    if (!part.startsWith(`${CONSENT_COOKIE_NAME}=`)) continue;
-    const value = decodeURIComponent(part.slice(CONSENT_COOKIE_NAME.length + 1));
-    return parseConsent(value);
-  }
-  return null;
+/** RU: Зчитати згоду з cookie/localStorage (стабільний snapshot). EN: Read consent with stable snapshot. */
+export function readConsentFromDocument(): ConsentState | null {
+  const raw = readConsentRawFromDocument();
+  if (raw === consentSnapshotRaw) return consentSnapshot;
+  consentSnapshotRaw = raw;
+  consentSnapshot = parseConsent(raw);
+  return consentSnapshot;
 }
 
 /** RU: Зберігає згоду в cookie + localStorage. EN: Persist consent to cookie and localStorage. */
@@ -136,6 +144,9 @@ export function persistConsent(state: ConsentState): void {
   } catch {
     /* ignore quota */
   }
+  // Keep snapshot cache in sync so getSnapshot stays stable after write.
+  consentSnapshotRaw = raw;
+  consentSnapshot = state;
 }
 
 export const OPEN_CONSENT_EVENT = "esosh:open-consent";

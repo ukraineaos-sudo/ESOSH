@@ -76,6 +76,7 @@
   - без `privacyConsent: true` → 400; honeypot `company` → `{ ok: true }` без доставки (згода не змінює honeypot-семантику)
   - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
 - Public consent cookie: `esosh_consent` (JSON categories + `version` + `ts`); mirror `localStorage`; bump `CONSENT_POLICY_VERSION` → banner знову
+- `readConsentFromDocument` must return a **stable reference** (cached by raw string) — `useSyncExternalStore` getSnapshot; new object each call → React #185 / blank “This page couldn’t load”
 - Privacy/Cookie pages: `/privacy-policy`, `/cookie-policy` (+ `/en/...`); статус текстів: **draft pending legal review**
 - Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files); `POST /api/enrollment/preview`; success = запис у Neon (лист адміну — Brevo best-effort; інше — webhook)
   - Blob файлів заявок: **private за замовчуванням**; `ENROLLMENT_BLOB_ACCESS=public` лише явно

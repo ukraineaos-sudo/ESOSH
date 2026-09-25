@@ -204,6 +204,7 @@ src/content/pages/en/privacy-policy.tsx
 src/content/pages/uk/cookie-policy.tsx
 src/content/pages/en/cookie-policy.tsx
 tests/consent-parse.test.mjs
+tests/consent-snapshot.test.mjs
 .cursor/rules/10-architecture-contracts.mdc
 .cursor/rules/00-project-context.mdc
 docs/SECURITY_PLAN.md
