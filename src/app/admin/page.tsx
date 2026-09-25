@@ -77,6 +77,12 @@ export default async function AdminHomePage() {
       cta: "Керувати новинами →",
     },
     {
+      href: "/admin/content/leadership",
+      title: "Керівний склад",
+      description: "Фото, імена та посади на сторінці «Про ESOSH» (UK + EN).",
+      mark: "◆",
+    },
+    {
       href: "/admin/media",
       title: "Медіа",
       description: "Зображення та PDF для обкладинок і матеріалів новин.",

@@ -74,6 +74,22 @@ export const newsPosts = pgTable("news_posts", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [uniqueIndex("news_posts_locale_slug_uidx").on(table.locale, table.slug)]);
 
+/** RU: Керівний склад (Про ESOSH). EN: Leadership / management team cards. */
+export const leadershipPeople = pgTable("leadership_people", {
+  id: serial("id").primaryKey(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  photoUrl: text("photo_url").notNull().default(""),
+  /** Extra CSS on photo (e.g. is--helmut). */
+  photoClass: varchar("photo_class", { length: 128 }).notNull().default(""),
+  nameUk: text("name_uk").notNull().default(""),
+  nameEn: text("name_en").notNull().default(""),
+  roleUk: text("role_uk").notNull().default(""),
+  roleEn: text("role_en").notNull().default(""),
+  status: varchar("status", { length: 32 }).notNull().default("published"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const members = pgTable("members", {
   id: serial("id").primaryKey(),
   publicId: varchar("public_id", { length: 32 }).notNull(),

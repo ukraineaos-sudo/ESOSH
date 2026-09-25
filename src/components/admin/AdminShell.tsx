@@ -5,11 +5,12 @@ import type { ReactNode } from "react";
 import { AdminNewAppsBadge } from "@/components/admin/AdminNewAppsBadge";
 import { getDb } from "@/db";
 import { applications } from "@/db/schema";
-import { getAdminSession, type AdminRole } from "@/lib/admin/auth";
+import { getAdminSession, isPasswordChangeEnforced, type AdminRole } from "@/lib/admin/auth";
 
 const rooms = [
   { href: "/admin", label: "Огляд", group: "main", icon: "⌂" },
   { href: "/admin/content/news", label: "Новини", group: "content", icon: "✎" },
+  { href: "/admin/content/leadership", label: "Керівний склад", group: "content", icon: "◆" },
   // CMS «Сторінки» приховано — див. docs/PAGES_CMS.md (WYSIWYG + імпорт перед увімкненням).
   // { href: "/admin/content/pages", label: "Сторінки", group: "content", icon: "▦" },
   { href: "/admin/media", label: "Медіа", group: "content", icon: "▣" },
@@ -173,10 +174,20 @@ export async function AdminShell({
         </header>
         {user.mustChangePassword && pathname !== "/admin/security" ? (
           <div className="admin-warn-banner admin-warn-banner--bar" role="status">
-            Змініть початковий пароль у розділі{" "}
-            <Link href="/admin/security">Безпека</Link>
-            {" — "}типовий admin/admin небезпечний. Записи (збереження/видалення) заблоковані, доки пароль не
-            змінено.
+            {isPasswordChangeEnforced() ? (
+              <>
+                Змініть початковий пароль у розділі{" "}
+                <Link href="/admin/security">Безпека</Link>
+                {" — "}типовий admin/admin небезпечний. Записи (збереження/видалення) заблоковані, доки пароль не
+                змінено.
+              </>
+            ) : (
+              <>
+                Рекомендовано змінити початковий пароль у розділі{" "}
+                <Link href="/admin/security">Безпека</Link>
+                {" — "}типовий admin/admin небезпечний. Блокування записів зараз вимкнено (тест).
+              </>
+            )}
           </div>
         ) : null}
         <main className="admin-main">{children}</main>

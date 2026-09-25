@@ -37,20 +37,29 @@ export async function POST(request: Request) {
   const title = String(body.title || "").trim();
   if (!slug || !title) return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   const status = body.status === "published" ? "published" : "draft";
-  const [row] = await db
-    .insert(newsPosts)
-    .values({
-      locale,
-      slug,
-      title,
-      excerpt: String(body.excerpt || ""),
-      coverUrl: body.coverUrl || null,
-      body: asBody(body.body),
-      status,
-      publishedAt: status === "published" ? new Date() : null,
-    })
-    .returning();
-  return NextResponse.json({ ok: true, item: row });
+  try {
+    const [row] = await db
+      .insert(newsPosts)
+      .values({
+        locale,
+        slug,
+        title,
+        excerpt: String(body.excerpt || ""),
+        coverUrl: body.coverUrl || null,
+        body: asBody(body.body),
+        status,
+        publishedAt: status === "published" ? new Date() : null,
+      })
+      .returning();
+    return NextResponse.json({ ok: true, item: row });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/unique|duplicate|news_posts_locale_slug/i.test(message)) {
+      return NextResponse.json({ ok: false, error: "duplicate" }, { status: 409 });
+    }
+    console.error("[admin/news POST]", message);
+    return NextResponse.json({ ok: false, error: "server" }, { status: 500 });
+  }
 }
 
 /** RU: Обновление новости. EN: Update a news post. */

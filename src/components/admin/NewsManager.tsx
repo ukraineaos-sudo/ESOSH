@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AdminConfirmDelete } from "@/components/admin/AdminConfirmDelete";
 import { AdminMediaPicker } from "@/components/admin/AdminMediaPicker";
 import { AdminRichTextEditor } from "@/components/admin/AdminRichTextEditor";
@@ -74,6 +74,12 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
   const [pendingDelete, setPendingDelete] = useState<NewsItem | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const editorPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!editing) return;
+    editorPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [editing?.id]);
 
   const sorted = useMemo(
     () =>
@@ -121,7 +127,18 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
       }),
     });
     if (!response.ok) {
-      setError("Не вдалося створити. Можливо, такий шлях уже зайнятий.");
+      const payload = await response.json().catch(() => ({}));
+      if (payload.error === "password_change_required") {
+        setError("Спочатку змініть початковий пароль у розділі «Безпека» — збереження заблоковано.");
+      } else if (response.status === 401) {
+        setError("Сесія закінчилась. Увійдіть знову в адмінку.");
+      } else if (payload.error === "duplicate" || response.status === 409) {
+        setError("Такий шлях уже зайнятий для цієї мови. Змініть «Шлях у адресі».");
+      } else if (payload.error === "unavailable" || response.status === 503) {
+        setError("База даних недоступна. Перевірте підключення DATABASE_URL.");
+      } else {
+        setError("Не вдалося створити новину. Спробуйте ще раз або змініть шлях.");
+      }
       return;
     }
     const data = await response.json().catch(() => ({}));
@@ -324,7 +341,7 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
       ) : null}
 
       {editing ? (
-        <div className="admin-panel admin-form admin-stack">
+        <div ref={editorPanelRef} className="admin-panel admin-form admin-stack" id="admin-news-editor">
           <h2>Редагування</h2>
           <p className="admin-muted">
             Статус: <strong>{statusLabelUk(editing.status)}</strong>

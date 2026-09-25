@@ -20,6 +20,7 @@
    - Live UX: header chip «нові заявки» polls `GET /api/admin/applications?status=new` ~30s (stops on 401); applications list same interval + `esosh:admin-apps-refresh` event
    - News CMS (Phase A–C): `/admin/content/news` = **єдиний каталог** новин; public `/news` + homepage = published `news_posts` (`listPublishedCmsNews`). Legacy TSX лишається dual-read fallback для `/news/{slug}` і джерелом `db:import-news`
    - Import: `npm run db:import-news` (`scripts/import-legacy-news.mjs`, docs `docs/NEWS_IMPORT.md`) — після імпорту всі TSX-статті в адмін-списку (edit/hide/delete як нові)
+   - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`
 8. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — draft pending legal review
@@ -46,7 +47,7 @@
 | Concern | Location |
 |---|---|
 | Legacy тело страниц | `src/content/pages/{uk,en}/**` |
-| CMS pages / news | Neon `pages`, `news_posts` (public news feed = published `news_posts` only) |
+| CMS pages / news / leadership | Neon `pages`, `news_posts`, `leadership_people` (public news feed = published `news_posts` only) |
 | Legacy news TSX (article fallback + import source) | `src/content/pages/{uk,en}/news/*.tsx` |
 | Metadata / sitemap inventory | `src/content/page-metadata.json` (+ CMS news in `sitemap.ts`) |
 | Media inventory (legacy) | `src/content/media-manifest.json` |
@@ -81,7 +82,7 @@
   - `testAnswers` у payload **не** зберігаються (лише `testScore` + `quizVersion`); `testPassedAt` лише при score ≥ 100
   - honeypot → `{ ok: true, honeypot: true }`; duplicate idempotency → `{ ok, duplicate, applicationPublicId, autoLevel, autoLevelLabelUk }`
 - Admin: `/admin/login` (username + password), session cookie `esosh_admin_session`, roles `admin` | `editor`; зміна пароля `/admin/security` → `POST /api/admin/password` (мін. 8 символів; інші сесії відкликаються)
-  - Поки `mustChangePassword`: write-API (`POST/PATCH/PUT/DELETE`) → `403 password_change_required`; GET списки дозволені
+  - Блокування write-API через `mustChangePassword` **вимкнено за замовчуванням**; увімкнути: `ADMIN_ENFORCE_PASSWORD_CHANGE=1` → тоді POST/PATCH/PUT/DELETE → `403 password_change_required`; GET списки дозволені
   - **Не залишати admin/admin у production**
 - Admin bootstrap: якщо `admin_users` порожня — створює користувача з `ADMIN_BOOTSTRAP_USERNAME` / `ADMIN_BOOTSTRAP_PASSWORD` (default `admin` / `admin`, `must_change_password`); **не залишати admin/admin у production**
 - Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх

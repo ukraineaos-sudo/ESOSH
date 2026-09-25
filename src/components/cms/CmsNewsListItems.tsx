@@ -8,6 +8,13 @@ type Props = {
   showEmpty?: boolean;
 };
 
+function formatNewsDate(value: Date | string | null | undefined, locale: string): string {
+  if (!value) return "";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString(locale === "en" ? "en-GB" : "uk-UA");
+}
+
 /** RU: Карточки опубликованных CMS-новостей. EN: Published CMS news cards. */
 export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Props) {
   const posts = await listPublishedCmsNews(locale, { limit });
@@ -48,9 +55,7 @@ export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Pro
             <div className="collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0">
               <h3 className="h3 is--margin-bottom-12">{post.title}</h3>
               <div className="regular-xs is--grey-20">
-                {post.publishedAt
-                  ? post.publishedAt.toLocaleDateString(locale === "en" ? "en-GB" : "uk-UA")
-                  : ""}
+                {formatNewsDate(post.publishedAt, locale)}
               </div>
             </div>
           </a>

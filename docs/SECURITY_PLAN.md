@@ -5,7 +5,7 @@
 
 ## Сделано в коде (текущий спринт)
 
-- [x] Санитизация CMS HTML (`isomorphic-dompurify`) перед публичным `dangerouslySetInnerHTML`
+- [x] Санитизация CMS HTML перед публичным `dangerouslySetInnerHTML` (лёгкий allowlist без jsdom; isomorphic-dompurify убран — вешал compile/SSR)
 - [x] Origin-check на `POST /api/admin/login`
 - [x] Production: отказ создавать bootstrap-админа со слабым паролем (`admin` / &lt; 8 символов)
 - [x] Production: запрет `ENROLLMENT_BLOB_ACCESS=public`

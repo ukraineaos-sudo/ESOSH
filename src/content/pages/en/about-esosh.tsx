@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LeadershipSection } from "@/components/cms/LeadershipSection";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -174,81 +175,7 @@ export default function PageContent() {
           </div>
         </div>
       </section>
-      <section className={"section is--margin-top-144--t-128--m-104"}>
-        <div className={"w-layout-blockcontainer container w-container"}>
-          <h2 className={"h2 is--margin-bottom-40"}>
-            {"The management team"}
-          </h2>
-          <div className={"w-layout-grid is--grid-3columns--t-2--m-1"}>
-            <div id={"w-node-_6f679b64-ec5a-a126-5532-61bc48f465b8-4f5ccd80"} className={"block"}>
-              <img src={"/images/about-esosh/OlgaBohdanova-560c8d24.jpeg"} loading={"lazy"} alt={""} className={"image is--w-100p is--height-480--a-360 is--fit-cover is--radius-6 is--margin-bottom-20--m-16"} width={603} height={744} decoding="async" />
-              <div className={"wrapper is--max-width-408 is--padding-right-24--m-0"}>
-                <h3 className={"h3 is--margin-bottom-8"}>
-                  {"Olha Bohdanova"}
-                </h3>
-                <div className={"regular-l is--grey-60"}>
-                  {"Co-founder, Chairman of the Board"}
-                </div>
-              </div>
-            </div>
-            <div id={"w-node-_8e1663bb-edb1-7ef8-e2c0-e49fc4f42e84-4f5ccd80"} className={"block"}>
-              <img src={"/images/about-esosh/01-10-6662ed46.webp"} loading={"lazy"} alt={""} className={"image is--w-100p is--height-480--a-360 is--fit-cover is--radius-6 is--margin-bottom-20--m-16"} width={1600} height={2400} decoding="async" />
-              <div className={"wrapper is--max-width-408 is--padding-right-24--m-0"}>
-                <h3 className={"h3 is--margin-bottom-8"}>
-                  {"Dmytro Grigorenko"}
-                </h3>
-                <div className={"regular-l is--grey-60"}>
-                  {"Co-founder, CEO"}
-                </div>
-              </div>
-            </div>
-            <div id={"w-node-_082d2927-1091-0a76-e91f-768850538fd1-4f5ccd80"} className={"block"}>
-              <img src={"/images/about-esosh/OlegTokar-60bdc828.jpeg"} loading={"lazy"} alt={""} className={"image is--w-100p is--height-480--a-360 is--fit-cover is--radius-6 is--margin-bottom-20--m-16"} width={600} height={600} decoding="async" />
-              <div className={"wrapper is--max-width-408 is--padding-right-24--m-0"}>
-                <h3 className={"h3 is--margin-bottom-8"}>
-                  {"Oleh Tokar"}
-                </h3>
-                <div className={"regular-l is--grey-60"}>
-                  {"Director of Development"}
-                </div>
-              </div>
-            </div>
-            <div id={"w-node-e4421021-af63-69cd-e764-50723d9492a1-4f5ccd80"} className={"block"}>
-              <img src={"/images/about-esosh/Ehnes-d0d0177e.jpg"} loading={"lazy"} alt={""} className={"image is--w-100p is--height-480--a-360 is--fit-cover is--radius-6 is--margin-bottom-20--m-16 is--helmut"} width={283} height={424} decoding="async" />
-              <div className={"wrapper is--max-width-408 is--padding-right-24--m-0"}>
-                <h3 className={"h3 is--margin-bottom-8"}>
-                  {"Helmut Ehnes"}
-                </h3>
-                <div className={"regular-l is--grey-60"}>
-                  {"Member of the Supervisory Board"}
-                </div>
-              </div>
-            </div>
-            <div id={"w-node-b3b703c1-d17d-9fa9-a8f4-ca12b034e33d-4f5ccd80"} className={"block"}>
-              <img src={"/images/about-esosh/Antonina-f9d22d41.webp"} loading={"lazy"} alt={""} className={"image is--w-100p is--height-480--a-360 is--fit-cover is--radius-6 is--margin-bottom-20--m-16"} width={360} height={356} decoding="async" />
-              <div className={"wrapper is--max-width-408 is--padding-right-24--m-0"}>
-                <h3 className={"h3 is--margin-bottom-8"}>
-                  {"Antonina Devenis"}
-                </h3>
-                <div className={"regular-l is--grey-60"}>
-                  {"Member of the Supervisory Board"}
-                </div>
-              </div>
-            </div>
-            <div id={"w-node-_26c7c893-52f9-8fa6-60c1-dce64978e3c7-4f5ccd80"} className={"block"}>
-              <img src={"/images/about-esosh/f0743e95-00d9-47bd-aaf6-5593a1e6b2a1-5a09de8d.webp"} loading={"lazy"} alt={""} className={"image is--w-100p is--height-480--a-360 is--fit-cover is--radius-6 is--margin-bottom-20--m-16"} width={697} height={821} decoding="async" />
-              <div className={"wrapper is--max-width-408 is--padding-right-24--m-0"}>
-                <h3 className={"h3 is--margin-bottom-8"}>
-                  {"Oleksandr Shevchenko"}
-                </h3>
-                <div className={"regular-l is--grey-60"}>
-                  {"Coordinator"}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <LeadershipSection locale="en" />
       <section className={"section is--margin-top-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
           <div className={"wrapper is--max-width-537 is--margin-bottom-40"}>

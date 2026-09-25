@@ -217,3 +217,12 @@ src/lib/cms/slugify.ts
 src/components/admin/AdminRichTextEditor.tsx
 src/components/admin/AdminMediaPicker.tsx
 src/app/api/admin/news/[id]/route.ts
+src/db/schema.ts
+src/lib/cms/leadership.ts
+src/components/cms/LeadershipSection.tsx
+src/components/admin/LeadershipManager.tsx
+src/app/api/admin/leadership/route.ts
+src/app/api/admin/leadership/[id]/route.ts
+src/app/admin/content/leadership/page.tsx
+scripts/seed-leadership.mjs
+docs/LEADERSHIP_CMS.md

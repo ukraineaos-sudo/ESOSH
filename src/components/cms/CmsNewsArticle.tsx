@@ -3,6 +3,13 @@ import { Footer } from "@/components/Footer";
 import { CmsBlocksView } from "@/components/cms/CmsBlocksView";
 import type { CmsNewsDoc } from "@/lib/cms/public";
 
+function formatNewsDate(value: Date | string | null | undefined, locale: string): string | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(locale === "en" ? "en-GB" : "uk-UA");
+}
+
 /** RU: Публичная статья CMS. EN: Public CMS news article. */
 export function CmsNewsArticle({
   post,
@@ -34,9 +41,9 @@ export function CmsNewsArticle({
             ← {post.locale === "en" ? "News" : "Новини"}
           </a>
           <h1 className="h1 is--margin-bottom-24">{post.title}</h1>
-          {post.publishedAt ? (
+          {formatNewsDate(post.publishedAt, post.locale) ? (
             <div className="regular-xs is--grey-20 is--margin-bottom-32">
-              {post.publishedAt.toLocaleDateString(post.locale === "en" ? "en-GB" : "uk-UA")}
+              {formatNewsDate(post.publishedAt, post.locale)}
             </div>
           ) : null}
           {post.coverUrl ? (

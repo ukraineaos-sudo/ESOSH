@@ -209,10 +209,19 @@ export function canEditContent(user: AdminSessionUser): boolean {
 /**
  * RU: Блокує write-API, поки не змінено початковий пароль.
  * EN: Block mutating admin APIs until bootstrap password is changed.
+ *
+ * Тимчасово вимкнено за замовчуванням (швидкі тести). Увімкнути:
+ * ADMIN_ENFORCE_PASSWORD_CHANGE=1
  */
 export function passwordChangeRequiredResponse(
   user: AdminSessionUser,
 ): Response | null {
+  if (process.env.ADMIN_ENFORCE_PASSWORD_CHANGE !== "1") return null;
   if (!user.mustChangePassword) return null;
   return Response.json({ ok: false, error: "password_change_required" }, { status: 403 });
+}
+
+/** RU: Чи увімкнено блокування записів через must_change_password. EN: Whether password-change gate is on. */
+export function isPasswordChangeEnforced(): boolean {
+  return process.env.ADMIN_ENFORCE_PASSWORD_CHANGE === "1";
 }
