@@ -81,6 +81,8 @@ export default async function AdminHomePage() {
       title: "Керівний склад",
       description: "Фото, імена та посади на сторінці «Про ESOSH» (UK + EN).",
       mark: "◆",
+      tone: "content",
+      cta: "Редагувати склад →",
     },
     {
       href: "/admin/media",
