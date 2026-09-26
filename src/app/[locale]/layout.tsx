@@ -34,7 +34,12 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body>
         <NextIntlClientProvider
-          messages={{ nav: messages.nav, contact: messages.contact, consent: messages.consent }}
+          messages={{
+            nav: messages.nav,
+            contact: messages.contact,
+            consent: messages.consent,
+            enrollment: messages.enrollment,
+          }}
         >
           <ConsentProvider>
             {children}

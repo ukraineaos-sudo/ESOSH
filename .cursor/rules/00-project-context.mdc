@@ -42,7 +42,7 @@ alwaysApply: true
 - маршруты и загрузчики страниц: `src/content/page-loaders.ts`, `src/content/page-metadata.json`;
 - тело страниц: `src/content/pages/**`;
 - chrome футера: `src/content/chrome/**`;
-- UI-строки навигации/формы/consent: `messages/{uk,en}.json` (ключи `nav`, `contact`, `consent`);
+- UI-строки навигации/формы/consent/enrollment: `messages/{uk,en}.json` (ключи `nav`, `contact`, `consent`, `enrollment`);
 - стили паритета: `src/styles/reference.css` (+ `navigation.css`, `contact.css`, `consent.css`, `refinements.css`);
 - архитектурная навигация: `CODE_MAP.md`.
 

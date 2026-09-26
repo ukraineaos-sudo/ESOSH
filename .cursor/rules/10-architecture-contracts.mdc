@@ -48,7 +48,7 @@ alwaysApply: true
 ## Публичные контракты
 
 - канонические пути страниц (uk без префикса, en с `/en`);
-- ключи `nav` / `contact` / `consent` в `messages/{uk,en}.json`;
+- ключи `nav` / `contact` / `consent` / `enrollment` в `messages/{uk,en}.json`;
 - `POST /api/contact` тело: `{ name, email, message, locale?, company?, privacyConsent: true }` (honeypot);
 - `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + файли; honeypot `company`; успіх = запис у Neon;
 - env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`;

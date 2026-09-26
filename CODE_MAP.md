@@ -12,7 +12,7 @@
 
 ## Архитектурные потоки
 1. Публичная страница: `src/app/[locale]/**/page.tsx` → `getPage()` dual-read → CMS blocks **или** legacy `src/content/pages/{uk|en}/**`
-2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`) + `ConsentProvider` + условный `BinotelWidgets`
+2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`, `enrollment`) + `ConsentProvider` + условный `BinotelWidgets`
 3. Chrome: `Header` / `Footer` → footer читает `site_settings` (fallback на `SITE`); ссылки Privacy / Cookies / cookie settings
 4. Контакты: `ContactForm` → `POST /api/contact` → zod (`privacyConsent: true`) → `deliverContact` (webhook)
 5. Форма вступу: `/join/apply` → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
