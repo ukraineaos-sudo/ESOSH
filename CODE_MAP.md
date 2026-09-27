@@ -23,7 +23,7 @@
    - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`
-8. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — draft pending legal review
+8. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — типовые тексты UA/международные (по решению заказчика без отдельного юр. review)
 
 ## Точки входа
 | Вход | Путь |
@@ -78,8 +78,8 @@
   - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
 - Public consent cookie: `esosh_consent` (JSON categories + `version` + `ts`); mirror `localStorage`; bump `CONSENT_POLICY_VERSION` → banner знову
 - `readConsentFromDocument` must return a **stable reference** (cached by raw string) — `useSyncExternalStore` getSnapshot; new object each call → React #185 / blank “This page couldn’t load”
-- Privacy/Cookie pages: `/privacy-policy`, `/cookie-policy` (+ `/en/...`); статус текстів: **draft pending legal review**
-- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files + optional `cf-turnstile-response`); `POST /api/enrollment/preview`; success = запис у Neon (лист адміну — Brevo best-effort; інше — webhook)
+- Privacy/Cookie pages: `/privacy-policy`, `/cookie-policy` (+ `/en/...`); типовые тексты UA / international
+- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + optional `attachment_*` files + optional `cf-turnstile-response`); legacy `photo` / `experience_*` / `diploma_*` / `certificate_*` ще приймаються; файли **не обов’язкові**; `POST /api/enrollment/preview`; success = запис у Neon (лист адміну — Brevo best-effort; інше — webhook)
   - якщо задано `TURNSTILE_SECRET_KEY` — обов’язковий успішний Cloudflare siteverify; інакше капча вимкнена (dev)
   - Blob файлів заявок: **private за замовчуванням**; `ENROLLMENT_BLOB_ACCESS=public` лише явно
   - `testAnswers` у payload **не** зберігаються (лише `testScore` + `quizVersion`); `testPassedAt` лише при score ≥ 100
@@ -90,6 +90,7 @@
 - Admin bootstrap: якщо `admin_users` порожня — створює користувача з `ADMIN_BOOTSTRAP_USERNAME` / `ADMIN_BOOTSTRAP_PASSWORD` (default `admin` / `admin`, `must_change_password`); **не залишати admin/admin у production**
 - Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх
 - News public feed: `CmsNewsListItems` → `listPublishedCmsNews(locale)` (newest `publishedAt`); без DB / порожня таблиця → порожній список (статті dual-read legacy TSX лишаються)
+- Home members stub: `HomeMembersStat` → `countJoinedMembers()` (усі рядки `members`); без DB → блок не рендериться
 - News import: `npm run db:import-news` (+ `--dry-run` / `--upsert`); див. `docs/NEWS_IMPORT.md`; DELETE news = `{ confirm: "так" }`
 - Pages CMS: UI вимкнено — критерії re-enable у `docs/PAGES_CMS.md`
 - Admin members registry: `GET /api/admin/members?q&status&level&industry&oshFunctions&minOshYears` → `{ items, stats, facets }`; статистика рахується по **відфільтрованому** набору; профіль з `members.profile` + fallback з останньої заявки
@@ -98,7 +99,7 @@
 - Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`; **загрузка только после consent `communications`**
 - Env для consent **не** потрібен (first-party cookie)
-
+- Enrollment admin deep-link у Brevo: `resolveAdminOrigin()` — localhost → request origin; поки `esosh.net` на старому хості → `https://esosh.vercel.app/admin/...`
 ## Проверки
 - `npm run lint`
 - `npm run build`
@@ -113,21 +114,13 @@
 - Honeypot и contact API не ослабляются админкой
 - Contact / enrollment без явної privacy-згоди не приймаються як валідні
 - Sitemap покрывает все записи `page-metadata.json` (+ опционально CMS news)
-- Тексти Privacy/Cookie — draft; не маркетинг «GDPR compliant» до review юриста
 - Після `db:import-news` CMS перекриває legacy для тих самих slug; URL не змінюються
-
-## Чеклист для юриста ESOSH (після деплою draft)
-1. Підтвердити найменування контролера, адресу, ЄДРПОУ / реєстраційні дані в Privacy.
-2. Підтвердити строки зберігання заявок і контактних звернень.
-3. Підтвердити класифікацію Binotel і наявність договорів із провайдерами (Vercel, Neon, Blob, Brevo, Binotel).
-4. Замінити draft-дисклеймер на затверджені тексти; bump `PRIVACY_NOTICE_VERSION` / `CONSENT_POLICY_VERSION`.
 
 ## Известные пробелы (продукт)
 1. Доставка контактної форми не налаштована без `CONTACT_WEBHOOK_URL`
 2. Текст питань тесту Кодексу — v1-заглушка; замінити офіційним банком ESOSH
 3. Кастомний домен через Wix — окремо
 4. Brevo Domains для `esosh.net` ще без DKIM/DMARC (deliverability warning у Brevo)
-5. Privacy/Cookie тексти — **draft pending legal review** (див. чеклист вище)
-6. Security backlog — `docs/SECURITY_PLAN.md` (TOTP admin, rate limit, security tests на виході на ринок)
-7. Pages CMS room прихована — потрібні WYSIWYG + імпорт/стратегія (`docs/PAGES_CMS.md`)
-8. News locale residual: slug `z-dnem-budivelnika` є лише в EN (немає UK TSX у capture) — EN у DB/admin; UK-контент = окрема контентна задача
+5. Security backlog — `docs/SECURITY_PLAN.md` (TOTP admin, rate limit, security tests на виході на ринок)
+6. Pages CMS room прихована — потрібні WYSIWYG + імпорт/стратегія (`docs/PAGES_CMS.md`)
+7. News locale residual: slug `z-dnem-budivelnika` є лише в EN (немає UK TSX у capture) — EN у DB/admin; UK-контент = окрема контентна задача

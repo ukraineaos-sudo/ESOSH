@@ -9,6 +9,7 @@ import {
 import { classifyEnrollment } from "@/lib/enrollment/classify";
 import {
   deleteEnrollmentBlobs,
+  isEnrollmentUploadFieldKey,
   putEnrollmentBlob,
   validateEnrollmentFileBatch,
   validateEnrollmentFileStrict,
@@ -19,6 +20,7 @@ import { upsertMemberFromEnrollment } from "@/lib/enrollment/members";
 import { deliverEnrollmentNotify } from "@/lib/enrollment/notify";
 import { CODEX_QUIZ_VERSION, scoreCodexQuiz } from "@/lib/enrollment/quiz";
 import { enrollmentPayloadSchema } from "@/lib/enrollment/schema";
+import { resolveAdminOrigin } from "@/lib/site";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
@@ -142,15 +144,13 @@ export async function POST(request: Request) {
   }
   for (const [key, value] of form.entries()) {
     if (!(value instanceof File) || value.size <= 0) continue;
-    if (key === "photo" || key === "payload") continue;
-    if (
-      !key.startsWith("experience_") &&
-      !key.startsWith("diploma_") &&
-      !key.startsWith("certificate_")
-    ) {
-      continue;
-    }
-    pending.push({ key, file: value, kind: "document" });
+    if (key === "photo" || key === "payload" || key === "cf-turnstile-response") continue;
+    if (!isEnrollmentUploadFieldKey(key)) continue;
+    pending.push({
+      key,
+      file: value,
+      kind: key === "photo" ? "photo" : "document",
+    });
   }
 
   for (const item of pending) {
@@ -163,18 +163,6 @@ export async function POST(request: Request) {
   const batchErr = validateEnrollmentFileBatch(pending.map((p) => p.file));
   if (batchErr) {
     return NextResponse.json({ ok: false, error: batchErr }, { status: 400 });
-  }
-
-  for (let i = 0; i < parsed.data.courses.length; i++) {
-    const course = parsed.data.courses[i];
-    if (course.courseType === "other") continue;
-    const hasCert = pending.some((f) => f.key.startsWith(`certificate_${i}_`));
-    if (!hasCert) {
-      return NextResponse.json(
-        { ok: false, error: "certificate_required", courseIndex: i },
-        { status: 400 },
-      );
-    }
   }
 
   const storedFiles: {
@@ -291,7 +279,7 @@ export async function POST(request: Request) {
     throw error;
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+  const siteUrl = resolveAdminOrigin(request);
   const fullName = `${parsed.data.lastName} ${parsed.data.firstName}`.trim();
   const notifyBase = {
     applicationPublicId: app.publicId,

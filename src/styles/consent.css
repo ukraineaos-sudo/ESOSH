@@ -44,13 +44,6 @@
   opacity: 0.92;
 }
 
-.consent-banner__draft {
-  margin: 8px 0 0;
-  font-size: 0.78rem;
-  font-style: italic;
-  opacity: 0.7;
-}
-
 .consent-banner__link {
   color: #1a4f9c;
   text-decoration: underline;

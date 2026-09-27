@@ -82,5 +82,9 @@ export type EnrollmentPayload = z.infer<typeof enrollmentPayloadSchema>;
 
 export const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 export const DOC_MAX_BYTES = 10 * 1024 * 1024;
+/** Max files per enrollment application (optional attachments pool). */
+export const ENROLLMENT_MAX_FILES = 20;
+/** Max total upload size per application. */
+export const ENROLLMENT_MAX_TOTAL_BYTES = 40 * 1024 * 1024;
 export const ALLOWED_DOC_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/jpg"]);
 export const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/jpg"]);

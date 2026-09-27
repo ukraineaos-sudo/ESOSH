@@ -35,15 +35,14 @@ export default function PageContent() {
               will confirm them on the last step.
             </p>
             <div className="enrollment-prep">
-              <p className="enrollment-prep__title">Please prepare in advance (if available)</p>
+              <p className="enrollment-prep__title">Documents are optional</p>
               <ul className="enrollment-prep__list">
-                <li>photo (JPG/PNG, up to 5 MB);</li>
-                <li>proof of experience (PDF/JPG/PNG);</li>
-                <li>diploma;</li>
-                <li>course certificates (PDF/JPG/PNG).</li>
+                <li>photo, diploma, certificates, proof of experience (PDF/JPG/PNG);</li>
+                <li>on the last step you can drag and drop files in one go — or skip.</li>
               </ul>
               <p className="enrollment-prep__note">
-                Files are not restored after a page refresh or closing the tab — upload them again if needed.
+                You can submit without files. Documents speed up review. Files are not restored after a
+                page refresh.
               </p>
             </div>
           </div>

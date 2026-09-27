@@ -232,3 +232,16 @@ src/components/TurnstileWidget.tsx
 src/components/EnrollmentCaptchaGate.tsx
 docs/SECURITY_PLAN.md
 tests/turnstile-token.test.mjs
+scripts/build-handoff-docx.mjs
+.gitignore
+src/lib/members/public-stats.ts
+src/components/cms/HomeMembersStat.tsx
+src/components/EnrollmentAttachmentsDropzone.tsx
+src/lib/enrollment/schema.ts
+src/lib/enrollment/files.ts
+src/app/api/enrollment/route.ts
+src/components/EnrollmentForm.tsx
+src/styles/enrollment.css
+src/components/admin/ApplicationDetailClient.tsx
+src/content/pages/uk/join/apply.tsx
+src/content/pages/en/join/apply.tsx

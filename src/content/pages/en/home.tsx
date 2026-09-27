@@ -2,6 +2,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CmsNewsListItems } from "@/components/cms/CmsNewsListItems";
+import { HomeMembersStat } from "@/components/cms/HomeMembersStat";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -136,6 +137,7 @@ export default function PageContent() {
           </div>
         </div>
       </section>
+      <HomeMembersStat locale="en" />
       <section className={"section is--margin-top-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
           <div className={"wrapper is--h-flex-center-center is--margin-bottom-64"}>

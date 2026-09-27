@@ -4,6 +4,8 @@ import {
   ALLOWED_DOC_TYPES,
   ALLOWED_PHOTO_TYPES,
   DOC_MAX_BYTES,
+  ENROLLMENT_MAX_FILES,
+  ENROLLMENT_MAX_TOTAL_BYTES,
   PHOTO_MAX_BYTES,
 } from "./schema";
 
@@ -15,10 +17,18 @@ export type StoredEnrollmentFile = {
   sizeBytes: number;
 };
 
-/** Max files per enrollment application (photo + docs). */
-export const ENROLLMENT_MAX_FILES = 20;
-/** Max total upload size per application. */
-export const ENROLLMENT_MAX_TOTAL_BYTES = 40 * 1024 * 1024;
+export { ENROLLMENT_MAX_FILES, ENROLLMENT_MAX_TOTAL_BYTES };
+
+/** RU: Чи дозволений ключ multipart-файлу заявки. EN: Allowed enrollment multipart file keys. */
+export function isEnrollmentUploadFieldKey(key: string): boolean {
+  return (
+    key === "photo" ||
+    key.startsWith("attachment_") ||
+    key.startsWith("experience_") ||
+    key.startsWith("diploma_") ||
+    key.startsWith("certificate_")
+  );
+}
 
 /** RU: access Blob: за замовчуванням private; public лише явно. EN: Default private; opt-in public. */
 function blobAccessForRead(): "public" | "private" {

@@ -49,6 +49,20 @@ alwaysApply: true
 - Не меняй ключи i18n скрытно; не подставляй случайный язык как тихий fallback.
 - PDF по локали: `*-uk.pdf` / `*-en.pdf`.
 
+## Git / коммиты (этот репозиторий)
+
+У разработчиков много проектов — **не опирайся на глобальный `git config` машины**.
+
+Для **ESOSH** (`ukraineaos-sudo/ESOSH`) при каждом `git commit` задавай автора только через env (без `git config`):
+
+- `GIT_AUTHOR_NAME=ukraineaos`
+- `GIT_AUTHOR_EMAIL=ukraineaos@gmail.com`
+- `GIT_COMMITTER_NAME=ukraineaos`
+- `GIT_COMMITTER_EMAIL=ukraineaos@gmail.com`
+
+Не коммить под личной почтой (`alexeyovch26@…` / `Lewa2424`), если пользователь явно не попросил иное.
+Не меняй глобальный/локальный `git config`.
+
 ## Связанные правила
 
 - Дизайн: `esosh-design-system.mdc`.

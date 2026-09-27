@@ -1,9 +1,9 @@
-/* Draft privacy policy — pending legal review. */
+/* Public privacy policy (typical UK / international template). */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { PRIVACY_NOTICE_VERSION } from "@/lib/consent";
 
-/** RU: Політика конфіденційності (типовий draft). EN: Privacy policy draft content. */
+/** RU: Політика конфіденційності. EN: Privacy policy content. */
 export default function PageContent() {
   return (
     <>
@@ -32,7 +32,7 @@ export default function PageContent() {
           <div className={"wrapper is--v-flex-center-top"}>
             <div className={"wrapper is--max-width-870 is--w-100p"}>
               <p className={"regular-s is--grey-60 is--margin-bottom-24"}>
-                {`Версія ${PRIVACY_NOTICE_VERSION} · Draft — pending legal review. Цей текст є типовим шаблоном і не є юридичною консультацією; підлягає затвердженню юристом асоціації ESOSH.`}
+                {`Версія ${PRIVACY_NOTICE_VERSION}`}
               </p>
 
               <div className={"wrapper is--margin-bottom-48"}>
@@ -80,7 +80,7 @@ export default function PageContent() {
                 <h2 className={"h2 is--margin-bottom-12"}>{"5. Строки зберігання"}</h2>
                 <p className={"regular-l"}>
                   {
-                    "Контактні звернення — протягом строку, необхідного для відповіді та обліку (орієнтовно до 24 місяців, якщо інше не вимагає закон). Заявки та дані членства — протягом розгляду та членських відносин, після чого — згідно з політикою архівування асоціації. Точні строки підлягають затвердженню юристом."
+                    "Контактні звернення — протягом строку, необхідного для відповіді та обліку (орієнтовно до 24 місяців, якщо інше не вимагає закон). Заявки та дані членства — протягом розгляду та членських відносин, після чого — згідно з політикою архівування асоціації."
                   }
                 </p>
               </div>

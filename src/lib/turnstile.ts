@@ -6,13 +6,25 @@ export type TurnstileVerifyResult =
   | { ok: true }
   | { ok: false; error: "captcha_required" | "captcha_invalid" | "captcha_unavailable" };
 
-/** RU: Чи увімкнена серверна перевірка Turnstile. EN: Whether Turnstile secret is configured. */
-export function isTurnstileEnforced(): boolean {
-  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim());
+/**
+ * RU: Turnstile лише в production (на localhost віджет дає 110200 без hostname).
+ * EN: Turnstile only in production (localhost needs Cloudflare hostname allowlist).
+ */
+export function isTurnstileActive(): boolean {
+  if (process.env.NODE_ENV !== "production") return false;
+  return Boolean(
+    process.env.TURNSTILE_SECRET_KEY?.trim() || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
+  );
 }
 
-/** RU: Публічний site key для віджета. EN: Public site key for the widget. */
+/** RU: Чи увімкнена серверна перевірка Turnstile. EN: Whether Turnstile secret is enforced. */
+export function isTurnstileEnforced(): boolean {
+  return isTurnstileActive() && Boolean(process.env.TURNSTILE_SECRET_KEY?.trim());
+}
+
+/** RU: Публічний site key для віджета (null поза production). EN: Public site key or null off-prod. */
 export function getTurnstileSiteKey(): string | null {
+  if (!isTurnstileActive()) return null;
   const key = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
   return key || null;
 }
@@ -20,16 +32,15 @@ export function getTurnstileSiteKey(): string | null {
 /**
  * RU: Перевірити токен Turnstile на сайті Cloudflare.
  * EN: Verify a Turnstile token with Cloudflare siteverify.
- * getSnapshot-stable: no; pure async I/O.
  */
 export async function verifyTurnstileToken(
   token: string | null | undefined,
   remoteip?: string | null,
 ): Promise<TurnstileVerifyResult> {
-  const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
-  if (!secret) {
+  if (!isTurnstileEnforced()) {
     return { ok: true };
   }
+  const secret = process.env.TURNSTILE_SECRET_KEY!.trim();
   if (!token || typeof token !== "string" || token.length < 10 || token.length > 2048) {
     return { ok: false, error: "captcha_required" };
   }

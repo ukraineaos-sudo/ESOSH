@@ -135,3 +135,40 @@ header.is--nav { position: relative; z-index: 30; flex-shrink: 0; }
   .is--courses-grid { grid-template-columns: minmax(0, 1fr) !important; }
   .wrapper.is--course { width: 100%; min-width: 0; }
 }
+
+/* Homepage members count stub (client request; all registry rows). */
+.home-members-stat__inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 40px 0;
+  border-top: 1px solid color-mix(in srgb, var(--accent, #1e4f91) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent, #1e4f91) 18%, transparent);
+}
+.home-members-stat__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent, #1e4f91);
+}
+.home-members-stat__number {
+  margin: 0 0 8px;
+  font-size: clamp(2.75rem, 6vw, 4rem);
+  line-height: 1;
+  font-weight: 700;
+  color: var(--grey-100, #1a1a1a);
+  letter-spacing: -0.02em;
+}
+.home-members-stat__caption {
+  margin: 0;
+  max-width: 28rem;
+}
+@media (max-width: 767px) {
+  .home-members-stat__inner {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 32px 0;
+  }
+}

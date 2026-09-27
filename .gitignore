@@ -33,6 +33,11 @@ yarn-error.log*
 .env
 .env*.local
 
+# Client handoff docs with secrets (do not commit)
+1_ESOSH_передача_клиенту_доступы.docx
+*_передача_клиенту*.docx
+*_Данные*.docx
+
 # vercel
 .vercel
 

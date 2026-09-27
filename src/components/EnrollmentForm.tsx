@@ -23,10 +23,7 @@ import type { ClassifyResult } from "@/lib/enrollment/classify";
 import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "@/lib/enrollment/levels";
 import { CODEX_QUESTIONS_PUBLIC } from "@/lib/enrollment/quiz";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
-
-type CourseDraft = EnrollmentCourseInput & {
-  certFiles: File[];
-};
+import { EnrollmentAttachmentsDropzone } from "@/components/EnrollmentAttachmentsDropzone";
 
 type FormIssue = {
   fieldId: string;
@@ -46,7 +43,6 @@ type Draft = {
   email: string;
   secondaryEmail: string;
   profileUrl: string;
-  photo: File | null;
   jobTitle: string;
   organization: string;
   industry: string;
@@ -55,14 +51,13 @@ type Draft = {
   totalYears: string;
   oshYears: string;
   responsibilities: string;
-  experienceFiles: File[];
   educationLevel: EducationLevel | "";
   profileEducation: boolean | null;
   institution: string;
   speciality: string;
   graduationYear: string;
-  diplomaFiles: File[];
-  courses: CourseDraft[];
+  courses: EnrollmentCourseInput[];
+  attachments: File[];
   cpdStatus: CpdStatus | "";
   cpdActivities: string[];
   cpdDescription: string;
@@ -75,7 +70,7 @@ type Draft = {
   marketingConsent: boolean;
 };
 
-const STORAGE_KEY = "esosh-enrollment-draft-v1";
+const STORAGE_KEY = "esosh-enrollment-draft-v2";
 const STEPS = 7;
 
 const COURSE_TYPES: CourseType[] = [
@@ -100,14 +95,13 @@ const CPD_ACTIVITY_VALUES = [
   "інше",
 ] as const;
 
-const emptyCourse = (): CourseDraft => ({
+const emptyCourse = (): EnrollmentCourseInput => ({
   courseType: "esosh_21",
   courseName: "",
   provider: "",
   courseYear: new Date().getFullYear(),
   hours: null,
   certificateNo: "",
-  certFiles: [],
 });
 
 function initialDraft(defaultCountry: string): Draft {
@@ -122,7 +116,6 @@ function initialDraft(defaultCountry: string): Draft {
     email: "",
     secondaryEmail: "",
     profileUrl: "",
-    photo: null,
     jobTitle: "",
     organization: "",
     industry: "",
@@ -131,14 +124,13 @@ function initialDraft(defaultCountry: string): Draft {
     totalYears: "",
     oshYears: "",
     responsibilities: "",
-    experienceFiles: [],
     educationLevel: "",
     profileEducation: null,
     institution: "",
     speciality: "",
     graduationYear: "",
-    diplomaFiles: [],
     courses: [],
+    attachments: [],
     cpdStatus: "",
     cpdActivities: [],
     cpdDescription: "",
@@ -166,11 +158,9 @@ function readStoredDraft(defaultCountry: string): { draft: Draft; step: number }
     const draft: Draft = {
       ...initialDraft(defaultCountry),
       ...parsed,
-      photo: null,
-      experienceFiles: [],
-      diplomaFiles: [],
+      attachments: [],
       courses: Array.isArray(parsed.courses)
-        ? parsed.courses.map((c) => ({ ...emptyCourse(), ...c, certFiles: [] }))
+        ? parsed.courses.map((c) => ({ ...emptyCourse(), ...c }))
         : [],
     };
     const step =
@@ -179,14 +169,6 @@ function readStoredDraft(defaultCountry: string): { draft: Draft; step: number }
   } catch {
     return { draft: initialDraft(defaultCountry), step: 1 };
   }
-}
-
-function omitCertFiles(courses: CourseDraft[]) {
-  return courses.map((course) => {
-    const { certFiles, ...rest } = course;
-    void certFiles;
-    return rest;
-  });
 }
 
 function injectControlProps(
@@ -274,16 +256,13 @@ export function EnrollmentForm({
   }
 
   useEffect(() => {
-    const { photo, experienceFiles, diplomaFiles, courses, ...rest } = draft;
-    void photo;
-    void experienceFiles;
-    void diplomaFiles;
+    const { attachments, ...rest } = draft;
+    void attachments;
     try {
       sessionStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
           ...rest,
-          courses: omitCertFiles(courses),
           step,
         }),
       );
@@ -316,7 +295,7 @@ export function EnrollmentForm({
             companySize: draft.companySize,
             profileEducation: draft.profileEducation,
             educationLevel: draft.educationLevel,
-            courses: omitCertFiles(draft.courses),
+            courses: draft.courses,
             cpdStatus: draft.cpdStatus,
             testAnswers: draft.testAnswers,
           }),
@@ -394,9 +373,6 @@ export function EnrollmentForm({
         }
         if (!c.provider.trim()) {
           add(`provider_${i}`, t("errors.provider"), t("courseProviderLabel", { n: i + 1 }));
-        }
-        if (c.courseType !== "other" && c.certFiles.length === 0) {
-          add(`certificate_${i}`, t("errors.certificate"), t("courseCertLabel", { n: i + 1 }));
         }
       });
     }
@@ -516,7 +492,7 @@ export function EnrollmentForm({
         institution: draft.institution.trim(),
         speciality: draft.speciality.trim(),
         graduationYear: draft.graduationYear === "" ? null : Number(draft.graduationYear),
-        courses: omitCertFiles(draft.courses).map((c) => ({
+        courses: draft.courses.map((c) => ({
           ...c,
           hours: c.hours ?? null,
           certificateNo: c.certificateNo || null,
@@ -539,12 +515,7 @@ export function EnrollmentForm({
       const form = new FormData();
       form.set("payload", JSON.stringify(payload));
       if (captchaToken) form.set("cf-turnstile-response", captchaToken);
-      if (draft.photo) form.set("photo", draft.photo);
-      draft.experienceFiles.forEach((f, i) => form.append(`experience_${i}`, f));
-      draft.diplomaFiles.forEach((f, i) => form.append(`diploma_${i}`, f));
-      draft.courses.forEach((c, i) => {
-        c.certFiles.forEach((f, j) => form.append(`certificate_${i}_${j}`, f));
-      });
+      draft.attachments.forEach((f, i) => form.append(`attachment_${i}`, f));
 
       const response = await fetch("/api/enrollment", { method: "POST", body: form });
       const data = await response.json().catch(() => ({}));
@@ -560,17 +531,14 @@ export function EnrollmentForm({
           setSubmitError(t(`submitErrors.${data.error}`));
         } else if (data.error === "email_conflict") {
           setSubmitError(t("submitErrors.emailConflict"));
-        } else if (data.error === "certificate_required") {
-          const idx = typeof data.courseIndex === "number" ? data.courseIndex : 0;
-          const issue: FormIssue = {
-            fieldId: `certificate_${idx}`,
-            step: 4,
-            message: t("submitErrors.certificateRequiredShort"),
-            label: t("courseCertLabel", { n: idx + 1 }),
-          };
-          setBlockingIssues([issue]);
-          setSubmitError(t("submitErrors.certificateRequired"));
-          jumpToIssue(issue);
+        } else if (
+          data.error === "too_large" ||
+          data.error === "bad_type" ||
+          data.error === "bad_signature" ||
+          data.error === "too_many_files" ||
+          data.error === "total_too_large"
+        ) {
+          setSubmitError(t(`submitErrors.${data.error}`));
         } else if (data.error === "invalid_fields" && Array.isArray(data.issues)) {
           const mapped: FormIssue[] = data.issues.map(
             (issue: { path?: (string | number)[]; message?: string }) => {
@@ -800,17 +768,6 @@ export function EnrollmentForm({
                 onChange={(e) => update("profileUrl", e.target.value)}
               />
             </Field>
-            <Field
-              id="photo"
-              label={t("fields.photo")}
-              hint={t("fileNotRestored")}
-            >
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                onChange={(e) => update("photo", e.target.files?.[0] || null)}
-              />
-            </Field>
           </fieldset>
         ) : null}
 
@@ -919,18 +876,6 @@ export function EnrollmentForm({
                 onChange={(e) => update("responsibilities", e.target.value)}
               />
             </Field>
-            <Field
-              id="experienceFiles"
-              label={t("fields.experienceFiles")}
-              hint={t("fileNotRestored")}
-            >
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => update("experienceFiles", Array.from(e.target.files || []))}
-              />
-            </Field>
           </fieldset>
         ) : null}
 
@@ -1016,14 +961,6 @@ export function EnrollmentForm({
                 max={new Date().getFullYear()}
                 value={draft.graduationYear}
                 onChange={(e) => update("graduationYear", e.target.value)}
-              />
-            </Field>
-            <Field id="diplomaFiles" label={t("fields.diplomaFiles")} hint={t("fileNotRestored")}>
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => update("diplomaFiles", Array.from(e.target.files || []))}
               />
             </Field>
           </fieldset>
@@ -1127,24 +1064,6 @@ export function EnrollmentForm({
                     onChange={(e) => {
                       const courses = [...draft.courses];
                       courses[index] = { ...course, certificateNo: e.target.value };
-                      update("courses", courses);
-                    }}
-                  />
-                </Field>
-                <Field
-                  id={`certificate_${index}`}
-                  label={t("fields.certificate")}
-                  required
-                  error={errors[`certificate_${index}`]}
-                  hint={t("fileNotRestored")}
-                >
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => {
-                      const courses = [...draft.courses];
-                      courses[index] = { ...course, certFiles: Array.from(e.target.files || []) };
                       update("courses", courses);
                     }}
                   />
@@ -1305,6 +1224,20 @@ export function EnrollmentForm({
                 {t("previewUnavailable")}
               </p>
             ) : null}
+            <EnrollmentAttachmentsDropzone
+              files={draft.attachments}
+              onChange={(next) => update("attachments", next)}
+              title={t("attachments.title")}
+              hint={t("attachments.hint")}
+              dropLabel={t("attachments.drop")}
+              browseLabel={t("attachments.browse")}
+              removeLabel={t("attachments.remove")}
+              emptyLabel={t("attachments.empty")}
+              optionalLabel={t("optional")}
+              errorTooMany={t("attachments.errorTooMany")}
+              errorTotalSize={t("attachments.errorTotalSize")}
+              errorFile={t("attachments.errorFile")}
+            />
             {turnstileSiteKey ? (
               <div
                 className="enrollment-captcha-step"

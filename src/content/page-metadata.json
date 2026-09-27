@@ -101,7 +101,7 @@
   },
   "/en/privacy-policy": {
     "title": "ESOSH — Privacy Policy",
-    "description": "How ESOSH processes personal data on the website, forms and membership applications. Draft pending legal review.",
+    "description": "How ESOSH processes personal data on the website, forms and membership applications.",
     "locale": "en",
     "alternates": {
       "uk": "/privacy-policy",
@@ -111,7 +111,7 @@
   },
   "/privacy-policy": {
     "title": "ESOSH — Політика конфіденційності",
-    "description": "Як ESOSH обробляє персональні дані на сайті, у формах і заявках на членство. Draft — pending legal review.",
+    "description": "Як ESOSH обробляє персональні дані на сайті, у формах і заявках на членство.",
     "locale": "uk",
     "alternates": {
       "uk": "/privacy-policy",
@@ -121,7 +121,7 @@
   },
   "/en/cookie-policy": {
     "title": "ESOSH — Cookie Policy",
-    "description": "Cookies and similar technologies used on the ESOSH website, and how to change your consent. Draft pending legal review.",
+    "description": "Cookies and similar technologies used on the ESOSH website, and how to change your consent.",
     "locale": "en",
     "alternates": {
       "uk": "/cookie-policy",
@@ -131,7 +131,7 @@
   },
   "/cookie-policy": {
     "title": "ESOSH — Політика cookies",
-    "description": "Cookies і подібні технології на сайті ESOSH та як змінити згоду. Draft — pending legal review.",
+    "description": "Cookies і подібні технології на сайті ESOSH та як змінити згоду.",
     "locale": "uk",
     "alternates": {
       "uk": "/cookie-policy",

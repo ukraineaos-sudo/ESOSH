@@ -18,7 +18,7 @@ alwaysApply: true
 - Admin CMS: `src/app/admin/**` + `src/app/api/admin/**` + Neon (`src/db`) + Blob; middleware защищает `/admin` и `/api/admin`.
 - Consent: `ConsentProvider` + banner (`src/lib/consent.ts`, `src/components/consent/**`); cookie `esosh_consent`.
 - Binotel: `BinotelWidgets` в locale layout — скрипти **лише після** згоди `communications` (`widgets.binotel.com` GetCall + chat).
-- Політики: `/privacy-policy`, `/cookie-policy` (uk+en; draft pending legal review).
+- Політики: `/privacy-policy`, `/cookie-policy` (uk+en; типові тексти).
 - Медиа: локальные пути в `public/` (манифест) **и** загруженные в Blob (`media_assets`).
 - Документы: `public/docs/{codex,terms,offer}-{uk|en}.pdf`.
 
@@ -50,7 +50,7 @@ alwaysApply: true
 - канонические пути страниц (uk без префикса, en с `/en`);
 - ключи `nav` / `contact` / `consent` / `enrollment` в `messages/{uk,en}.json`;
 - `POST /api/contact` тело: `{ name, email, message, locale?, company?, privacyConsent: true }` (honeypot);
-- `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + файли + `cf-turnstile-response` (якщо увімкнено Turnstile); honeypot `company`; успіх = запис у Neon;
+- `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + опційні файли (`attachment_*`, legacy keys ще приймаються) + `cf-turnstile-response` (якщо увімкнено Turnstile); honeypot `company`; успіх = запис у Neon; сертифікати/документи **не обов’язкові**;
 - env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`;
 - публичные файлы в `public/images/**`, `public/docs/**`;
 - sitemap / robots;

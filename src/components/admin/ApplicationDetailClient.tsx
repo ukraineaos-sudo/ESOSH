@@ -585,6 +585,7 @@ function criterionStateUk(state: string): string {
 
 function fileFieldUk(fieldKey: string): string {
   if (fieldKey === "photo") return "Фото";
+  if (fieldKey.startsWith("attachment_")) return "Додаток";
   if (fieldKey.startsWith("experience_")) return "Підтвердження стажу";
   if (fieldKey.startsWith("diploma_")) return "Диплом";
   if (fieldKey.startsWith("certificate_")) return "Сертифікат";

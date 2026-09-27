@@ -24,7 +24,6 @@ export function ConsentBanner() {
               {t("cookieLink")}
             </Link>
           </p>
-          <p className="consent-banner__draft">{t("draftNote")}</p>
         </div>
         <div className="consent-banner__actions">
           <button type="button" className="consent-btn consent-btn--primary" onClick={acceptAll}>

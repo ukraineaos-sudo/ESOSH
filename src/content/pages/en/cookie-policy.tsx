@@ -1,10 +1,10 @@
-/* Draft cookie policy — pending legal review. */
+/* Public cookie policy (typical UK / international template). */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OpenConsentSettingsButton } from "@/components/consent/OpenConsentSettingsButton";
 import { CONSENT_COOKIE_NAME, CONSENT_POLICY_VERSION } from "@/lib/consent";
 
-/** RU: Політика cookies EN. EN: Cookie policy draft (English). */
+/** RU: Політика cookies EN. EN: Cookie policy content. */
 export default function PageContent() {
   return (
     <>
@@ -33,7 +33,7 @@ export default function PageContent() {
           <div className={"wrapper is--v-flex-center-top"}>
             <div className={"wrapper is--max-width-870 is--w-100p"}>
               <p className={"regular-s is--grey-60 is--margin-bottom-24"}>
-                {`Version ${CONSENT_POLICY_VERSION} · Draft — pending legal review. Not legal advice; subject to ESOSH counsel approval.`}
+                {`Version ${CONSENT_POLICY_VERSION}`}
               </p>
 
               <div className={"wrapper is--margin-bottom-48"}>

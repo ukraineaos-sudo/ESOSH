@@ -9,7 +9,11 @@ import { TurnstileWidget } from "@/components/TurnstileWidget";
 export function EnrollmentCaptchaGate() {
   const t = useTranslations("enrollment");
   const locale = useLocale() === "en" ? "en" : "uk";
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || "";
+  // Client bundle: NODE_ENV is "development" under `next dev` — skip widget (error 110200 on localhost).
+  const siteKey =
+    process.env.NODE_ENV === "production"
+      ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ""
+      : "";
   const [unlocked, setUnlocked] = useState(!siteKey);
   const [token, setToken] = useState<string | null>(null);
   const [widgetError, setWidgetError] = useState(false);
