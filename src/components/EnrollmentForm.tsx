@@ -22,6 +22,7 @@ import type {
 import type { ClassifyResult } from "@/lib/enrollment/classify";
 import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "@/lib/enrollment/levels";
 import { CODEX_QUESTIONS_PUBLIC } from "@/lib/enrollment/quiz";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 
 type CourseDraft = EnrollmentCourseInput & {
   certFiles: File[];
@@ -211,8 +212,19 @@ function injectControlProps(
   });
 }
 
+type EnrollmentFormProps = {
+  /** Token from Turnstile gate / step-7 widget; null when captcha disabled. */
+  turnstileToken?: string | null;
+  onTurnstileToken?: (token: string | null) => void;
+  turnstileSiteKey?: string;
+};
+
 /** RU: 7-крокова форма вступу за ТЗ. EN: Multi-step enrollment form. */
-export function EnrollmentForm() {
+export function EnrollmentForm({
+  turnstileToken = null,
+  onTurnstileToken,
+  turnstileSiteKey,
+}: EnrollmentFormProps = {}) {
   const t = useTranslations("enrollment");
   const locale = useLocale() === "en" ? "en" : "uk";
   const defaultCountry = t("defaultCountry");
@@ -222,6 +234,7 @@ export function EnrollmentForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [localCaptchaToken, setLocalCaptchaToken] = useState<string | null>(turnstileToken);
   const [blockingIssues, setBlockingIssues] = useState<FormIssue[]>([]);
   const [result, setResult] = useState<{
     kind: "ok" | "duplicate" | "honeypot";
@@ -232,6 +245,17 @@ export function EnrollmentForm() {
   const [idempotencyKey] = useState(newIdempotencyKey);
   const [liveClassify, setLiveClassify] = useState<ClassifyResult | null>(null);
   const [previewUnavailable, setPreviewUnavailable] = useState(false);
+
+  const captchaToken = localCaptchaToken ?? turnstileToken;
+
+  function setCaptchaToken(next: string | null) {
+    setLocalCaptchaToken(next);
+    onTurnstileToken?.(next);
+  }
+
+  useEffect(() => {
+    setLocalCaptchaToken(turnstileToken);
+  }, [turnstileToken]);
 
   function levelLabel(code: string | undefined, fallbackUk?: string): string {
     if (!code) return fallbackUk || "";
@@ -453,6 +477,17 @@ export function EnrollmentForm() {
       jumpToIssue(issues[0]);
       return;
     }
+    if (turnstileSiteKey && !captchaToken) {
+      setSubmitError(t("submitErrors.captcha_required"));
+      setStep(7);
+      setTimeout(() => {
+        document.getElementById("enrollment-field-turnstile")?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 50);
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
     setBlockingIssues([]);
@@ -503,6 +538,7 @@ export function EnrollmentForm() {
 
       const form = new FormData();
       form.set("payload", JSON.stringify(payload));
+      if (captchaToken) form.set("cf-turnstile-response", captchaToken);
       if (draft.photo) form.set("photo", draft.photo);
       draft.experienceFiles.forEach((f, i) => form.append(`experience_${i}`, f));
       draft.diplomaFiles.forEach((f, i) => form.append(`diploma_${i}`, f));
@@ -515,6 +551,13 @@ export function EnrollmentForm() {
       if (!response.ok) {
         if (data.error === "unavailable" || data.error === "blob_unavailable") {
           setSubmitError(t("submitErrors.unavailable"));
+        } else if (
+          data.error === "captcha_required" ||
+          data.error === "captcha_invalid" ||
+          data.error === "captcha_unavailable"
+        ) {
+          setCaptchaToken(null);
+          setSubmitError(t(`submitErrors.${data.error}`));
         } else if (data.error === "email_conflict") {
           setSubmitError(t("submitErrors.emailConflict"));
         } else if (data.error === "certificate_required") {
@@ -1261,6 +1304,31 @@ export function EnrollmentForm() {
               <p className="enrollment-hint enrollment-warn" role="status">
                 {t("previewUnavailable")}
               </p>
+            ) : null}
+            {turnstileSiteKey ? (
+              <div
+                className="enrollment-captcha-step"
+                id="enrollment-field-turnstile"
+                role="group"
+                aria-labelledby="enrollment-captcha-step-title"
+              >
+                <p id="enrollment-captcha-step-title" className="enrollment-question">
+                  {t("captcha.stepConfirm")}
+                  <span className="enrollment-req"> {t("requiredMark")}</span>
+                </p>
+                <TurnstileWidget
+                  siteKey={turnstileSiteKey}
+                  language={locale}
+                  onSuccess={(next) => setCaptchaToken(next)}
+                  onExpire={() => setCaptchaToken(null)}
+                  onError={() => setCaptchaToken(null)}
+                />
+                {!captchaToken ? (
+                  <p className="site-form-error is--margin-top-8" role="alert">
+                    {t("captcha.required")}
+                  </p>
+                ) : null}
+              </div>
             ) : null}
             <fieldset className="enrollment-consents">
               <legend className="enrollment-question">{t("consentsLegend")}</legend>

@@ -1,7 +1,7 @@
 /* Public ESOSH content — clean enrollment application page (no hero photo). */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { EnrollmentForm } from "@/components/EnrollmentForm";
+import { EnrollmentCaptchaGate } from "@/components/EnrollmentCaptchaGate";
 
 /** RU: Чиста EN-сторінка форми вступу. EN: Clean English enrollment apply page. */
 export default function PageContent() {
@@ -47,7 +47,7 @@ export default function PageContent() {
               </p>
             </div>
           </div>
-          <EnrollmentForm />
+          <EnrollmentCaptchaGate />
         </div>
       </section>
       <Footer />

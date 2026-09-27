@@ -55,6 +55,7 @@ Honeypot оставить. Логировать только факт 429 без
 
 ### Публичные API / антиабуз
 - [ ] Rate limit contact + enrollment (+ preview)
+- [x] Cloudflare Turnstile на `/join/apply` (гейт перед анкетою + `siteverify` на `POST /api/enrollment`)
 - [ ] Единый error envelope без утечки stack в неожиданных catch
 
 ### Файлы и ПДн

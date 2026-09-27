@@ -19,6 +19,7 @@ import { upsertMemberFromEnrollment } from "@/lib/enrollment/members";
 import { deliverEnrollmentNotify } from "@/lib/enrollment/notify";
 import { CODEX_QUIZ_VERSION, scoreCodexQuiz } from "@/lib/enrollment/quiz";
 import { enrollmentPayloadSchema } from "@/lib/enrollment/schema";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -57,6 +58,19 @@ export async function POST(request: Request) {
     form = await request.formData();
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_form" }, { status: 400 });
+  }
+
+  const turnstileToken =
+    typeof form.get("cf-turnstile-response") === "string"
+      ? String(form.get("cf-turnstile-response"))
+      : null;
+  const captcha = await verifyTurnstileToken(
+    turnstileToken,
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+  );
+  if (!captcha.ok) {
+    const status = captcha.error === "captcha_unavailable" ? 503 : 400;
+    return NextResponse.json({ ok: false, error: captcha.error }, { status });
   }
 
   const rawPayload = form.get("payload");

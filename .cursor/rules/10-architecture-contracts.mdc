@@ -14,7 +14,7 @@ alwaysApply: true
 - Навигация: `src/components/Header.tsx` + `navigation/*` + строки `messages.*.nav`.
 - Футер: `src/components/Footer.tsx` → `src/content/chrome/footer-{uk|en}.tsx` + `getContactSettings()`.
 - Контакты: `ContactForm` → `POST /api/contact` → `contactSchema` (`privacyConsent: true`) → `deliverContact` (webhook).
-- Форма вступу: `/join/apply` → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`.
+- Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`.
 - Admin CMS: `src/app/admin/**` + `src/app/api/admin/**` + Neon (`src/db`) + Blob; middleware защищает `/admin` и `/api/admin`.
 - Consent: `ConsentProvider` + banner (`src/lib/consent.ts`, `src/components/consent/**`); cookie `esosh_consent`.
 - Binotel: `BinotelWidgets` в locale layout — скрипти **лише після** згоди `communications` (`widgets.binotel.com` GetCall + chat).
@@ -50,8 +50,8 @@ alwaysApply: true
 - канонические пути страниц (uk без префикса, en с `/en`);
 - ключи `nav` / `contact` / `consent` / `enrollment` в `messages/{uk,en}.json`;
 - `POST /api/contact` тело: `{ name, email, message, locale?, company?, privacyConsent: true }` (honeypot);
-- `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + файли; honeypot `company`; успіх = запис у Neon;
-- env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`;
+- `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + файли + `cf-turnstile-response` (якщо увімкнено Turnstile); honeypot `company`; успіх = запис у Neon;
+- env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`;
 - публичные файлы в `public/images/**`, `public/docs/**`;
 - sitemap / robots;
 - admin: `/admin/*` (session cookie), `/api/admin/*`.

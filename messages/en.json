@@ -254,8 +254,18 @@
       "certificateRequired": "A certificate file is required for the declared course.",
       "certificateRequiredShort": "Add a certificate",
       "invalidFields": "The server rejected some fields. Open an item in the list below.",
+      "captcha_required": "Complete the “I’m not a robot” check before submitting.",
+      "captcha_invalid": "Verification failed. Refresh the widget and try again.",
+      "captcha_unavailable": "The verification service is temporarily unavailable. Try later or email office@esosh.net.",
       "generic": "Could not submit the application{detail}. Check the fields and try again.",
       "network": "Network error. Please try again. The application was not sent."
+    },
+    "captcha": {
+      "gateTitle": "Confirm you are human",
+      "gateHint": "Before filling the application, complete a short Cloudflare check. This protects against spam and automated submissions.",
+      "stepConfirm": "Confirm the check before submitting",
+      "required": "Complete the check to submit the application.",
+      "widgetError": "Could not load the check. Refresh the page or allow challenges.cloudflare.com in your ad blocker."
     },
     "success": {
       "thanks": "Thank you!",

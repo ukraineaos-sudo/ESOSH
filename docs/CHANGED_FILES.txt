@@ -227,3 +227,8 @@ src/app/api/admin/leadership/[id]/route.ts
 src/app/admin/content/leadership/page.tsx
 scripts/seed-leadership.mjs
 docs/LEADERSHIP_CMS.md
+src/lib/turnstile.ts
+src/components/TurnstileWidget.tsx
+src/components/EnrollmentCaptchaGate.tsx
+docs/SECURITY_PLAN.md
+tests/turnstile-token.test.mjs

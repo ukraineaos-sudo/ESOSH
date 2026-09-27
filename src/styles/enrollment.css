@@ -41,6 +41,26 @@
   opacity: 0.85;
 }
 
+.enrollment-captcha-gate {
+  max-width: 720px;
+  padding: 20px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--light-blue, #c5d4e8);
+  background: color-mix(in srgb, var(--accent, #1e4f91) 4%, white);
+}
+
+.enrollment-turnstile {
+  min-height: 65px;
+}
+
+.enrollment-captcha-step {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--light-blue, #c5d4e8);
+  background: #fff;
+}
+
 .enrollment-progress {
   display: flex;
   gap: 8px;

@@ -32,7 +32,7 @@ alwaysApply: false
 
 - Не вставляй сырой HTML из внешних источников без санитизации.
 - Внешние ссылки (Drive, соцсети, партнёры) проверяй на ожидаемый хост при переносе.
-- Разрешённый third-party runtime: Binotel (`widgets.binotel.com` GetCall + chat) через `BinotelWidgets`.
+- Разрешённый third-party runtime: Binotel (`widgets.binotel.com` GetCall + chat) через `BinotelWidgets`; Cloudflare Turnstile (`challenges.cloudflare.com`) на `/join/apply` для антиботу.
 - Не подключай Webflow runtime и прочие произвольные скрипты без задачи и оценки PII/tracking.
 
 ## Проверки по применимости

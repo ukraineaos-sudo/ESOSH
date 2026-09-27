@@ -15,7 +15,7 @@
 2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`, `enrollment`) + `ConsentProvider` + условный `BinotelWidgets`
 3. Chrome: `Header` / `Footer` → footer читает `site_settings` (fallback на `SITE`); ссылки Privacy / Cookies / cookie settings
 4. Контакты: `ContactForm` → `POST /api/contact` → zod (`privacyConsent: true`) → `deliverContact` (webhook)
-5. Форма вступу: `/join/apply` → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
+5. Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` (+ `cf-turnstile-response`) → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
 6. Admin: `/admin` shell (sidebar + sticky chrome) → session cookie → `/api/admin/*` → Neon/Blob
    - Live UX: header chip «нові заявки» polls `GET /api/admin/applications?status=new` ~30s (stops on 401); applications list same interval + `esosh:admin-apps-refresh` event
    - News CMS (Phase A–C): `/admin/content/news` = **єдиний каталог** новин; public `/news` + homepage = published `news_posts` (`listPublishedCmsNews`). Legacy TSX лишається dual-read fallback для `/news/{slug}` і джерелом `db:import-news`
@@ -60,7 +60,8 @@
 | Contact delivery | `src/lib/contact/deliver-contact.ts` |
 | Consent cookie / categories | `src/lib/consent.ts` (`CONSENT_POLICY_VERSION`, `PRIVACY_NOTICE_VERSION`) |
 | Privacy / Cookie pages | `src/content/pages/{uk,en}/privacy-policy.tsx`, `cookie-policy.tsx` |
-| Enrollment form | `src/components/EnrollmentForm.tsx` + `src/styles/enrollment.css` |
+| Enrollment form | `src/components/EnrollmentCaptchaGate.tsx` + `EnrollmentForm.tsx` + `TurnstileWidget.tsx` + `src/styles/enrollment.css` |
+| Turnstile verify | `src/lib/turnstile.ts` (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`) |
 | Enrollment schema / classify / files / notify / Brevo | `src/lib/enrollment/**` |
 | Applications / members | Neon `applications`, `members`, `application_files`, `application_events` |
 | Member registry filters/stats | `src/lib/admin/member-registry.ts` + `/admin/members` + `GET /api/admin/members` |
@@ -78,7 +79,8 @@
 - Public consent cookie: `esosh_consent` (JSON categories + `version` + `ts`); mirror `localStorage`; bump `CONSENT_POLICY_VERSION` → banner знову
 - `readConsentFromDocument` must return a **stable reference** (cached by raw string) — `useSyncExternalStore` getSnapshot; new object each call → React #185 / blank “This page couldn’t load”
 - Privacy/Cookie pages: `/privacy-policy`, `/cookie-policy` (+ `/en/...`); статус текстів: **draft pending legal review**
-- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files); `POST /api/enrollment/preview`; success = запис у Neon (лист адміну — Brevo best-effort; інше — webhook)
+- Enrollment: `POST /api/enrollment` multipart (`payload` JSON + files + optional `cf-turnstile-response`); `POST /api/enrollment/preview`; success = запис у Neon (лист адміну — Brevo best-effort; інше — webhook)
+  - якщо задано `TURNSTILE_SECRET_KEY` — обов’язковий успішний Cloudflare siteverify; інакше капча вимкнена (dev)
   - Blob файлів заявок: **private за замовчуванням**; `ENROLLMENT_BLOB_ACCESS=public` лише явно
   - `testAnswers` у payload **не** зберігаються (лише `testScore` + `quizVersion`); `testPassedAt` лише при score ≥ 100
   - honeypot → `{ ok: true, honeypot: true }`; duplicate idempotency → `{ ok, duplicate, applicationPublicId, autoLevel, autoLevelLabelUk }`
