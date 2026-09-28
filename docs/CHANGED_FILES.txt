@@ -272,3 +272,4 @@ docs/CHANGED_FILES.txt
 scripts/generate-training-certificate.py
 public/docs/trainings/uav-attacks-certificate-uk.pdf
 public/docs/trainings/uav-attacks-certificate-en.pdf
+src/components/trainings/TrainingLesson.tsx

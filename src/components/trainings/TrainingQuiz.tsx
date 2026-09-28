@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import type {
   LocaleCode,
   QuizOptionId,
@@ -12,27 +11,33 @@ import type {
 const OPTION_IDS: QuizOptionId[] = ["A", "B", "C"];
 const DEFAULT_PASS_THRESHOLD = 80;
 
+export type TrainingQuizResult = {
+  score: number;
+  total: number;
+  scorePercent: number;
+} | null;
+
 type Props = {
   locale: LocaleCode;
   questions: QuizQuestion[];
   ui: TrainingQuizUi;
-  /** Locale-matched static certificate PDF under /public. */
-  certificateUrl?: string;
-  /** Minimum score percent required to show the download button. */
+  /** When true, answers cannot be changed (video not finished). */
+  locked?: boolean;
   passThresholdPercent?: number;
+  onResultChange?: (result: TrainingQuizResult) => void;
 };
 
 type Answers = Record<number, QuizOptionId | undefined>;
 
-/** RU: Клієнтський квіз A/B/C без збереження на сервері. EN: Client-side A/B/C quiz, no server persistence. */
+/** RU: Клієнтський квіз A/B/C; блокується до перегляду відео. EN: Client quiz; locked until video done. */
 export function TrainingQuiz({
   locale,
   questions,
   ui,
-  certificateUrl,
+  locked = false,
   passThresholdPercent = DEFAULT_PASS_THRESHOLD,
+  onResultChange,
 }: Props) {
-  const t = useTranslations("trainings");
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
   const [showIncomplete, setShowIncomplete] = useState(false);
@@ -51,13 +56,30 @@ export function TrainingQuiz({
     return { score, total, scorePercent, byId };
   }, [answers, questions, submitted]);
 
+  useEffect(() => {
+    if (!onResultChange) return;
+    if (!results) {
+      onResultChange(null);
+      return;
+    }
+    onResultChange({
+      score: results.score,
+      total: results.total,
+      scorePercent: results.scorePercent,
+    });
+  }, [results, onResultChange]);
+
+  // Keep threshold referenced for future UI hints without unused lint
+  void passThresholdPercent;
+
   function onSelect(questionId: number, option: QuizOptionId) {
-    if (submitted) return;
+    if (submitted || locked) return;
     setShowIncomplete(false);
     setAnswers((prev) => ({ ...prev, [questionId]: option }));
   }
 
   function onSubmit() {
+    if (locked) return;
     const complete = questions.every((q) => answers[q.id] != null);
     if (!complete) {
       setShowIncomplete(true);
@@ -68,6 +90,7 @@ export function TrainingQuiz({
   }
 
   function onReset() {
+    if (locked) return;
     setAnswers({});
     setSubmitted(false);
     setShowIncomplete(false);
@@ -79,13 +102,12 @@ export function TrainingQuiz({
         .replace("{total}", String(results.total))
     : null;
 
-  const canDownloadCertificate =
-    results != null &&
-    Boolean(certificateUrl) &&
-    results.scorePercent >= passThresholdPercent;
-
   return (
-    <section className="training-quiz" aria-labelledby="training-quiz-title">
+    <section
+      className={`training-quiz${locked ? " is-locked" : ""}`}
+      aria-labelledby="training-quiz-title"
+      aria-disabled={locked}
+    >
       <h2 id="training-quiz-title" className="h2 is--margin-bottom-24">
         {ui.title[locale]}
       </h2>
@@ -103,7 +125,7 @@ export function TrainingQuiz({
 
           return (
             <li key={q.id} className={`training-quiz__item${statusClass}`}>
-              <fieldset className="training-quiz__fieldset">
+              <fieldset className="training-quiz__fieldset" disabled={locked || submitted}>
                 <legend className="training-quiz__question">
                   <span className="training-quiz__number">{q.id}.</span>{" "}
                   {q.question[locale]}
@@ -126,7 +148,7 @@ export function TrainingQuiz({
                           name={`quiz-q${q.id}`}
                           value={optionId}
                           checked={optionIsSelected}
-                          disabled={submitted}
+                          disabled={locked || submitted}
                           onChange={() => onSelect(q.id, optionId)}
                         />
                         <span className="training-quiz__option-letter">
@@ -165,28 +187,25 @@ export function TrainingQuiz({
         </p>
       ) : null}
 
-      {submitted && results && !canDownloadCertificate && certificateUrl ? (
-        <p className="training-quiz__cert-hint" role="status">
-          {t("certificateThresholdHint", { threshold: passThresholdPercent })}
-        </p>
-      ) : null}
-
       <div className="training-quiz__actions">
         {!submitted ? (
-          <button type="button" className="btn is--primary w-button" onClick={onSubmit}>
+          <button
+            type="button"
+            className="btn is--primary w-button"
+            onClick={onSubmit}
+            disabled={locked}
+          >
             {ui.submit[locale]}
           </button>
         ) : (
-          <>
-            {canDownloadCertificate && certificateUrl ? (
-              <a className="btn is--primary w-button" href={certificateUrl} download>
-                {t("downloadCertificate")}
-              </a>
-            ) : null}
-            <button type="button" className="btn is--tertiary w-button" onClick={onReset}>
-              {ui.reset[locale]}
-            </button>
-          </>
+          <button
+            type="button"
+            className="btn is--tertiary w-button"
+            onClick={onReset}
+            disabled={locked}
+          >
+            {ui.reset[locale]}
+          </button>
         )}
       </div>
     </section>

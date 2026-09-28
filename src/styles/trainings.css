@@ -3,7 +3,7 @@
 .training-video {
   width: 100%;
   max-width: 960px;
-  margin: 0 auto 40px;
+  margin: 0 auto 16px;
 }
 
 .training-video__frame {
@@ -15,12 +15,31 @@
   overflow: hidden;
 }
 
-.training-video__frame iframe {
+.training-video__frame iframe,
+.training-video__player-host,
+.training-video__player-host iframe {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.training-video__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.72);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.training-video__seek-hint {
+  margin: 10px 0 0;
+  color: #4a5568;
+  max-width: 960px;
 }
 
 .training-video--pending .training-video__placeholder {
@@ -35,15 +54,92 @@
   background: #f5f8fc;
 }
 
+.training-status-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #d0d7e2;
+  background: #f3f4f6;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.training-status-mark__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 2px solid #94a3b8;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.training-status-mark.is-done {
+  border-color: #2f9e6a;
+  background: #eaf8f1;
+  color: #1f7a4d;
+}
+
+.training-status-mark.is-done .training-status-mark__icon {
+  border-color: #2f9e6a;
+  background: #2f9e6a;
+  color: #fff;
+}
+
 .training-detail-lead {
   max-width: 720px;
   margin-bottom: 32px;
 }
 
+.training-lesson {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.training-lesson__lock-hint {
+  margin: 0 0 16px;
+  color: #a33b3b;
+  font-weight: 600;
+}
+
+.training-lesson__footer-status {
+  max-width: 800px;
+  margin: 8px auto 0;
+}
+
+.training-lesson__cert {
+  max-width: 800px;
+  margin: 20px auto 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.training-lesson__cert .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .training-quiz {
   max-width: 800px;
-  margin: 0 auto;
-  padding-bottom: 48px;
+  margin: 24px auto 0;
+  padding-bottom: 8px;
+}
+
+.training-quiz.is-locked {
+  opacity: 0.55;
+}
+
+.training-quiz.is-locked .training-quiz__option {
+  cursor: not-allowed;
 }
 
 .training-quiz__list {
@@ -181,7 +277,7 @@
 }
 
 .training-quiz__cert-hint {
-  margin: 12px 0 0;
+  margin: 0;
   color: #4a5568;
   font-size: 0.95rem;
   line-height: 1.45;
@@ -197,6 +293,11 @@
 
 .training-quiz__actions .btn {
   text-decoration: none;
+}
+
+.training-quiz__actions .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 @media (max-width: 767px) {

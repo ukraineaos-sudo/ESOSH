@@ -299,6 +299,11 @@
   },
   "trainings": {
     "downloadCertificate": "Download certificate",
-    "certificateThresholdHint": "The certificate unlocks at a score of at least {threshold}%."
+    "certificateThresholdHint": "The certificate unlocks at a score of at least {threshold}%.",
+    "quizLockedHint": "Watch the video to the end first — then the quiz unlocks.",
+    "quizNotPassed": "Quiz not completed yet",
+    "quizPassedScore": "Quiz completed: {score} of {total} ({percent}%)",
+    "certNeedVideo": "Watch the video to the end first.",
+    "certNeedQuiz": "Complete the quiz first."
   }
 }

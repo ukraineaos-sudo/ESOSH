@@ -299,6 +299,11 @@
   },
   "trainings": {
     "downloadCertificate": "Завантажити сертифікат",
-    "certificateThresholdHint": "Сертифікат доступний після результату не менше {threshold}%."
+    "certificateThresholdHint": "Сертифікат доступний після результату не менше {threshold}%.",
+    "quizLockedHint": "Спочатку перегляньте відео до кінця — тоді відкриється тест.",
+    "quizNotPassed": "Тест ще не пройдено",
+    "quizPassedScore": "Тест пройдено на {score} з {total} ({percent}%)",
+    "certNeedVideo": "Спочатку перегляньте відео до кінця.",
+    "certNeedQuiz": "Спочатку пройдіть тест."
   }
 }

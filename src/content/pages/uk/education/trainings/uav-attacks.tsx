@@ -1,7 +1,6 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { TrainingQuiz } from "@/components/trainings/TrainingQuiz";
-import { YoutubeConsentEmbed } from "@/components/trainings/YoutubeConsentEmbed";
+import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { uavAttacksTraining } from "@/content/trainings";
 
 /** RU: Деталь тренінгу БПЛА. EN: UAV training detail (uk). */
@@ -38,18 +37,7 @@ export default function PageContent() {
           <div className={"training-detail-lead"}>
             <p className={"regular-l"}>{training.summary.uk}</p>
           </div>
-          <YoutubeConsentEmbed
-            locale="uk"
-            videoId={training.youtubeId}
-            title={training.videoTitle.uk}
-          />
-          <TrainingQuiz
-            locale="uk"
-            questions={training.quiz}
-            ui={training.quizUi}
-            certificateUrl={training.certificatePdf?.uk}
-            passThresholdPercent={training.passThresholdPercent}
-          />
+          <TrainingLesson locale="uk" training={training} />
         </div>
       </section>
       <Footer />
