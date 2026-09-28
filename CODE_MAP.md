@@ -22,7 +22,7 @@
    - Import: `npm run db:import-news` (`scripts/import-legacy-news.mjs`, docs `docs/NEWS_IMPORT.md`) — після імпорту всі TSX-статті в адмін-списку (edit/hide/delete як нові)
    - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
-7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`
+7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`; YouTube embeds на тренінгах **только после** `marketing === true` (`YoutubeConsentEmbed`)
 8. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — типовые тексты UA/международные (по решению заказчика без отдельного юр. review)
 
 ## Точки входа
@@ -34,6 +34,8 @@
 | Contact API | `src/app/api/contact/route.ts` |
 | Enrollment API | `src/app/api/enrollment/**` |
 | Enrollment classify / quiz | `src/lib/enrollment/**` |
+| Trainings catalog / quiz content | `src/content/trainings/**` |
+| Training quiz UI / YouTube gate | `src/components/trainings/**` |
 | Admin UI | `src/app/admin/**` |
 | Admin API | `src/app/api/admin/**` |
 | DB schema | `src/db/schema.ts` |
@@ -54,7 +56,8 @@
 | Uploaded media | Vercel Blob + `media_assets` |
 | Nav / form / consent UI strings | `messages/{uk,en}.json` (`nav`, `contact`, `consent`) |
 | Footer markup | `src/content/chrome/**` |
-| Visual parity CSS | `src/styles/reference.css` (+ navigation/contact/enrollment/consent/refinements) |
+| Visual parity CSS | `src/styles/reference.css` (+ navigation/contact/enrollment/consent/trainings/refinements) |
+| Trainings listing + quiz copy | `src/content/trainings/**` (+ pages `education/trainings*`) |
 | Admin UI CSS | `src/app/admin/admin.css` |
 | Contact validation | `src/lib/contact.ts` |
 | Contact delivery | `src/lib/contact/deliver-contact.ts` |
@@ -73,6 +76,7 @@
 ## Публичные контракты
 - Locales: `uk` (default, no prefix), `en` (`/en/...`), `localeDetection: false`
 - Routes: зеркало slug esosh.net; список — `page-loaders` / `page-metadata`; CMS может перекрыть маршрут после publish
+  - Education trainings (new): `/education/trainings`, `/education/trainings/uav-attacks` (+ `/en/...`)
 - Contact API body: `{ name, email, message, locale?, company?, privacyConsent: true }`
   - без `privacyConsent: true` → 400; honeypot `company` → `{ ok: true }` без доставки (згода не змінює honeypot-семантику)
   - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
@@ -98,6 +102,7 @@
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
 - Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`; **загрузка только после consent `communications`**
+- YouTube (trainings): `youtube-nocookie.com/embed/...` через `YoutubeConsentEmbed`; **только после consent `marketing`**
 - Env для consent **не** потрібен (first-party cookie)
 - Enrollment admin deep-link у Brevo: `resolveAdminOrigin()` — localhost → request origin; поки `esosh.net` на старому хості → `https://esosh.vercel.app/admin/...`
 ## Проверки
@@ -110,6 +115,7 @@
 - Нет ложного успеха формы без webhook
 - Нет Webflow runtime-скриптов в HTML
 - Binotel GetCall + chat **не** в DOM без згоди `communications`
+- YouTube iframe на тренінгах **не** в DOM без згоди `marketing`
 - Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable; **лента /news и блок новостей на главной** при отсутствии DB — пустые (статьи `/news/{slug}` всё ещё dual-read legacy)
 - Honeypot и contact API не ослабляются админкой
 - Contact / enrollment без явної privacy-згоди не приймаються як валідні

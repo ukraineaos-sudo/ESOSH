@@ -13,6 +13,7 @@
     "education": "Education",
     "projects": "Projects",
     "courses": "Courses",
+    "trainings": "Trainings",
     "news": "News",
     "contacts": "Contacts",
     "menu": "Menu",
@@ -65,7 +66,7 @@
     "catAnalytics": "Analytics",
     "catAnalyticsDesc": "Not used yet. Reserved for the future.",
     "catMarketing": "Marketing",
-    "catMarketingDesc": "Not used yet. Reserved for the future.",
+    "catMarketingDesc": "Third-party video players (YouTube) on training pages. The player does not load without consent.",
     "save": "Save choice",
     "close": "Close",
     "footerPrivacy": "Privacy",
@@ -295,5 +296,9 @@
       "emailNote": "A confirmation will also be sent to your email (if delivery is configured)."
     },
     "defaultCountry": "Ukraine"
+  },
+  "trainings": {
+    "downloadCertificate": "Download certificate",
+    "certificateThresholdHint": "The certificate unlocks at a score of at least {threshold}%."
   }
 }

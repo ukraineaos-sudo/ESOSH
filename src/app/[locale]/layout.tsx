@@ -10,6 +10,7 @@ import "@/styles/navigation.css";
 import "@/styles/contact.css";
 import "@/styles/enrollment.css";
 import "@/styles/consent.css";
+import "@/styles/trainings.css";
 import "@/styles/refinements.css";
 import "../globals.css";
 

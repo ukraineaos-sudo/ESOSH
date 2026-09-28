@@ -14,6 +14,7 @@ export const navigationGroups: NavigationGroup[] = [
   { key: "education", items: [
     { key: "projects", href: "/education/projects" },
     { key: "courses", href: "/education/courses" },
+    { key: "trainings", href: "/education/trainings" },
   ] },
   { key: "news", href: "/news" },
   { key: "contacts", href: "/contact-us" },

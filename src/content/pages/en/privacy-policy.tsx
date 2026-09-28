@@ -54,7 +54,12 @@ export default function PageContent() {
                   <li>{"messages submitted via the contact form;"}</li>
                   <li>{"membership / enrolment application data and supporting files;"}</li>
                   <li>{"technical data (IP, browser type, cookies as described in the Cookie Policy);"}</li>
-                  <li>{"communications data via third-party widgets (e.g. Binotel) if you consent."}</li>
+                  <li>{"communications data via third-party widgets (e.g. Binotel) if you consent;"}</li>
+                  <li>
+                    {
+                      "data from the third-party YouTube player on training pages if you consent to the Marketing category."
+                    }
+                  </li>
                 </ul>
               </div>
 
@@ -71,7 +76,7 @@ export default function PageContent() {
                 <h2 className={"h2 is--margin-bottom-12"}>{"4. Recipients and international transfers"}</h2>
                 <p className={"regular-l"}>
                   {
-                    "Infrastructure providers may include Vercel, Neon and Vercel Blob. Email notifications may use a provider such as Brevo. Contact form submissions may be forwarded via a configured webhook. Binotel widgets load only after consent to the Communications category. Processor agreements (DPAs) are concluded separately. Transfers outside Ukraine / the EEA rely on the safeguards offered by those providers."
+                    "Infrastructure providers may include Vercel, Neon and Vercel Blob. Email notifications may use a provider such as Brevo. Contact form submissions may be forwarded via a configured webhook. Binotel widgets load only after consent to the Communications category. The YouTube player on training pages loads only after Marketing consent. Processor agreements (DPAs) are concluded separately. Transfers outside Ukraine / the EEA rely on the safeguards offered by those providers."
                   }
                 </p>
               </div>

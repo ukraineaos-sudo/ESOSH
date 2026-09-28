@@ -56,6 +56,7 @@ export const ROUTES = {
   news: "/news",
   courses: "/education/courses",
   projects: "/education/projects",
+  trainings: "/education/trainings",
   joinEnrollment: "/join/enrollment",
   joinParticipation: "/join/participation",
   joinApply: "/join/apply",

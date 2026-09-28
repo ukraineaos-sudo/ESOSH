@@ -71,6 +71,9 @@ export default function FooterContent({
                   <a href={"/education/courses"} className={"footer-menu-link"}>
                     {"Курси"}
                   </a>
+                  <a href={"/education/trainings"} className={"footer-menu-link"}>
+                    {"Тренінги"}
+                  </a>
                 </div>
               </div>
               <div id={"w-node-_9bcc6dd1-016b-8498-c6ca-2e36aa9ebaa9-aa9eba94"} className={"wrapper"}>

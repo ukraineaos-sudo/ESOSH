@@ -61,8 +61,14 @@ export default function PageContent() {
                     }
                   </p>
                   <p className={"regular-l"}>
-                    <strong>{"Analytics / marketing. "}</strong>
+                    <strong>{"Analytics. "}</strong>
                     {"Not used yet; reserved for the future."}
+                  </p>
+                  <p className={"regular-l"}>
+                    <strong>{"Marketing. "}</strong>
+                    {
+                      "Third-party YouTube player on training pages (youtube-nocookie.com). Loaded only after your consent."
+                    }
                   </p>
                 </div>
               </div>
@@ -81,6 +87,10 @@ export default function PageContent() {
                   <p className={"is--margin-bottom-12"}>
                     <strong>{"Binotel cookies"}</strong>
                     {" — only after Communications consent; set by widgets.binotel.com."}
+                  </p>
+                  <p className={"is--margin-bottom-12"}>
+                    <strong>{"YouTube cookies"}</strong>
+                    {" — only after Marketing consent on training pages; set by youtube-nocookie.com / Google."}
                   </p>
                   <p>
                     <strong>{"esosh_admin_session"}</strong>

@@ -95,6 +95,22 @@
     "uk": "/education/projects",
     "en": "/en/education/projects"
   },
+  "/en/education/trainings": {
+    "uk": "/education/trainings",
+    "en": "/en/education/trainings"
+  },
+  "/education/trainings": {
+    "uk": "/education/trainings",
+    "en": "/en/education/trainings"
+  },
+  "/en/education/trainings/uav-attacks": {
+    "uk": "/education/trainings/uav-attacks",
+    "en": "/en/education/trainings/uav-attacks"
+  },
+  "/education/trainings/uav-attacks": {
+    "uk": "/education/trainings/uav-attacks",
+    "en": "/en/education/trainings/uav-attacks"
+  },
   "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu": {
     "uk": "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu",
     "en": "/en/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu"

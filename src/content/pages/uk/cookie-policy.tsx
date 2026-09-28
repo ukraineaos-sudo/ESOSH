@@ -61,8 +61,14 @@ export default function PageContent() {
                     }
                   </p>
                   <p className={"regular-l"}>
-                    <strong>{"Аналітика / маркетинг. "}</strong>
-                    {"Наразі не використовуються; зарезервовано на майбутнє."}
+                    <strong>{"Аналітика. "}</strong>
+                    {"Наразі не використовується; зарезервовано на майбутнє."}
+                  </p>
+                  <p className={"regular-l"}>
+                    <strong>{"Маркетинг. "}</strong>
+                    {
+                      "Сторонній відеоплеєр YouTube на сторінках тренінгів (youtube-nocookie.com). Завантажується лише після вашої згоди."
+                    }
                   </p>
                 </div>
               </div>
@@ -81,6 +87,10 @@ export default function PageContent() {
                   <p className={"is--margin-bottom-12"}>
                     <strong>{"Cookies Binotel"}</strong>
                     {" — лише після згоди «Комунікації»; встановлюються доменом widgets.binotel.com."}
+                  </p>
+                  <p className={"is--margin-bottom-12"}>
+                    <strong>{"Cookies YouTube"}</strong>
+                    {" — лише після згоди «Маркетинг» на сторінках тренінгів; встановлюються доменом youtube-nocookie.com / Google."}
                   </p>
                   <p>
                     <strong>{"esosh_admin_session"}</strong>

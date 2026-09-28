@@ -299,6 +299,46 @@
     },
     "image": null
   },
+  "/en/education/trainings": {
+    "title": "ESOSH — Trainings",
+    "description": "Short video trainings on safety and emergency actions.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/trainings",
+      "en": "/en/education/trainings"
+    },
+    "image": null
+  },
+  "/education/trainings": {
+    "title": "ESOSH — Тренінги",
+    "description": "Короткі відеотренінги з безпеки та дій у надзвичайних ситуаціях.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/trainings",
+      "en": "/en/education/trainings"
+    },
+    "image": null
+  },
+  "/en/education/trainings/uav-attacks": {
+    "title": "ESOSH — Actions during UAV attacks",
+    "description": "Video training on civilian safety actions during UAV attacks, with a knowledge check.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
+  "/education/trainings/uav-attacks": {
+    "title": "ESOSH — Дії під час атак БПЛА",
+    "description": "Відеотренінг про безпечні дії цивільних під час атак безпілотників, з перевіркою знань.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
   "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu": {
     "title": "ESOSH — 26 квітня день пам'яті про чорнобильську катастрофу",
     "description": "Дізнайтесь більше про \"26 квітня день пам'яті про чорнобильську катастрофу\"",
