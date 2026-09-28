@@ -40,6 +40,7 @@ export default async function LocaleLayout({
             contact: messages.contact,
             consent: messages.consent,
             enrollment: messages.enrollment,
+            trainings: messages.trainings,
           }}
         >
           <ConsentProvider>
