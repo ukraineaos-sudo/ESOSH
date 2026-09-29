@@ -339,6 +339,26 @@
     },
     "image": null
   },
+  "/en/education/trainings/risk-assessment": {
+    "title": "ESOSH — Risk assessment. Awareness course",
+    "description": "Three short modules on risk assessment with a knowledge check and certificate.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/education/trainings/risk-assessment": {
+    "title": "ESOSH — Оцінка ризиків. Базовий курс",
+    "description": "Три короткі модулі з оцінки ризиків, тест і сертифікат.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
   "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu": {
     "title": "ESOSH — 26 квітня день пам'яті про чорнобильську катастрофу",
     "description": "Дізнайтесь більше про \"26 квітня день пам'яті про чорнобильську катастрофу\"",

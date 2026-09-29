@@ -1,4 +1,5 @@
 import { SITE } from "@/lib/site";
+import type { AppLocale } from "@/i18n/routing";
 import { deliverBrevoAdminNewApplication } from "./brevo";
 import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "./levels";
 
@@ -13,7 +14,7 @@ export type EnrollmentNotifyEvent =
       organization?: string;
       autoLevel: LevelCode;
       autoLevelLabelUk: string;
-      locale: "uk" | "en";
+      locale: AppLocale;
       adminUrl?: string;
     }
   | {
@@ -25,7 +26,7 @@ export type EnrollmentNotifyEvent =
       status: string;
       approvedLevel?: LevelCode | null;
       message?: string;
-      locale: "uk" | "en";
+      locale: AppLocale;
     };
 
 async function deliverEnrollmentWebhook(

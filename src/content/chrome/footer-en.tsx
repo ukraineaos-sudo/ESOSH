@@ -3,12 +3,16 @@ import { defaultContactSettings } from "@/lib/site-settings";
 import { FooterSocialIcons } from "@/components/FooterSocialIcons";
 import { OpenConsentSettingsButton } from "@/components/consent/OpenConsentSettingsButton";
 
-/** RU: Подвал сайта. EN: Localized site footer. */
+/** RU: Подвал сайта (EN chrome; localePrefix для /de|/es|…). EN: EN chrome footer with locale prefix. */
 export default function FooterContent({
   contacts = defaultContactSettings(),
+  localePrefix = "/en",
 }: {
   contacts?: ContactSettings;
+  /** Prefixed locale root without trailing slash, e.g. `/en` or `/de`. */
+  localePrefix?: string;
 }) {
+  const p = localePrefix || "/en";
   const phone0 = contacts.phones[0] || { display: "", href: "#" };
   const phone1 = contacts.phones[1] || { display: "", href: "#" };
   return (
@@ -16,17 +20,17 @@ export default function FooterContent({
         <div className={"w-layout-blockcontainer container w-container"}>
           <div className={"footer-wrapper is--h-flex-top-space-between"}>
             <div className={"footer-logo-copyright"}>
-              <a href={"/en"} aria-current={"page"} className={"footer-logo-wrapper is--margin-bottom-24 w-inline-block w--current"}>
+              <a href={p} aria-current={"page"} className={"footer-logo-wrapper is--margin-bottom-24 w-inline-block w--current"}>
                 <img src={"/images/home/Logo-White-c13cc8ca.png"} loading={"lazy"} alt={"Esosh"} className={"footer-logo"} width={104} height={40} decoding="async" />
               </a>
               <div className={"medium-xs is--grey-20"}>
                 {"© 2022 ESOSH. All Rights Reserved"}
               </div>
               <div className={"footer-legal-links wrapper is--v-flex-start-start is--rows-gap-12 is--margin-top-16"}>
-                <a href={"/en/privacy-policy"} className={"footer-menu-link"}>
+                <a href={`${p}/privacy-policy`} className={"footer-menu-link"}>
                   {"Privacy"}
                 </a>
-                <a href={"/en/cookie-policy"} className={"footer-menu-link"}>
+                <a href={`${p}/cookie-policy`} className={"footer-menu-link"}>
                   {"Cookies"}
                 </a>
                 <OpenConsentSettingsButton className={"footer-menu-link"}>
@@ -43,19 +47,19 @@ export default function FooterContent({
                   {"Menu"}
                 </div>
                 <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
-                  <a href={"/en"} aria-current={"page"} className={"footer-menu-link w--current"}>
+                  <a href={p} aria-current={"page"} className={"footer-menu-link w--current"}>
                     {"Home"}
                   </a>
-                  <a href={"/en/about-esosh"} className={"footer-menu-link"}>
+                  <a href={`${p}/about-esosh`} className={"footer-menu-link"}>
                     {"About ESOSH"}
                   </a>
-                  <a href={"/en/businesses"} className={"footer-menu-link"}>
+                  <a href={`${p}/businesses`} className={"footer-menu-link"}>
                     {"For Enterprises"}
                   </a>
-                  <a href={"/en/news"} className={"footer-menu-link"}>
+                  <a href={`${p}/news`} className={"footer-menu-link"}>
                     {"News"}
                   </a>
-                  <a href={"/en/contact-us"} className={"footer-menu-link"}>
+                  <a href={`${p}/contact-us`} className={"footer-menu-link"}>
                     {"Contacts"}
                   </a>
                 </div>
@@ -65,13 +69,13 @@ export default function FooterContent({
                   {"Training"}
                 </div>
                 <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
-                  <a href={"/en/education/projects"} className={"footer-menu-link"}>
+                  <a href={`${p}/education/projects`} className={"footer-menu-link"}>
                     {"Projects"}
                   </a>
-                  <a href={"/en/education/courses"} className={"footer-menu-link"}>
+                  <a href={`${p}/education/courses`} className={"footer-menu-link"}>
                     {"Courses"}
                   </a>
-                  <a href={"/en/education/trainings"} className={"footer-menu-link"}>
+                  <a href={`${p}/education/trainings`} className={"footer-menu-link"}>
                     {"Trainings"}
                   </a>
                 </div>
@@ -81,24 +85,24 @@ export default function FooterContent({
                   {"Join"}
                 </div>
                 <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
-                  <a href={"/en/join/apply"} className={"footer-menu-link"}>
+                  <a href={`${p}/join/apply`} className={"footer-menu-link"}>
                     {"Fill out the form"}
                   </a>
-                  <a href={"/en/join/enrollment"} className={"footer-menu-link"}>
+                  <a href={`${p}/join/enrollment`} className={"footer-menu-link"}>
                     {"Participation in ESOSH of enterprises"}
                   </a>
-                  <a href={"/en/join/participation"} className={"footer-menu-link"}>
+                  <a href={`${p}/join/participation`} className={"footer-menu-link"}>
                     {"Joining ESOSH for professionals"}
                   </a>
-                  <a href={"/en/join/codex"} className={"footer-menu-link"}>
+                  <a href={`${p}/join/codex`} className={"footer-menu-link"}>
                     {"Code of conduct"}
                   </a>
-                  <a href={"/en/join/terms"} className={"footer-menu-link"}>
+                  <a href={`${p}/join/terms`} className={"footer-menu-link"}>
                     <strong>
                       {"Activity Statement of ESOSH"}
                     </strong>
                   </a>
-                  <a href={"/en/join/safety-league-best-practices"} className={"footer-menu-link"}>
+                  <a href={`${p}/join/safety-league-best-practices`} className={"footer-menu-link"}>
                     <strong>
                       {"ESOSH groups and good practices"}
                     </strong>

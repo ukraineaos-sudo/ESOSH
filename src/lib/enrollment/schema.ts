@@ -52,7 +52,7 @@ export const enrollmentPayloadSchema = z.object({
   privacyConsent: z.literal(true),
   serviceMessages: z.literal(true),
   marketingConsent: z.boolean().default(false),
-  locale: z.enum(["uk", "en"]).default("uk"),
+  locale: z.enum(["uk", "en", "de", "es", "fr", "az", "kk"]).default("uk"),
   idempotencyKey: z.string().trim().min(8).max(64),
   company: z.string().optional(),
 }).superRefine((data, ctx) => {

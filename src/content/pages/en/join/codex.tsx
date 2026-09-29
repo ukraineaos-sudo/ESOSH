@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -434,9 +435,9 @@ export default function PageContent() {
                     <br />
                     {"If the Governing Board of the ESOSH decides that the participant has violated the Code of Conduct, the Board shall decide to exclude him from the members of the Community within the limits of its powers and in accordance with the applicable legal framework of the country in which the ESOSH operates."}
                   </p>
-                  <a href={"/docs/codex-en.pdf"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
+                  <LocaleDocLink docId="codex" locale="en" className={"btn is--primary w-button"}>
                     {"Download Code"}
-                  </a>
+                  </LocaleDocLink>
                 </div>
               </div>
             </div>

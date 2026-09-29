@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -852,9 +853,9 @@ export default function PageContent() {
                 <p className={"regular-l is--margin-bottom-24"}>
                   {"This Regulation shall enter into force from the date of its approval by the Board of Directors of the Union, shall be binding upon execution by the new members of the Union, and shall be effective until its repeal or the adoption of a new provision governing similar matters, in the manner established by the internal regulatory documents of the Union. Amendments and additions to this Regulation shall enter into force from the date of their approval by the Board of Directors of the Union."}
                 </p>
-                <a href={"/docs/terms-en.pdf"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
+                <LocaleDocLink docId="terms" locale="en" className={"btn is--primary w-button"}>
                   {"Download position"}
-                </a>
+                </LocaleDocLink>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -434,9 +435,9 @@ export default function PageContent() {
                     <br />
                     {"У разі, якщо Правління ЄСОП вирішить, що даний учасник порушив Кодекс поведінки, Правління приймає рішення про виключення його з членів співтовариства у рамках своїх повноважень та згідно чинної нормативно-правової бази країни, де здійснює свою діяльність ЄСОП."}
                   </p>
-                  <a href={"/docs/codex-uk.pdf"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
+                  <LocaleDocLink docId="codex" locale="uk" className={"btn is--primary w-button"}>
                     {"Завантажити кодекс"}
-                  </a>
+                  </LocaleDocLink>
                 </div>
               </div>
             </div>

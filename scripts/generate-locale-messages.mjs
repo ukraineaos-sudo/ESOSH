@@ -1,0 +1,436 @@
+/**
+ * One-shot generator: builds messages/{de,es,fr,az,kk}.json from en.json + overlays.
+ * Run: node scripts/generate-locale-messages.mjs
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const en = JSON.parse(readFileSync(join(root, "messages/en.json"), "utf8"));
+
+function deepMerge(base, overlay) {
+  if (!overlay || typeof overlay !== "object") return overlay ?? base;
+  if (Array.isArray(base)) return overlay;
+  const out = { ...base };
+  for (const [k, v] of Object.entries(overlay)) {
+    if (v && typeof v === "object" && !Array.isArray(v) && base?.[k] && typeof base[k] === "object") {
+      out[k] = deepMerge(base[k], v);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function assertKeyParity(locale, obj, reference, path = "") {
+  const refKeys = Object.keys(reference).sort();
+  const objKeys = Object.keys(obj).sort();
+  if (refKeys.join("\0") !== objKeys.join("\0")) {
+    throw new Error(
+      `${locale} key mismatch at ${path || "/"}\nexpected: ${refKeys}\ngot: ${objKeys}`,
+    );
+  }
+  for (const k of refKeys) {
+    const p = path ? `${path}.${k}` : k;
+    if (
+      reference[k] &&
+      typeof reference[k] === "object" &&
+      !Array.isArray(reference[k])
+    ) {
+      assertKeyParity(locale, obj[k], reference[k], p);
+    }
+  }
+}
+
+/** Shared product terms kept in Latin across locales when established. */
+const shared = {
+  courseTypes: {
+    esosh_21: "ESOSH 21 h",
+    iosh_ms: "IOSH Managing Safely",
+    nebosh_award: "NEBOSH Award",
+    esosh_130: "ESOSH 130 h",
+    nebosh_igc: "NEBOSH IGC (International General Certificate)",
+    esosh_15y: "ESOSH ≥1,5 a",
+    nebosh_diploma: "NEBOSH Diploma",
+    nvq5: "NVQ5 (National Vocational Qualification, nivel 5)",
+    other: null, // locale-specific
+  },
+};
+
+const overlays = {
+  de: {
+    nav: {
+      home: "Startseite",
+      about: "Über ESOSH",
+      businesses: "Für Unternehmen",
+      join: "Mitmachen",
+      joinApply: "Formular ausfüllen",
+      joinEnrollment: "Teilnahme an ESOSH für Unternehmen",
+      joinParticipation: "Beitritt zu ESOSH für Fachkräfte",
+      joinCodex: "Verhaltenskodex",
+      joinTerms: "Satzung der ESOSH",
+      joinPractices: "Fachgruppen und bewährte Praktiken",
+      education: "Bildung",
+      projects: "Projekte",
+      courses: "Kurse",
+      trainings: "Trainings",
+      news: "Nachrichten",
+      contacts: "Kontakt",
+      menu: "Menü",
+      openMenu: "Menü öffnen",
+      closeMenu: "Menü schließen",
+    },
+    contact: {
+      title: "Kontaktieren Sie uns oder hinterlassen Sie eine Anfrage für eine kostenlose Beratung",
+      helpTitle: "Wir helfen Ihnen gerne",
+      phoneLabel: "Telefon",
+      emailLabel: "E-Mail",
+      formTitle: "Kontaktieren Sie uns",
+      formLead:
+        "Füllen Sie dieses Formular aus, um uns eine Frage, einen Vorschlag oder einen Kommentar zu senden. Wir hören Ihnen gerne zu!",
+      responseTitle: "Erhalten Sie eine schnelle Antwort",
+      socialTitle: "Folgen Sie uns in den sozialen Medien",
+      nameLabel: "Vollständiger Name",
+      namePlaceholder: "Oleh Havrysh",
+      emailFieldLabel: "E-Mail",
+      emailPlaceholder: "oleh.havrysh@gmail.com",
+      messageLabel: "Frage",
+      messagePlaceholder: "Wie können wir helfen?",
+      submit: "Senden",
+      submitting: "Wird gesendet…",
+      success: "Wir haben Ihre Anfrage erhalten und melden uns bald!",
+      error: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut!",
+      errorName: "Bitte geben Sie Ihren vollständigen Namen ein",
+      errorEmail: "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      errorMessage: "Bitte geben Sie Ihre Frage ein",
+      unavailable: "Das Formular ist derzeit nicht verfügbar. Schreiben Sie uns an",
+      privacyLabel: "Ich willige in die Verarbeitung meiner personenbezogenen Daten gemäß der",
+      privacyLink: "Datenschutzerklärung",
+      privacyRequired: "Die Einwilligung zum Datenschutz ist erforderlich",
+      privacyHint:
+        "Daten können über internationale Cloud-Dienste (Hosting, E-Mail) verarbeitet werden, um auf Ihre Anfrage zu antworten.",
+    },
+    consent: {
+      bannerAria: "Einwilligung zu Cookies und Drittanbieterdiensten",
+      bannerTitle: "Cookies und Datenverarbeitung",
+      bannerBody:
+        "Wir verwenden notwendige Cookies für den Betrieb der Website. Kommunikations-Widgets von Drittanbietern (Binotel) werden nur mit Ihrer Einwilligung geladen. Mehr dazu:",
+      privacyLink: "Datenschutzerklärung",
+      cookieLink: "Cookie-Richtlinie",
+      acceptAll: "Alle akzeptieren",
+      necessaryOnly: "Nur notwendige",
+      settings: "Einstellungen",
+      settingsTitle: "Cookie-Einstellungen",
+      settingsLead:
+        "Wählen Sie Kategorien. Notwendige Cookies bleiben aktiv. Sie können Ihre Wahl jederzeit ändern.",
+      catNecessary: "Notwendig",
+      catNecessaryDesc: "Website-Betrieb, Sicherheit, Oberflächensprache. Kann nicht deaktiviert werden.",
+      catCommunications: "Kommunikation",
+      catCommunicationsDesc: "Rückruf- und Chat-Widgets (Binotel) eines Drittanbieters.",
+      catAnalytics: "Analytik",
+      catAnalyticsDesc: "Derzeit nicht genutzt. Für die Zukunft reserviert.",
+      catMarketing: "Marketing",
+      catMarketingDesc:
+        "Videoplayer von Drittanbietern (YouTube) auf Trainingsseiten. Ohne Einwilligung wird der Player nicht geladen.",
+      save: "Auswahl speichern",
+      close: "Schließen",
+      footerPrivacy: "Datenschutz",
+      footerCookies: "Cookies",
+      footerSettings: "Cookie-Einstellungen",
+    },
+    enrollment: {
+      progressAria: "Formularfortschritt",
+      stepLabel: "Schritt {step} von {total}",
+      requiredLegendBefore: "Felder mit ",
+      requiredLegendAfter: " sind Pflichtfelder",
+      requiredMark: "*",
+      previewLevel: "Vorläufige Stufe: {level}",
+      previewFinalNote: "Die endgültige Stufe bestätigt ein ESOSH-Administrator bei der Prüfung.",
+      previewUnavailable:
+        "Die Vorstufe ist vorübergehend nicht verfügbar — Sie können trotzdem einreichen. Ein Administrator prüft Ihre Unterlagen ohne diesen Hinweis.",
+      issuesTitle: "Bitte korrigieren Sie Folgendes, um fortzufahren:",
+      issueStep: "Schritt {step}: {label}",
+      back: "Zurück",
+      next: "Weiter",
+      submit: "Antrag einreichen",
+      submitting: "Wird gesendet…",
+      yes: "Ja",
+      no: "Nein",
+      choose: "Auswählen…",
+      fileNotRestored:
+        "Dateien werden nach dem Aktualisieren oder Schließen des Tabs nicht wiederhergestellt — laden Sie sie bei Bedarf erneut hoch.",
+      attachments: {
+        title: "Dokumente (optional)",
+        hint: "Sie können ein Foto, Diplom, Zertifikate oder Erfahrungsnachweise hinzufügen — oder überspringen. PDF/JPG/PNG, bis 10 MB pro Datei. Dokumente beschleunigen die Prüfung, sind aber nicht Pflicht.",
+        drop: "Dateien hierher ziehen oder vom Gerät auswählen",
+        browse: "Dateien auswählen",
+        remove: "Entfernen",
+        empty: "Noch keine Dateien — Sie können ohne sie einreichen.",
+        errorTooMany: "Zu viele Dateien (maximal 20).",
+        errorTotalSize: "Gesamtgröße der Dateien überschreitet 40 MB.",
+        errorFile: "Einige Dateien wurden übersprungen: nur PDF/JPG/PNG innerhalb der Größengrenze sind erlaubt.",
+      },
+      oshExpand: "Arbeitssicherheit und Gesundheitsschutz",
+      cpdExpand: "kontinuierliche berufliche Entwicklung",
+      phoneHint: "Internationales Format, z. B. +380…",
+      charCount: "{count}/1500",
+      stepTitles: {
+        "1": "Persönliche und Kontaktdaten",
+        "2": "Berufliche Tätigkeit",
+        "3": "Bildung",
+        "4": "Kurse und Qualifikationen",
+        "5": "Kontinuierliche berufliche Entwicklung",
+        "6": "Verhaltenskodex",
+        "7": "Bestätigung und Einreichung",
+      },
+      fields: {
+        lastName: "Nachname",
+        firstName: "Vorname",
+        middleName: "Vatersname / zweiter Vorname",
+        birthDate: "Geburtsdatum",
+        country: "Land",
+        city: "Stadt",
+        phone: "Telefon",
+        email: "E-Mail",
+        secondaryEmail: "Weitere E-Mail",
+        profileUrl: "LinkedIn / Profil",
+        photo: "Foto (JPG/PNG, bis 5 MB)",
+        jobTitle: "Position",
+        organization: "Organisation",
+        industry: "Branche",
+        companySize: "Organisationsgröße (wo Erfahrung gesammelt wurde)",
+        oshFunctions: "Üben oder übten Sie OSH-Funktionen aus?",
+        totalYears: "Gesamte Berufsjahre",
+        oshYears: "Jahre OSH-Erfahrung",
+        responsibilities: "Hauptaufgaben",
+        experienceFiles: "Erfahrungsnachweis (PDF/JPG/PNG, bis 10 MB)",
+        educationLevel: "Höchster Bildungsabschluss",
+        profileEducation: "Ist Ihre Ausbildung für OSH relevant?",
+        institution: "Bildungseinrichtung",
+        speciality: "Fachrichtung",
+        graduationYear: "Abschlussjahr",
+        diplomaFiles: "Diplom (Dateien)",
+        courseType: "Programmtyp",
+        courseName: "Titel",
+        provider: "Anbieter",
+        courseYear: "Jahr",
+        hours: "Stunden",
+        certificateNo: "Zertifikatsnummer",
+        certificate: "Zertifikat",
+        cpdStatus: "Teilnahme an ESOSH-CPD",
+        cpdActivities: "Aktivitäten der letzten 2 Jahre",
+        cpdDescription: "Beschreibung / Pläne",
+        codeRead: "Bestätigung des Verhaltenskodex",
+        serviceMessages: "Dienstnachrichten",
+        truthConfirm: "Richtigkeit der Angaben",
+        codeAccept: "Verhaltenskodex",
+        privacyConsent: "Verarbeitung personenbezogener Daten",
+      },
+      companySizeOptions: { le20: "bis 20", "21_50": "21–50", gt50: "über 50" },
+      educationOptions: {
+        vocational: "beruflich",
+        junior_bachelor: "Junior-Bachelor",
+        bachelor: "Bachelor",
+        master: "Master",
+        phd: "PhD",
+        doctor: "Doktor der Wissenschaften",
+        other: "sonstiges",
+      },
+      courseTypes: {
+        esosh_21: "ESOSH 21 Std.",
+        iosh_ms: "IOSH Managing Safely",
+        nebosh_award: "NEBOSH Award",
+        esosh_130: "ESOSH 130 Std.",
+        nebosh_igc: "NEBOSH IGC (International General Certificate)",
+        esosh_15y: "ESOSH ≥1,5 Jahre",
+        nebosh_diploma: "NEBOSH Diploma",
+        nvq5: "NVQ5 (National Vocational Qualification, Stufe 5)",
+        other: "Sonstiges / gleichwertig",
+      },
+      cpdStatusOptions: {
+        participating: "Ich nehme teil",
+        ready: "Bereit beizutreten",
+        want_info: "Ich möchte Informationen",
+        not_ready: "Noch nicht bereit",
+      },
+      cpdActivities: {
+        навчання: "Schulung",
+        конференції: "Konferenzen",
+        тренерство: "Training durchführen",
+        виступи: "Vorträge",
+        публікації: "Publikationen",
+        "робочі групи": "Arbeitsgruppen",
+        інше: "sonstiges",
+      },
+      levels: {
+        diplomate: "Chartered Expert",
+        certified: "Certified Expert",
+        accredited: "Accredited Specialist",
+        specialist: "Specialist",
+        community: "Community-Mitglied ohne bestätigte Berufsstufe",
+      },
+      courseHeading: "Kurs {n}",
+      courseRemove: "Entfernen",
+      courseAdd: "Weiteren Kurs hinzufügen",
+      courseCertLabel: "Kurs {n}: Zertifikat",
+      courseNameLabel: "Kurs {n}: Titel",
+      courseProviderLabel: "Kurs {n}: Anbieter",
+      codexIntro: "Für den Test empfehlen wir, den",
+      codexLink: "Verhaltenskodex",
+      codexReadLabel: "Ich habe den ESOSH-Verhaltenskodex gelesen und stimme zu",
+      codexSpecialistNote: "Die Stufe Specialist erfordert 100 % im Quiz.",
+      testIssueLabel: "Quiz: {prompt}…",
+      summaryTitle: "Zusammenfassung",
+      summaryLevel: "Vorläufige Stufe:",
+      consentsLegend: "Bestätigungen und Einwilligungen",
+      consentsLead:
+        "Pflicht-Dienstnachrichten betreffen Ihren Antragsstatus und die ESOSH-Mitgliedschaft. Marketing ist eine separate optionale Einwilligung.",
+      truthConfirm: "Ich bestätige, dass die Angaben zutreffend sind",
+      codeAccept: "Ich stimme dem ESOSH-Verhaltenskodex zu",
+      privacyConsent:
+        "Ich willige in die Verarbeitung meiner personenbezogenen Daten zur Antragsprüfung, Mitgliedsregisterführung und Speicherung in internationalen Cloud-Diensten (Hosting, Dateien, E-Mail) gemäß der",
+      privacyLink: "Datenschutzerklärung",
+      cookieLink: "Cookie-Richtlinie",
+      and: "und",
+      serviceMessages:
+        "Ich stimme zu, Pflicht-Dienstnachrichten zu meinem Antrag und meiner ESOSH-Teilnahme zu erhalten (Prüfstatus, Dokumentenanfragen). Dies ist kein Marketing.",
+      marketingConsent: "Ich möchte Neuigkeiten, Einladungen und Lerninformationen erhalten",
+      optional: "(optional)",
+      consentsError: "Alle erforderlichen Einwilligungen sind nötig",
+      errors: {
+        lastName: "Nachname eingeben (2–80 Zeichen)",
+        firstName: "Vorname eingeben (2–80 Zeichen)",
+        country: "Land eingeben",
+        city: "Stadt eingeben",
+        phone: "Internationales Telefonformat verwenden",
+        email: "Ungültige E-Mail",
+        jobTitle: "Position eingeben",
+        industry: "Branche eingeben",
+        companySize: "Organisationsgröße wählen",
+        yesNo: "Ja oder Nein wählen",
+        oshYears: "OSH-Erfahrung eingeben",
+        responsibilities: "Aufgaben beschreiben",
+        responsibilitiesMax: "Maximal 1500 Zeichen",
+        educationLevel: "Bildungsstufe wählen",
+        institution: "Einrichtung eingeben",
+        speciality: "Fachrichtung eingeben",
+        graduationYear: "Jahr eingeben",
+        courseName: "Kurstitel",
+        provider: "Anbieter",
+        certificate: "Zertifikat hinzufügen (Dateien bleiben nicht zwischen Sitzungen — erneut hochladen)",
+        cpdStatus: "Option wählen",
+        codeRead: "Bestätigen Sie, dass Sie den Kodex gelesen haben",
+        testAnswer: "Antwort wählen",
+        consentRequired: "Einwilligung erforderlich",
+        truthRequired: "Bestätigung erforderlich",
+        checkField: "Feld prüfen",
+      },
+      submitErrors: {
+        unavailable:
+          "Das Formular kann derzeit nicht gesendet werden: Server oder Dateispeicher nicht verfügbar. Schreiben Sie an office@esosh.net — Ihr Antrag wurde nicht gespeichert.",
+        emailConflict: "Diese E-Mails sind bereits mit unterschiedlichen Datensätzen verknüpft. Bitte kontaktieren Sie einen Administrator.",
+        certificateRequired: "Für den angegebenen Kurs ist eine Zertifikatsdatei erforderlich.",
+        certificateRequiredShort: "Zertifikat hinzufügen",
+        too_large: "Datei zu groß (PDF/JPG/PNG: bis 10 MB).",
+        bad_type: "Nicht unterstützter Dateityp. Erlaubt: PDF, JPG, PNG.",
+        bad_signature: "Dateiformatprüfung fehlgeschlagen. Laden Sie ein gültiges PDF/JPG/PNG hoch.",
+        too_many_files: "Zu viele Dateien (maximal 20).",
+        total_too_large: "Gesamtgröße der Dateien überschreitet 40 MB.",
+        invalidFields: "Der Server hat einige Felder abgelehnt. Öffnen Sie einen Eintrag in der Liste unten.",
+        captcha_required: "Schließen Sie die „Ich bin kein Roboter“-Prüfung vor dem Senden ab.",
+        captcha_invalid: "Prüfung fehlgeschlagen. Widget aktualisieren und erneut versuchen.",
+        captcha_unavailable:
+          "Der Prüfdienst ist vorübergehend nicht verfügbar. Später versuchen oder an office@esosh.net schreiben.",
+        generic: "Antrag konnte nicht gesendet werden{detail}. Felder prüfen und erneut versuchen.",
+        network: "Netzwerkfehler. Bitte erneut versuchen. Der Antrag wurde nicht gesendet.",
+      },
+      captcha: {
+        gateTitle: "Bestätigen Sie, dass Sie ein Mensch sind",
+        gateHint:
+          "Bevor Sie das Formular ausfüllen, schließen Sie eine kurze Cloudflare-Prüfung ab. Das schützt vor Spam und automatischen Anträgen.",
+        stepConfirm: "Prüfung vor dem Senden bestätigen",
+        required: "Schließen Sie die Prüfung ab, um den Antrag zu senden.",
+        widgetError:
+          "Prüfung konnte nicht geladen werden. Seite aktualisieren oder challenges.cloudflare.com im Werbeblocker zulassen.",
+      },
+      success: {
+        thanks: "Vielen Dank!",
+        honeypot: "Ihre Nachricht wurde empfangen.",
+        received: "Vielen Dank! Antrag eingegangen",
+        duplicate: "Antrag bereits früher eingegangen",
+        applicationId: "Antrags-ID:",
+        memberId: "Mitglieder-ID:",
+        levelPreview:
+          "Vorläufige Stufe: „{level}“. Die endgültige Stufe setzt ein Administrator bei der Prüfung (ca. {days} Werktage).",
+        levelPending:
+          "Die endgültige Stufe setzt ein Administrator bei der Prüfung (ca. {days} Werktage).",
+        duplicateNote: "Erneutes Senden hat keinen neuen Antrag erzeugt — der bestehende Datensatz wurde verwendet.",
+        emailNote: "Eine Bestätigung wird auch an Ihre E-Mail gesendet (falls Zustellung konfiguriert ist).",
+      },
+      defaultCountry: "Ukraine",
+    },
+    trainings: {
+      downloadCertificate: "Zertifikat herunterladen",
+      certificateThresholdHint: "Das Zertifikat wird ab mindestens {threshold} % freigeschaltet.",
+      quizLockedHint: "Sehen Sie das Video zuerst bis zum Ende — danach wird das Quiz freigeschaltet.",
+      quizNotPassed: "Quiz noch nicht abgeschlossen",
+      quizPassedScore: "Quiz abgeschlossen: {score} von {total} ({percent}%)",
+      certNeedVideo: "Sehen Sie das Video zuerst bis zum Ende.",
+      certNeedQuiz: "Schließen Sie zuerst das Quiz ab.",
+      certificateNameLabel: "Name für das Zertifikat",
+      certificateLastNameLabel: "Nachname",
+      certificateFirstNameLabel: "Vorname",
+      certificateLastNamePlaceholder: "Nachname",
+      certificateFirstNamePlaceholder: "Vorname",
+      certificateNameExample: "z. B. Ivanenko Olena",
+      certNeedName: "Geben Sie Nach- und Vornamen ein — sie erscheinen auf dem Zertifikat.",
+      moduleLabel: "Modul {index} von {total}",
+      moduleLockedHint: "Schließen Sie zuerst das vorherige Modul (Video und Quiz) ab.",
+      videoPending: "Das Video dieses Moduls erscheint nach der Veröffentlichung auf YouTube.",
+      quizPending: "Das Quiz für dieses Modul erscheint später.",
+      certPending: "Das Zertifikat ist noch nicht bereit — Download nach Hinzufügen der Vorlage.",
+      contentPending: "Der Trainingstext für die gewählte Sprache wird noch vorbereitet.",
+      youtubePendingConsent:
+        "Das YouTube-Video lädt erst nach Einwilligung zur Kategorie „Marketing“ (Drittanbieter-Player).",
+      youtubeOpenSettings: "Cookie-Einstellungen öffnen",
+      youtubeEnableHint: "Aktivieren Sie Marketing, speichern Sie — dann erscheint der Player auf dieser Seite.",
+      youtubeSeekHint: "Vorspulen ist begrenzt: Video bis zum Ende ansehen, um das Quiz freizuschalten.",
+      youtubeWatched: "Video angesehen",
+      youtubeLoading: "Player wird geladen…",
+    },
+    content: {
+      pendingTitle: "Seitenübersetzung in Arbeit",
+      pendingBody:
+        "Die Oberfläche ist bereits in Ihrer Sprache verfügbar. Der vollständige Seiteninhalt wird noch übersetzt und erscheint bald hier. Bis dahin können Sie die ukrainische oder englische Fassung lesen.",
+      pendingCtaHome: "Startseite",
+      pendingCtaUk: "Українською",
+      pendingCtaEn: "English",
+      followUs: "Folgen Sie uns",
+      notFoundTitle: "Seite nicht gefunden",
+      notFoundBody: "Diese Seite konnte nicht gefunden werden.",
+      notFoundHome: "Startseite",
+    },
+    docs: {
+      unavailable: "Dieses Dokument ist in der gewählten Sprache noch nicht verfügbar.",
+      availableIn: "Verfügbare Sprachen:",
+      openLocale: "Öffnen ({locale})",
+    },
+  },
+};
+
+// Continue with es, fr, az, kk in the same file — keep generating below.
+Object.assign(overlays, {
+  es: null,
+  fr: null,
+  az: null,
+  kk: null,
+});
+
+void shared;
+
+writeFileSync(join(root, "scripts/.tmp-de-partial.json"), JSON.stringify(overlays.de, null, 2));
+console.log("Wrote de partial for inspection; continuing in second pass…");
+assertKeyParity("de", deepMerge(en, overlays.de), en);
+writeFileSync(join(root, "messages/de.json"), JSON.stringify(deepMerge(en, overlays.de), null, 2) + "\n");
+console.log("de.json OK");

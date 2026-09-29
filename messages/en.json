@@ -304,6 +304,41 @@
     "quizNotPassed": "Quiz not completed yet",
     "quizPassedScore": "Quiz completed: {score} of {total} ({percent}%)",
     "certNeedVideo": "Watch the video to the end first.",
-    "certNeedQuiz": "Complete the quiz first."
+    "certNeedQuiz": "Complete the quiz first.",
+    "certificateNameLabel": "Name for the certificate",
+    "certificateLastNameLabel": "Last name",
+    "certificateFirstNameLabel": "First name",
+    "certificateLastNamePlaceholder": "Last name",
+    "certificateFirstNamePlaceholder": "First name",
+    "certificateNameExample": "e.g. Ivanenko Olena",
+    "certNeedName": "Enter your last and first name — they will appear on the certificate.",
+    "moduleLabel": "Module {index} of {total}",
+    "moduleLockedHint": "Finish the previous module (video and quiz) first.",
+    "videoPending": "This module’s video will appear after it is published on YouTube.",
+    "quizPending": "The quiz for this module will appear later.",
+    "certPending": "The certificate is not ready yet — download will unlock once the template is added.",
+    "contentPending": "Training copy for the selected language is still being prepared.",
+    "youtubePendingConsent": "The YouTube video loads only after you consent to the Marketing category (third-party player).",
+    "youtubeOpenSettings": "Open cookie settings",
+    "youtubeEnableHint": "Enable Marketing, save your choice, and the player will appear on this page.",
+    "youtubeSeekHint": "Forward seeking is limited: watch the video to the end to unlock the quiz.",
+    "youtubeWatched": "Video watched",
+    "youtubeLoading": "Loading player…"
+  },
+  "content": {
+    "pendingTitle": "Page translation in progress",
+    "pendingBody": "The interface is already available in your language. The full page body is still being translated and will appear here soon. You can read the Ukrainian or English version in the meantime.",
+    "pendingCtaHome": "Home",
+    "pendingCtaUk": "Українською",
+    "pendingCtaEn": "English",
+    "followUs": "Follow us",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page could not be found.",
+    "notFoundHome": "Home"
+  },
+  "docs": {
+    "unavailable": "This document is not available in the selected language yet.",
+    "availableIn": "Available languages:",
+    "openLocale": "Open ({locale})"
   }
 }

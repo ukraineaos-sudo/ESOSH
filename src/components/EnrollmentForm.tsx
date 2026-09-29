@@ -24,6 +24,7 @@ import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "@/lib/enr
 import { CODEX_QUESTIONS_PUBLIC } from "@/lib/enrollment/quiz";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { EnrollmentAttachmentsDropzone } from "@/components/EnrollmentAttachmentsDropzone";
+import { isAppLocale } from "@/lib/locale";
 
 type FormIssue = {
   fieldId: string;
@@ -208,7 +209,10 @@ export function EnrollmentForm({
   turnstileSiteKey,
 }: EnrollmentFormProps = {}) {
   const t = useTranslations("enrollment");
-  const locale = useLocale() === "en" ? "en" : "uk";
+  const rawLocale = useLocale();
+  const locale = isAppLocale(rawLocale) ? rawLocale : "uk";
+  /** Codex quiz prompts exist only in uk/en — use en for other UI locales (explicit, not silent body swap). */
+  const quizLocale = locale === "uk" ? "uk" : "en";
   const defaultCountry = t("defaultCountry");
   const stored = useState(() => readStoredDraft(defaultCountry))[0];
   const [step, setStep] = useState(stored.step);
@@ -248,11 +252,11 @@ export function EnrollmentForm({
   }
 
   function quizPrompt(q: (typeof CODEX_QUESTIONS_PUBLIC)[number]): string {
-    return locale === "en" ? q.promptEn : q.promptUk;
+    return quizLocale === "en" ? q.promptEn : q.promptUk;
   }
 
   function quizOptionLabel(opt: { labelUk: string; labelEn: string }): string {
-    return locale === "en" ? opt.labelEn : opt.labelUk;
+    return quizLocale === "en" ? opt.labelEn : opt.labelUk;
   }
 
   useEffect(() => {

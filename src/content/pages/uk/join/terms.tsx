@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -852,9 +853,9 @@ export default function PageContent() {
                 <p className={"regular-l is--margin-bottom-24"}>
                   {"Це Положення набирає чинності з дати його затвердження Правлінням Спілки, є обов’язковим до виконання новими членами Спілки, та діє до моменту його скасування або прийняття нового положення, яке регулює аналогічні питання, в порядку, встановленому внутрішніми нормативними документами Спілки. Зміни та доповнення до цього Положення набирають чинності з дня їх затвердження Правлінням Спілки."}
                 </p>
-                <a href={"/docs/terms-uk.pdf"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
+                <LocaleDocLink docId="terms" locale="uk" className={"btn is--primary w-button"}>
                   {"Завантажити положення"}
-                </a>
+                </LocaleDocLink>
               </div>
             </div>
           </div>

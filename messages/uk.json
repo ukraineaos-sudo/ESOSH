@@ -304,6 +304,41 @@
     "quizNotPassed": "Тест ще не пройдено",
     "quizPassedScore": "Тест пройдено на {score} з {total} ({percent}%)",
     "certNeedVideo": "Спочатку перегляньте відео до кінця.",
-    "certNeedQuiz": "Спочатку пройдіть тест."
+    "certNeedQuiz": "Спочатку пройдіть тест.",
+    "certificateNameLabel": "ПІБ для сертифіката",
+    "certificateLastNameLabel": "Прізвище",
+    "certificateFirstNameLabel": "Ім’я",
+    "certificateLastNamePlaceholder": "Прізвище",
+    "certificateFirstNamePlaceholder": "Ім’я",
+    "certificateNameExample": "напр. Іваненко Олена",
+    "certNeedName": "Вкажіть прізвище та ім’я — так вони з’являться в сертифікаті.",
+    "moduleLabel": "Модуль {index} з {total}",
+    "moduleLockedHint": "Спочатку завершіть попередній модуль (відео та тест).",
+    "videoPending": "Відео цього модуля з’явиться після публікації на YouTube.",
+    "quizPending": "Тест для цього модуля з’явиться пізніше.",
+    "certPending": "Сертифікат ще готується — завантаження буде доступне після додавання бланка.",
+    "contentPending": "Текст цього тренінгу для обраної мови ще готується.",
+    "youtubePendingConsent": "Відео з YouTube завантажується лише після згоди на категорію «Маркетинг» (сторонній плеєр).",
+    "youtubeOpenSettings": "Відкрити налаштування cookies",
+    "youtubeEnableHint": "Увімкніть «Маркетинг», збережіть вибір — і плеєр з’явиться на цій сторінці.",
+    "youtubeSeekHint": "Перемотка вперед обмежена: перегляньте відео до кінця, щоб відкрити тест.",
+    "youtubeWatched": "Відео переглянуте",
+    "youtubeLoading": "Завантаження плеєра…"
+  },
+  "content": {
+    "pendingTitle": "Переклад сторінки готується",
+    "pendingBody": "Інтерфейс уже доступний обраною мовою. Повний текст цієї сторінки ще перекладається — незабаром з’явиться тут. Можна переглянути версії українською або англійською.",
+    "pendingCtaHome": "На головну",
+    "pendingCtaUk": "Українською",
+    "pendingCtaEn": "English",
+    "followUs": "Слідкуйте за нами",
+    "notFoundTitle": "Сторінку не знайдено",
+    "notFoundBody": "Цю сторінку не знайдено.",
+    "notFoundHome": "На головну"
+  },
+  "docs": {
+    "unavailable": "Документ цією мовою ще недоступний.",
+    "availableIn": "Доступні мови:",
+    "openLocale": "Відкрити ({locale})"
   }
 }

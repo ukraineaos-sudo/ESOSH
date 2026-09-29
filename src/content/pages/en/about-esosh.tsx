@@ -2,6 +2,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LeadershipSection } from "@/components/cms/LeadershipSection";
+import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -308,9 +309,9 @@ export default function PageContent() {
                       </p>
                     </div>
                   </div>
-                  <a href={"/docs/offer-en.pdf"} className={"btn is--primary w-button"} target={"_blank"} rel="noopener noreferrer">
+                  <LocaleDocLink docId="offer" locale="en" className={"btn is--primary w-button"}>
                     {"The Public Offer Agreement"}
-                  </a>
+                  </LocaleDocLink>
                 </div>
               </div>
             </div>

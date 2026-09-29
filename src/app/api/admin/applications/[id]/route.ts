@@ -17,6 +17,7 @@ import {
 } from "@/lib/enrollment/levels";
 import { deleteEnrollmentBlobs } from "@/lib/enrollment/files";
 import { deliverEnrollmentNotify } from "@/lib/enrollment/notify";
+import type { AppLocale } from "@/i18n/routing";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -192,7 +193,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
       status: updated.status,
       approvedLevel: (updated.approvedLevel as LevelCode | null) || null,
       message: body.candidateMessage || undefined,
-      locale: (updated.locale as "uk" | "en") || "uk",
+      locale: (updated.locale as AppLocale) || "uk",
     });
   }
 

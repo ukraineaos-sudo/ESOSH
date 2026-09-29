@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { hasConsent } from "@/lib/consent";
 import { useConsent } from "@/components/consent/ConsentProvider";
 import type { LocaleCode } from "@/content/trainings/types";
@@ -16,29 +17,6 @@ type Props = {
 
 const SEEK_TOLERANCE_SEC = 1.4;
 const POLL_MS = 400;
-
-const copy = {
-  uk: {
-    pending:
-      "Відео з YouTube завантажується лише після згоди на категорію «Маркетинг» (сторонній плеєр).",
-    openSettings: "Відкрити налаштування cookies",
-    enableHint: "Увімкніть «Маркетинг», збережіть вибір — і плеєр з’явиться на цій сторінці.",
-    seekHint: "Перемотка вперед обмежена: перегляньте відео до кінця, щоб відкрити тест.",
-    watched: "Відео переглянуте",
-    notWatched: "Відео переглянуте",
-    loadingPlayer: "Завантаження плеєра…",
-  },
-  en: {
-    pending:
-      "The YouTube video loads only after you consent to the Marketing category (third-party player).",
-    openSettings: "Open cookie settings",
-    enableHint: "Enable Marketing, save your choice, and the player will appear on this page.",
-    seekHint: "Forward seeking is limited: watch the video to the end to unlock the quiz.",
-    watched: "Video watched",
-    notWatched: "Video watched",
-    loadingPlayer: "Loading player…",
-  },
-} as const;
 
 type YtPlayer = {
   destroy: () => void;
@@ -145,7 +123,8 @@ export function YoutubeConsentEmbed({
 }: Props) {
   const { ready, consent, openSettings } = useConsent();
   const allowed = ready && hasConsent(consent, "marketing");
-  const t = copy[locale];
+  const t = useTranslations("trainings");
+  void locale;
   const hostId = useId().replace(/:/g, "");
   const playerHostId = `yt-host-${hostId}`;
 
@@ -279,7 +258,7 @@ export function YoutubeConsentEmbed({
     return (
       <div className="training-video training-video--pending" aria-busy="true">
         <div className="training-video__placeholder">
-          <p className="regular-l">{t.pending}</p>
+          <p className="regular-l">{t("youtubePendingConsent")}</p>
         </div>
       </div>
     );
@@ -289,13 +268,13 @@ export function YoutubeConsentEmbed({
     return (
       <div className="training-video training-video--pending">
         <div className="training-video__placeholder">
-          <p className="regular-l is--margin-bottom-16">{t.pending}</p>
-          <p className="regular-s is--margin-bottom-24">{t.enableHint}</p>
+          <p className="regular-l is--margin-bottom-16">{t("youtubePendingConsent")}</p>
+          <p className="regular-s is--margin-bottom-24">{t("youtubeEnableHint")}</p>
           <button type="button" className="btn is--primary w-button" onClick={openSettings}>
-            {t.openSettings}
+            {t("youtubeOpenSettings")}
           </button>
         </div>
-        <TrainingStatusMark done={false} label={t.notWatched} />
+        <TrainingStatusMark done={false} label={t("youtubeWatched")} />
       </div>
     );
   }
@@ -306,12 +285,12 @@ export function YoutubeConsentEmbed({
         <div id={playerHostId} className="training-video__player-host" />
         {!playerReady ? (
           <div className="training-video__loading" aria-live="polite">
-            {t.loadingPlayer}
+            {t("youtubeLoading")}
           </div>
         ) : null}
       </div>
-      <p className="training-video__seek-hint regular-s">{t.seekHint}</p>
-      <TrainingStatusMark done={completed} label={t.watched} />
+      <p className="training-video__seek-hint regular-s">{t("youtubeSeekHint")}</p>
+      <TrainingStatusMark done={completed} label={t("youtubeWatched")} />
     </div>
   );
 }

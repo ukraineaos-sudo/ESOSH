@@ -3,6 +3,7 @@
 import { useLocale } from "next-intl";
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
 import { SITE } from "@/lib/site";
+import { localizedPath } from "@/lib/locale";
 
 type Props = {
   subject?: string;
@@ -10,10 +11,10 @@ type Props = {
   children: ReactNode;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">;
 
-/** RU: mailto с запасным переходом на контакты, если почтовый клиент не открылся. EN: mailto with contact-page fallback when no mail client handles it. */
+/** RU: mailto с запасным переходом на контакты. EN: mailto with contact-page fallback. */
 export function MailtoActionLink({ subject, body, children, className, onClick, ...rest }: Props) {
   const locale = useLocale();
-  const contactPath = locale === "en" ? "/en/contact-us" : "/contact-us";
+  const contactPath = localizedPath(locale, "/contact-us");
   const params = new URLSearchParams();
   if (subject) params.set("subject", subject);
   if (body) params.set("body", body);
@@ -30,5 +31,9 @@ export function MailtoActionLink({ subject, body, children, className, onClick, 
     }, 800);
   }
 
-  return <a href={href} className={className} onClick={handleClick} {...rest}>{children}</a>;
+  return (
+    <a href={href} className={className} onClick={handleClick} {...rest}>
+      {children}
+    </a>
+  );
 }

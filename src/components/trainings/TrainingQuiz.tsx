@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type {
   LocaleCode,
   QuizOptionId,
   QuizQuestion,
   TrainingQuizUi,
 } from "@/content/trainings/types";
+import { pickLocalized, pickQuizText, QUIZ_OPTION_IDS } from "@/content/trainings/types";
 
-const OPTION_IDS: QuizOptionId[] = ["A", "B", "C"];
 const DEFAULT_PASS_THRESHOLD = 80;
+const DEFAULT_OPTION_PREFIX: Record<QuizOptionId, string> = {
+  A: "A",
+  B: "B",
+  C: "C",
+  D: "D",
+  E: "E",
+};
 
 export type TrainingQuizResult = {
   score: number;
@@ -29,7 +37,11 @@ type Props = {
 
 type Answers = Record<number, QuizOptionId | undefined>;
 
-/** RU: Клієнтський квіз A/B/C; блокується до перегляду відео. EN: Client quiz; locked until video done. */
+function optionIdsForQuestion(q: QuizQuestion): QuizOptionId[] {
+  return QUIZ_OPTION_IDS.filter((id) => q.options[id] != null);
+}
+
+/** RU: Квіз 3–5 варіантів; блокується до перегляду відео. EN: Quiz with 3–5 options; locked until video done. */
 export function TrainingQuiz({
   locale,
   questions,
@@ -38,9 +50,13 @@ export function TrainingQuiz({
   passThresholdPercent = DEFAULT_PASS_THRESHOLD,
   onResultChange,
 }: Props) {
+  const t = useTranslations("trainings");
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
   const [showIncomplete, setShowIncomplete] = useState(false);
+  const optionPrefix = { ...DEFAULT_OPTION_PREFIX, ...ui.optionPrefix };
+  const onResultChangeRef = useRef(onResultChange);
+  onResultChangeRef.current = onResultChange;
 
   const results = useMemo(() => {
     if (!submitted) return null;
@@ -57,19 +73,19 @@ export function TrainingQuiz({
   }, [answers, questions, submitted]);
 
   useEffect(() => {
-    if (!onResultChange) return;
+    const cb = onResultChangeRef.current;
+    if (!cb) return;
     if (!results) {
-      onResultChange(null);
+      cb(null);
       return;
     }
-    onResultChange({
+    cb({
       score: results.score,
       total: results.total,
       scorePercent: results.scorePercent,
     });
-  }, [results, onResultChange]);
+  }, [results]);
 
-  // Keep threshold referenced for future UI hints without unused lint
   void passThresholdPercent;
 
   function onSelect(questionId: number, option: QuizOptionId) {
@@ -96,11 +112,22 @@ export function TrainingQuiz({
     setShowIncomplete(false);
   }
 
-  const scoreText = results
-    ? ui.scoreLabel[locale]
-        .replace("{score}", String(results.score))
-        .replace("{total}", String(results.total))
-    : null;
+  const scoreTemplate = pickLocalized(ui.scoreLabel, locale);
+  const scoreText =
+    results && scoreTemplate
+      ? scoreTemplate
+          .replace("{score}", String(results.score))
+          .replace("{total}", String(results.total))
+      : null;
+
+  const title = pickLocalized(ui.title, locale);
+  if (!title) {
+    return (
+      <p className="training-module__video-pending regular-s" role="status">
+        {t("contentPending")}
+      </p>
+    );
+  }
 
   return (
     <section
@@ -109,7 +136,7 @@ export function TrainingQuiz({
       aria-disabled={locked}
     >
       <h2 id="training-quiz-title" className="h2 is--margin-bottom-24">
-        {ui.title[locale]}
+        {title}
       </h2>
 
       <ol className="training-quiz__list">
@@ -122,89 +149,77 @@ export function TrainingQuiz({
               : submitted && isCorrect === false
                 ? " is-wrong"
                 : "";
-
+          const questionText = pickQuizText(q.question, locale);
+          const optionIds = optionIdsForQuestion(q);
           return (
             <li key={q.id} className={`training-quiz__item${statusClass}`}>
-              <fieldset className="training-quiz__fieldset" disabled={locked || submitted}>
-                <legend className="training-quiz__question">
-                  <span className="training-quiz__number">{q.id}.</span>{" "}
-                  {q.question[locale]}
-                </legend>
-                <div className="training-quiz__options" role="presentation">
-                  {OPTION_IDS.map((optionId) => {
-                    const inputId = `quiz-q${q.id}-${optionId}`;
-                    const optionIsCorrect = q.correct === optionId;
-                    const optionIsSelected = selected === optionId;
-                    let optionClass = "training-quiz__option";
-                    if (submitted) {
-                      if (optionIsCorrect) optionClass += " is-key";
-                      if (optionIsSelected && !optionIsCorrect) optionClass += " is-picked-wrong";
-                    }
-                    return (
-                      <label key={optionId} className={optionClass} htmlFor={inputId}>
-                        <input
-                          id={inputId}
-                          type="radio"
-                          name={`quiz-q${q.id}`}
-                          value={optionId}
-                          checked={optionIsSelected}
-                          disabled={locked || submitted}
-                          onChange={() => onSelect(q.id, optionId)}
-                        />
-                        <span className="training-quiz__option-letter">
-                          {ui.optionPrefix[optionId]})
-                        </span>
-                        <span className="training-quiz__option-text">
-                          {q.options[optionId][locale]}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-                {submitted ? (
-                  <p
-                    className={`training-quiz__feedback${isCorrect ? " is-correct" : " is-wrong"}`}
-                    role="status"
-                  >
-                    {isCorrect ? ui.correctLabel[locale] : ui.wrongLabel[locale]}
-                  </p>
-                ) : null}
-              </fieldset>
+              <p className="training-quiz__question regular-m">{questionText}</p>
+              <div className="training-quiz__options" role="radiogroup" aria-label={questionText}>
+                {optionIds.map((optionId) => {
+                  const optionMap = q.options[optionId];
+                  if (!optionMap) return null;
+                  const optionText = pickQuizText(optionMap, locale);
+                  const id = `q${q.id}-${optionId}`;
+                  const pickedWrong =
+                    submitted && selected === optionId && optionId !== q.correct;
+                  const isKey = submitted && optionId === q.correct;
+                  return (
+                    <label
+                      key={optionId}
+                      className={`training-quiz__option${isKey ? " is-key" : ""}${
+                        pickedWrong ? " is-picked-wrong" : ""
+                      }`}
+                      htmlFor={id}
+                    >
+                      <input
+                        id={id}
+                        type="radio"
+                        name={`q-${q.id}`}
+                        value={optionId}
+                        checked={selected === optionId}
+                        disabled={locked || submitted}
+                        onChange={() => onSelect(q.id, optionId)}
+                      />
+                      <span>
+                        <span className="training-quiz__option-letter">{optionPrefix[optionId]}.</span>{" "}
+                        <span className="training-quiz__option-text">{optionText}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              {submitted && isCorrect != null ? (
+                <p className="training-quiz__feedback regular-s" role="status">
+                  {isCorrect
+                    ? pickLocalized(ui.correctLabel, locale)
+                    : pickLocalized(ui.wrongLabel, locale)}
+                </p>
+              ) : null}
             </li>
           );
         })}
       </ol>
 
       {showIncomplete ? (
-        <p className="training-quiz__incomplete" role="alert">
-          {ui.incomplete[locale]}
+        <p className="training-quiz__incomplete regular-s" role="alert">
+          {pickLocalized(ui.incomplete, locale)}
         </p>
       ) : null}
 
       {scoreText ? (
-        <p className="training-quiz__score" role="status">
+        <p className="training-quiz__score regular-m" role="status">
           {scoreText}
         </p>
       ) : null}
 
       <div className="training-quiz__actions">
         {!submitted ? (
-          <button
-            type="button"
-            className="btn is--primary w-button"
-            onClick={onSubmit}
-            disabled={locked}
-          >
-            {ui.submit[locale]}
+          <button type="button" className="btn is--primary w-button" onClick={onSubmit} disabled={locked}>
+            {pickLocalized(ui.submit, locale)}
           </button>
         ) : (
-          <button
-            type="button"
-            className="btn is--tertiary w-button"
-            onClick={onReset}
-            disabled={locked}
-          >
-            {ui.reset[locale]}
+          <button type="button" className="btn is--primary w-button" onClick={onReset} disabled={locked}>
+            {pickLocalized(ui.reset, locale)}
           </button>
         )}
       </div>

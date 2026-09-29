@@ -29,7 +29,6 @@ const quizUi: TrainingQuizUi = {
     uk: "Неправильно",
     en: "Incorrect",
   },
-  optionPrefix: { A: "A", B: "B", C: "C" },
 };
 
 /** RU: Тренінг «Дії під час атак БПЛА». EN: UAV-attacks training with quiz. */
@@ -44,18 +43,22 @@ export const uavAttacksTraining: TrainingDetail = {
     uk: "Відеотренінг про безпечні дії цивільних під час атак безпілотників, з перевіркою знань після перегляду.",
     en: "A video training on civilian safety actions during UAV attacks, with a knowledge check after watching.",
   },
-  videoTitle: {
-    uk: "Відео: Дії під час атак БПЛА",
-    en: "Video: Actions during UAV attacks",
-  },
-  youtubeId: "7k3REZ12lpo",
-  certificatePdf: {
-    uk: "/docs/trainings/uav-attacks-certificate-uk.pdf",
-    en: "/docs/trainings/uav-attacks-certificate-en.pdf",
-  },
+  certificateDocId: "trainings/uav-attacks-certificate",
   passThresholdPercent: 80,
   quizUi,
-  quiz: [
+  modules: [
+    {
+      id: "main",
+      title: {
+        uk: "Модуль 1",
+        en: "Module 1",
+      },
+      videoTitle: {
+        uk: "Відео: Дії під час атак БПЛА",
+        en: "Video: Actions during UAV attacks",
+      },
+      youtubeId: "7k3REZ12lpo",
+      quiz: [
     {
       id: 1,
       question: {
@@ -275,6 +278,8 @@ export const uavAttacksTraining: TrainingDetail = {
         },
       },
       correct: "C",
+    },
+  ],
     },
   ],
 };

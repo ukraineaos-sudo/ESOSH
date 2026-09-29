@@ -11,8 +11,8 @@
 - Tests: Node.js `node:test` (`tests/site.test.mjs`)
 
 ## Архитектурные потоки
-1. Публичная страница: `src/app/[locale]/**/page.tsx` → `getPage()` dual-read → CMS blocks **или** legacy `src/content/pages/{uk|en}/**`
-2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`, `enrollment`) + `ConsentProvider` + условный `BinotelWidgets`
+1. Публичная страница: `src/app/[locale]/**/page.tsx` → `getPage()` dual-read → CMS blocks **или** legacy `src/content/pages/{uk|en}/**` **или** `ContentTranslationPending` для новых локалей без тела
+2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs`) + `ConsentProvider` + условный `BinotelWidgets`
 3. Chrome: `Header` / `Footer` → footer читает `site_settings` (fallback на `SITE`); ссылки Privacy / Cookies / cookie settings
 4. Контакты: `ContactForm` → `POST /api/contact` → zod (`privacyConsent: true`) → `deliverContact` (webhook)
 5. Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` (+ `cf-turnstile-response`) → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
@@ -23,7 +23,8 @@
    - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`; YouTube embeds на тренінгах **только после** `marketing === true` (`YoutubeConsentEmbed`)
-8. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — типовые тексты UA/международные (по решению заказчика без отдельного юр. review)
+8. Trainings: `TrainingLesson` → sequential `modules[]` (YouTube + quiz each; anti forward-seek) → overall score ≥ `passThresholdPercent` + name fields → static PDF download; video IDs may be empty until upload (`videoPending`)
+9. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — типовые тексты UA/международные (по решению заказчика без отдельного юр. review)
 
 ## Точки входа
 | Вход | Путь |
@@ -35,7 +36,8 @@
 | Enrollment API | `src/app/api/enrollment/**` |
 | Enrollment classify / quiz | `src/lib/enrollment/**` |
 | Trainings catalog / quiz content | `src/content/trainings/**` |
-| Training quiz UI / YouTube gate | `src/components/trainings/**` |
+| Training quiz UI / YouTube gate | `src/components/trainings/**` (`TrainingLesson`, `YoutubeConsentEmbed`, `TrainingQuiz`) |
+| Training certificate generator | `scripts/generate-training-certificate.py` → `public/docs/trainings/*` |
 | Admin UI | `src/app/admin/**` |
 | Admin API | `src/app/api/admin/**` |
 | DB schema | `src/db/schema.ts` |
@@ -54,12 +56,12 @@
 | Metadata / sitemap inventory | `src/content/page-metadata.json` (+ CMS news in `sitemap.ts`) |
 | Media inventory (legacy) | `src/content/media-manifest.json` |
 | Uploaded media | Vercel Blob + `media_assets` |
-| Nav / form / consent UI strings | `messages/{uk,en}.json` (`nav`, `contact`, `consent`) |
-| Footer markup | `src/content/chrome/**` |
+| Nav / form / consent / trainings / content / docs UI strings | `messages/{uk,en,de,es,fr,az,kk}.json` |
+| Footer markup | `src/content/chrome/**` (uk chrome; EN chrome + `localePrefix` for all prefixed locales) |
 | Visual parity CSS | `src/styles/reference.css` (+ navigation/contact/enrollment/consent/trainings/refinements) |
-| Trainings listing + quiz copy | `src/content/trainings/**` (+ pages `education/trainings*`) |
+| Trainings listing + quiz copy | `src/content/trainings/**` (+ pages `education/trainings*`; `pickLocalized` — no silent fallback) |
 | Admin UI CSS | `src/app/admin/admin.css` |
-| Contact validation | `src/lib/contact.ts` |
+| Contact validation | `src/lib/contact.ts` (`appLocaleSchema`) |
 | Contact delivery | `src/lib/contact/deliver-contact.ts` |
 | Consent cookie / categories | `src/lib/consent.ts` (`CONSENT_POLICY_VERSION`, `PRIVACY_NOTICE_VERSION`) |
 | Privacy / Cookie pages | `src/content/pages/{uk,en}/privacy-policy.tsx`, `cookie-policy.tsx` |
@@ -70,14 +72,17 @@
 | Member registry filters/stats | `src/lib/admin/member-registry.ts` + `/admin/members` + `GET /api/admin/members` |
 | Binotel widget URLs | `src/lib/binotel.ts` |
 | Phones / social fallback | `src/lib/site.ts` |
-| PDF docs | `public/docs/*-{uk\|en}.pdf` |
+| Locale path helpers | `src/lib/locale.ts` (`localizedPath`, `switchLocalePath`, `hasLegacyPageContent`) |
+| PDF docs resolution | `src/lib/docs.ts` (`DOC_INVENTORY`, `resolveLocaleDoc`) + `LocaleDocLink`; naming `public/docs/README.md` |
+| PDF files on disk | `public/docs/*-{locale}.pdf` (today: uk+en only); trainings certs `public/docs/trainings/*-certificate-{uk\|en}.pdf` |
 | Local media | `public/images/**` |
 
 ## Публичные контракты
-- Locales: `uk` (default, no prefix), `en` (`/en/...`), `localeDetection: false`
+- Locales: `uk` (default, no prefix), `en` `/en/...`, `de` `/de/...`, `es` `/es/...`, `fr` `/fr/...`, `az` `/az/...`, `kk` `/kk/...`; `localeDetection: false`
+- Full marketing TSX bodies: **uk + en only**. New locales get translated chrome (`messages/*`) + honest `ContentTranslationPending` (no silent reuse of uk/en body)
 - Routes: зеркало slug esosh.net; список — `page-loaders` / `page-metadata`; CMS может перекрыть маршрут после publish
-  - Education trainings (new): `/education/trainings`, `/education/trainings/uav-attacks` (+ `/en/...`)
-- Contact API body: `{ name, email, message, locale?, company?, privacyConsent: true }`
+  - Education trainings (new): `/education/trainings`, `/education/trainings/risk-assessment`, `/education/trainings/uav-attacks` (+ `/{locale}/...` for prefixed locales)
+- Contact API body: `{ name, email, message, locale?, company?, privacyConsent: true }` (`locale` ∈ uk|en|de|es|fr|az|kk)
   - без `privacyConsent: true` → 400; honeypot `company` → `{ ok: true }` без доставки (згода не змінює honeypot-семантику)
   - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
 - Public consent cookie: `esosh_consent` (JSON categories + `version` + `ts`); mirror `localStorage`; bump `CONSENT_POLICY_VERSION` → banner знову
@@ -102,7 +107,8 @@
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
 - Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`; **загрузка только после consent `communications`**
-- YouTube (trainings): `youtube-nocookie.com/embed/...` через `YoutubeConsentEmbed`; **только после consent `marketing`**
+- YouTube (trainings): YouTube IFrame API + `youtube-nocookie` через `YoutubeConsentEmbed`; **только после consent `marketing`**; forward-seek limited; quiz locked until video end; certificate CTA needs video done + score ≥ `passThresholdPercent` (client-side gate, not server auth)
+- Locale layout must pass client namespaces used by `"use client"` trees: `nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs` (missing namespace → raw `namespace.key` in UI)
 - Env для consent **не** потрібен (first-party cookie)
 - Enrollment admin deep-link у Brevo: `resolveAdminOrigin()` — localhost → request origin; поки `esosh.net` на старому хості → `https://esosh.vercel.app/admin/...`
 ## Проверки
@@ -115,7 +121,8 @@
 - Нет ложного успеха формы без webhook
 - Нет Webflow runtime-скриптов в HTML
 - Binotel GetCall + chat **не** в DOM без згоди `communications`
-- YouTube iframe на тренінгах **не** в DOM без згоди `marketing`
+- YouTube iframe / player на тренінгах **не** в DOM без згоди `marketing`
+- Training certificate download is a **static public PDF** unlocked in UI only (name fields collected client-side for future personalization); not a signed credential
 - Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable; **лента /news и блок новостей на главной** при отсутствии DB — пустые (статьи `/news/{slug}` всё ещё dual-read legacy)
 - Honeypot и contact API не ослабляются админкой
 - Contact / enrollment без явної privacy-згоди не приймаються як валідні

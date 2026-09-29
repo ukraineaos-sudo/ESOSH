@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { TrainingQuiz } from "@/components/trainings/TrainingQuiz";
 import {
   TrainingStatusMark,
   YoutubeConsentEmbed,
 } from "@/components/trainings/YoutubeConsentEmbed";
-import type { LocaleCode, TrainingDetail } from "@/content/trainings/types";
+import type { LocaleCode, TrainingDetail, TrainingModule } from "@/content/trainings/types";
+import { pickLocalized } from "@/content/trainings/types";
+import { resolveLocaleDoc } from "@/lib/docs";
 
 type Props = {
   locale: LocaleCode;
@@ -20,95 +22,340 @@ type QuizOutcome = {
   scorePercent: number;
 };
 
-function doneStorageKey(slug: string) {
+function moduleVideoKey(slug: string, moduleId: string) {
+  return `esosh-training-video-done-v1:${slug}:${moduleId}`;
+}
+
+/** Legacy single-module key used before modular trainings. */
+function legacyVideoKey(slug: string) {
   return `esosh-training-video-done-v1:${slug}`;
 }
 
-/** RU: Відео → тест → сертифікат з перевіркою прогресу. EN: Video → quiz → certificate progress gate. */
+function certNameStorageKey(slug: string) {
+  return `esosh-training-cert-name-v1:${slug}`;
+}
+
+function normalizeNamePart(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function isNameReady(firstName: string, lastName: string) {
+  return normalizeNamePart(firstName).length >= 2 && normalizeNamePart(lastName).length >= 2;
+}
+
+function emptyOutcomes(modules: TrainingModule[]): Record<string, QuizOutcome | null> {
+  const map: Record<string, QuizOutcome | null> = {};
+  for (const mod of modules) map[mod.id] = null;
+  return map;
+}
+
+/** RU: Модулі відео→тест → ПІБ → сертифікат. EN: Modules video→quiz → name → certificate. */
 export function TrainingLesson({ locale, training }: Props) {
   const t = useTranslations("trainings");
-  const [videoDone, setVideoDone] = useState(false);
-  const [quizOutcome, setQuizOutcome] = useState<QuizOutcome | null>(null);
+  const firstNameId = useId();
+  const lastNameId = useId();
+  const modules = training.modules;
+  const [videoDoneByModule, setVideoDoneByModule] = useState<Record<string, boolean>>(() => {
+    const map: Record<string, boolean> = {};
+    for (const mod of modules) map[mod.id] = false;
+    return map;
+  });
+  const [quizByModule, setQuizByModule] = useState<Record<string, QuizOutcome | null>>(() =>
+    emptyOutcomes(modules),
+  );
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   useEffect(() => {
     try {
-      if (sessionStorage.getItem(doneStorageKey(training.slug)) === "1") {
-        setVideoDone(true);
+      const nextVideo: Record<string, boolean> = {};
+      for (const mod of modules) {
+        const key = moduleVideoKey(training.slug, mod.id);
+        let done = sessionStorage.getItem(key) === "1";
+        if (!done && modules.length === 1 && mod.id === modules[0]?.id) {
+          done = sessionStorage.getItem(legacyVideoKey(training.slug)) === "1";
+        }
+        nextVideo[mod.id] = done;
+      }
+      setVideoDoneByModule(nextVideo);
+
+      const raw = sessionStorage.getItem(certNameStorageKey(training.slug));
+      if (raw) {
+        const parsed = JSON.parse(raw) as { firstName?: string; lastName?: string };
+        if (typeof parsed.firstName === "string") setFirstName(parsed.firstName);
+        if (typeof parsed.lastName === "string") setLastName(parsed.lastName);
       }
     } catch {
       /* ignore */
     }
-  }, [training.slug]);
+  }, [modules, training.slug]);
 
-  const onVideoCompleted = useCallback(() => {
-    setVideoDone(true);
-    try {
-      sessionStorage.setItem(doneStorageKey(training.slug), "1");
-    } catch {
-      /* ignore */
-    }
-  }, [training.slug]);
+  const persistCertName = useCallback(
+    (nextFirst: string, nextLast: string) => {
+      try {
+        sessionStorage.setItem(
+          certNameStorageKey(training.slug),
+          JSON.stringify({ firstName: nextFirst, lastName: nextLast }),
+        );
+      } catch {
+        /* ignore */
+      }
+    },
+    [training.slug],
+  );
+
+  const markVideoDone = useCallback(
+    (moduleId: string) => {
+      setVideoDoneByModule((prev) => ({ ...prev, [moduleId]: true }));
+      try {
+        sessionStorage.setItem(moduleVideoKey(training.slug, moduleId), "1");
+        if (modules.length === 1) {
+          sessionStorage.setItem(legacyVideoKey(training.slug), "1");
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [modules.length, training.slug],
+  );
 
   const threshold = training.passThresholdPercent ?? 80;
+  const certificateResolution = training.certificateDocId
+    ? resolveLocaleDoc(training.certificateDocId, locale)
+    : null;
   const certificateUrl =
-    locale === "en" ? training.certificatePdf?.en : training.certificatePdf?.uk;
-  const quizPassed = quizOutcome != null && quizOutcome.scorePercent >= threshold;
-  const canDownload = videoDone && quizPassed && Boolean(certificateUrl);
+    certificateResolution?.status === "available"
+      ? certificateResolution.href
+      : pickLocalized(training.certificatePdf, locale);
 
-  const quizStatusLabel =
-    quizOutcome == null
-      ? t("quizNotPassed")
-      : t("quizPassedScore", {
-          score: quizOutcome.score,
-          total: quizOutcome.total,
-          percent: Math.round(quizOutcome.scorePercent),
-        });
+  const totals = useMemo(() => {
+    let score = 0;
+    let total = 0;
+    let allSubmitted = true;
+    for (const mod of modules) {
+      const outcome = quizByModule[mod.id];
+      if (!outcome) {
+        allSubmitted = false;
+        continue;
+      }
+      score += outcome.score;
+      total += outcome.total;
+    }
+    const scorePercent = total > 0 ? (score / total) * 100 : 0;
+    return { score, total, scorePercent, allSubmitted };
+  }, [modules, quizByModule]);
+
+  const allVideosDone = modules.every((mod) => videoDoneByModule[mod.id]);
+  const quizPassed = totals.allSubmitted && totals.scorePercent >= threshold;
+  const courseComplete = allVideosDone && quizPassed;
+  const canDownload = courseComplete && Boolean(certificateUrl);
+  const nameReady = isNameReady(firstName, lastName);
+  const canDownloadNamed = canDownload && nameReady;
+
+  const overallStatusLabel = !totals.allSubmitted
+    ? t("quizNotPassed")
+    : t("quizPassedScore", {
+        score: totals.score,
+        total: totals.total,
+        percent: Math.round(totals.scorePercent),
+      });
+
+  function isModuleUnlocked(index: number): boolean {
+    if (index === 0) return true;
+    const prev = modules[index - 1];
+    if (!prev) return false;
+    // Empty shell: show all module slots until video/quiz are filled in.
+    if (!prev.youtubeId.trim() && prev.quiz.length === 0) return true;
+    return Boolean(videoDoneByModule[prev.id] && quizByModule[prev.id]);
+  }
+
+  function certHint(): string {
+    if (!allVideosDone) return t("certNeedVideo");
+    if (!totals.allSubmitted) return t("certNeedQuiz");
+    if (totals.allSubmitted && totals.scorePercent < threshold) {
+      return t("certificateThresholdHint", { threshold });
+    }
+    if (!certificateUrl || certificateResolution?.status === "unavailable") {
+      return t("certPending");
+    }
+    return t("certificateThresholdHint", { threshold });
+  }
+
+  function renderNameFields() {
+    return (
+      <div className="training-lesson__cert-name">
+        <p className="training-lesson__cert-name-label regular-s">{t("certificateNameLabel")}</p>
+        <div className="training-lesson__cert-name-row">
+          <label className="training-lesson__cert-field" htmlFor={lastNameId}>
+            <input
+              id={lastNameId}
+              className="form-input text-field w-input"
+              type="text"
+              name="certificateLastName"
+              autoComplete="family-name"
+              aria-label={t("certificateLastNameLabel")}
+              value={lastName}
+              placeholder={t("certificateLastNamePlaceholder")}
+              onChange={(event) => {
+                const value = event.target.value;
+                setLastName(value);
+                persistCertName(firstName, value);
+              }}
+            />
+          </label>
+          <label className="training-lesson__cert-field" htmlFor={firstNameId}>
+            <input
+              id={firstNameId}
+              className="form-input text-field w-input"
+              type="text"
+              name="certificateFirstName"
+              autoComplete="given-name"
+              aria-label={t("certificateFirstNameLabel")}
+              value={firstName}
+              placeholder={t("certificateFirstNamePlaceholder")}
+              onChange={(event) => {
+                const value = event.target.value;
+                setFirstName(value);
+                persistCertName(value, lastName);
+              }}
+            />
+          </label>
+        </div>
+        <p className="training-lesson__cert-name-example" aria-hidden="true">
+          {t("certificateNameExample")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="training-lesson">
-      <YoutubeConsentEmbed
-        locale={locale}
-        videoId={training.youtubeId}
-        title={training.videoTitle[locale]}
-        completed={videoDone}
-        onCompleted={onVideoCompleted}
-      />
+      {modules.map((mod, index) => {
+        const unlocked = isModuleUnlocked(index);
+        const videoDone = Boolean(videoDoneByModule[mod.id]);
+        const hasVideo = mod.youtubeId.trim().length > 0;
+        const showModuleChrome = modules.length > 1;
 
-      {!videoDone ? (
-        <p className="training-lesson__lock-hint regular-s" role="status">
-          {t("quizLockedHint")}
-        </p>
-      ) : null}
+        return (
+          <section
+            key={mod.id}
+            className={`training-module${unlocked ? "" : " is-locked"}`}
+            aria-labelledby={showModuleChrome ? `training-module-${mod.id}` : undefined}
+          >
+            {showModuleChrome ? (
+              <header className="training-module__header">
+                <p className="training-module__eyebrow regular-s">
+                  {t("moduleLabel", { index: index + 1, total: modules.length })}
+                </p>
+                <h2 id={`training-module-${mod.id}`} className="h3 training-module__title">
+                  {pickLocalized(mod.title, locale) ?? t("contentPending")}
+                </h2>
+              </header>
+            ) : null}
 
-      <TrainingQuiz
-        locale={locale}
-        questions={training.quiz}
-        ui={training.quizUi}
-        locked={!videoDone}
-        onResultChange={setQuizOutcome}
-        passThresholdPercent={threshold}
-      />
+            {!unlocked ? (
+              <p className="training-lesson__lock-hint regular-s" role="status">
+                {t("moduleLockedHint")}
+              </p>
+            ) : null}
+
+            {unlocked && !hasVideo ? (
+              <p className="training-module__video-pending regular-s" role="status">
+                {t("videoPending")}
+              </p>
+            ) : null}
+
+            {unlocked && hasVideo ? (
+              <YoutubeConsentEmbed
+                locale={locale}
+                videoId={mod.youtubeId}
+                title={pickLocalized(mod.videoTitle, locale) ?? t("contentPending")}
+                completed={videoDone}
+                onCompleted={() => markVideoDone(mod.id)}
+              />
+            ) : null}
+
+            {unlocked && hasVideo && !videoDone ? (
+              <p className="training-lesson__lock-hint regular-s" role="status">
+                {t("quizLockedHint")}
+              </p>
+            ) : null}
+
+            {unlocked && hasVideo && videoDone && mod.quiz.length === 0 ? (
+              <p className="training-module__video-pending regular-s" role="status">
+                {t("quizPending")}
+              </p>
+            ) : null}
+
+            {unlocked && !hasVideo && mod.quiz.length === 0 ? (
+              <p className="training-module__video-pending regular-s" role="status">
+                {t("quizPending")}
+              </p>
+            ) : null}
+
+            {unlocked && mod.quiz.length > 0 ? (
+              <TrainingQuiz
+                locale={locale}
+                questions={mod.quiz}
+                ui={training.quizUi}
+                locked={!hasVideo || !videoDone}
+                onResultChange={(result) => {
+                  setQuizByModule((prev) => {
+                    const previous = prev[mod.id];
+                    if (result == null && previous == null) return prev;
+                    if (
+                      result &&
+                      previous &&
+                      result.score === previous.score &&
+                      result.total === previous.total &&
+                      result.scorePercent === previous.scorePercent
+                    ) {
+                      return prev;
+                    }
+                    return { ...prev, [mod.id]: result };
+                  });
+                }}
+                passThresholdPercent={threshold}
+              />
+            ) : null}
+          </section>
+        );
+      })}
 
       <div className="training-lesson__footer-status">
-        <TrainingStatusMark done={quizOutcome != null} label={quizStatusLabel} />
+        <TrainingStatusMark done={totals.allSubmitted} label={overallStatusLabel} />
       </div>
 
       <div className="training-lesson__cert">
-        {canDownload && certificateUrl ? (
-          <a className="btn is--primary w-button" href={certificateUrl} download>
-            {t("downloadCertificate")}
-          </a>
+        {courseComplete ? (
+          <>
+            {renderNameFields()}
+            {canDownloadNamed ? (
+              <a className="btn is--primary w-button" href={certificateUrl!} download>
+                {t("downloadCertificate")}
+              </a>
+            ) : (
+              <button type="button" className="btn is--primary w-button" disabled>
+                {t("downloadCertificate")}
+              </button>
+            )}
+            {!nameReady ? (
+              <p className="training-quiz__cert-hint" role="status">
+                {t("certNeedName")}
+              </p>
+            ) : !certificateUrl ? (
+              <p className="training-quiz__cert-hint" role="status">
+                {t("certPending")}
+              </p>
+            ) : null}
+          </>
         ) : (
           <>
             <button type="button" className="btn is--primary w-button" disabled>
               {t("downloadCertificate")}
             </button>
             <p className="training-quiz__cert-hint" role="status">
-              {!videoDone
-                ? t("certNeedVideo")
-                : quizOutcome == null
-                  ? t("certNeedQuiz")
-                  : t("certificateThresholdHint", { threshold })}
+              {certHint()}
             </p>
           </>
         )}

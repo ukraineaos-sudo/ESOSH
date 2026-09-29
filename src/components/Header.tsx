@@ -5,16 +5,17 @@ import { NavigationDropdown } from "./navigation/NavigationDropdown";
 import { MobileMenu } from "./navigation/MobileMenu";
 import { LocaleSwitch } from "./navigation/LocaleSwitch";
 import { navigationGroups } from "./navigation/navigation-groups";
+import { localePathPrefix, localizedPath } from "@/lib/locale";
 
 /** RU: Общая навигация сайта. EN: Shared site navigation. */
 export function Header() {
   const locale = useLocale();
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const prefix = locale === "en" ? "/en" : "";
+  const prefix = localePathPrefix(locale);
   return <header className="w-layout-blockcontainer container is--nav w-container">
     <nav className="nav" aria-label={t("menu")}>
-      <a href={prefix || "/"} className="nav-logo-wrapper w-inline-block" aria-label="ESOSH">
+      <a href={localizedPath(locale, "/")} className="nav-logo-wrapper w-inline-block" aria-label="ESOSH">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/logo-color.png" alt="ESOSH" className="nav-logo" width={104} height={40} />
       </a>
