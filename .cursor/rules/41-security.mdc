@@ -16,13 +16,13 @@ alwaysApply: false
 - Валидация: zod (`src/lib/contact.ts`) на сервере; клиент — UX.
 - Honeypot `company`: ответ `ok: true`, доставки нет.
 - Origin check: чужой `Origin` → 403.
-- Без `CONTACT_WEBHOOK_URL` → `unavailable` / 503 (не имитировать успех).
+- Доставка: Brevo (`BREVO_*` + admin email) или `CONTACT_WEBHOOK_*`; без обоих → `unavailable` / 503 (не имитировать успех).
 - Ошибка получателя → 502; не логируй тело обращения с PII без нужды.
 - Лимит размера тела запроса соблюдай.
 
 ## Секреты и окружение
 
-- `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN` — только server-side.
+- `BREVO_API_KEY`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN` — только server-side.
 - `NEXT_PUBLIC_SITE_URL` — публичный канонический origin.
 - Не коммить `.env*`, ключи, токены (кроме `.env.example` без секретов).
 - Не печатай секреты и production-конфиг в терминал, лог или ответ пользователю.

@@ -13,7 +13,7 @@ alwaysApply: true
 - Оболочка: `src/app/[locale]/layout.tsx` (reference CSS + next-intl) → `Header` / content / `Footer`.
 - Навигация: `src/components/Header.tsx` + `navigation/*` + строки `messages.*.nav`.
 - Футер: `src/components/Footer.tsx` → `src/content/chrome/footer-{uk|en}.tsx` + `getContactSettings()`.
-- Контакты: `ContactForm` → `POST /api/contact` → `contactSchema` (`privacyConsent: true`) → `deliverContact` (webhook).
+- Контакты: `ContactForm` → `POST /api/contact` → `contactSchema` (`privacyConsent: true`) → `deliverContact` (Brevo → иначе webhook).
 - Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` → Neon `applications`/`members` + private Blob; адмін `/admin/applications`.
 - Admin CMS: `src/app/admin/**` + `src/app/api/admin/**` + Neon (`src/db`) + Blob; middleware защищает `/admin` и `/api/admin`.
 - Consent: `ConsentProvider` + banner (`src/lib/consent.ts`, `src/components/consent/**`); cookie `esosh_consent`.
@@ -39,7 +39,7 @@ alwaysApply: true
 
 ## Запрещённые направления
 
-- UI не импортирует server-only секреты (`CONTACT_WEBHOOK_*`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, bootstrap passwords).
+- UI не импортирует server-only секреты (`BREVO_API_KEY`, `CONTACT_WEBHOOK_*`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, bootstrap passwords).
 - Не создавай второй публичный роутер или второй i18n-механизм вне `src/i18n`.
 - Не тащи архитектуру других проектов (Astro pages, Wix, `/admin` из чужих репо) без явной задачи — **исключение**: staff `/admin` этого репозитория как замена Webflow.
 - Не оставляй прод-зависимости от CDN Webflow / внешних PDF без явного временного решения.
@@ -51,7 +51,7 @@ alwaysApply: true
 - ключи `nav` / `contact` / `consent` / `enrollment` в `messages/{uk,en}.json`;
 - `POST /api/contact` тело: `{ name, email, message, locale?, company?, privacyConsent: true }` (honeypot);
 - `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + опційні файли (`attachment_*`, legacy keys ще приймаються) + `cf-turnstile-response` (якщо увімкнено Turnstile); honeypot `company`; успіх = запис у Neon; сертифікати/документи **не обов’язкові**;
-- env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`;
+- env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_ADMIN_EMAIL` (опц.), `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`;
 - публичные файлы в `public/images/**`, `public/docs/**`;
 - sitemap / robots;
 - admin: `/admin/*` (session cookie), `/api/admin/*`.

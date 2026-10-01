@@ -77,11 +77,16 @@ export async function sendBrevoTransactionalEmail(input: {
   subject: string;
   htmlContent: string;
   textContent?: string;
+  replyTo?: { email: string; name?: string };
+  tags?: string[];
 }): Promise<BrevoSendResult> {
   const apiKey = process.env.BREVO_API_KEY?.trim();
   const senderEmail = process.env.BREVO_SENDER_EMAIL?.trim();
   const senderName = process.env.BREVO_SENDER_NAME?.trim() || "ESOSH";
   if (!apiKey || !senderEmail || !input.toEmail.trim()) return "unavailable";
+
+  const replyToEmail = input.replyTo?.email?.trim();
+  const tags = input.tags?.length ? input.tags : ["enrollment", "admin-notify"];
 
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -97,7 +102,15 @@ export async function sendBrevoTransactionalEmail(input: {
         subject: input.subject,
         htmlContent: input.htmlContent,
         ...(input.textContent ? { textContent: input.textContent } : {}),
-        tags: ["enrollment", "admin-notify"],
+        ...(replyToEmail
+          ? {
+              replyTo: {
+                email: replyToEmail,
+                ...(input.replyTo?.name ? { name: input.replyTo.name } : {}),
+              },
+            }
+          : {}),
+        tags,
       }),
       signal: AbortSignal.timeout(10000),
       redirect: "error",

@@ -14,7 +14,7 @@
 1. Публичная страница: `src/app/[locale]/**/page.tsx` → `getPage()` dual-read → CMS blocks **или** legacy `src/content/pages/{uk|en}/**` **или** `ContentTranslationPending` для новых локалей без тела
 2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs`) + `ConsentProvider` + условный `BinotelWidgets`
 3. Chrome: `Header` / `Footer` → footer читает `site_settings` (fallback на `SITE`); ссылки Privacy / Cookies / cookie settings
-4. Контакты: `ContactForm` → `POST /api/contact` → zod (`privacyConsent: true`) → `deliverContact` (webhook)
+4. Контакты: `ContactForm` → `POST /api/contact` → zod (`privacyConsent: true`) → `deliverContact` (Brevo → иначе webhook)
 5. Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` (+ `cf-turnstile-response`) → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
 6. Admin: `/admin` shell (sidebar + sticky chrome) → session cookie → `/api/admin/*` → Neon/Blob
    - Live UX: header chip «нові заявки» polls `GET /api/admin/applications?status=new` ~30s (stops on 401); applications list same interval + `esosh:admin-apps-refresh` event
@@ -62,7 +62,7 @@
 | Trainings listing + quiz copy | `src/content/trainings/**` (+ pages `education/trainings*`; `pickLocalized` — no silent fallback) |
 | Admin UI CSS | `src/app/admin/admin.css` |
 | Contact validation | `src/lib/contact.ts` (`appLocaleSchema`) |
-| Contact delivery | `src/lib/contact/deliver-contact.ts` |
+| Contact delivery | `src/lib/contact/deliver-contact.ts` (Brevo `brevo-contact.ts`, webhook fallback) |
 | Consent cookie / categories | `src/lib/consent.ts` (`CONSENT_POLICY_VERSION`, `PRIVACY_NOTICE_VERSION`) |
 | Privacy / Cookie pages | `src/content/pages/{uk,en}/privacy-policy.tsx`, `cookie-policy.tsx` |
 | Enrollment form | `src/components/EnrollmentCaptchaGate.tsx` + `EnrollmentForm.tsx` + `TurnstileWidget.tsx` + `src/styles/enrollment.css` |
@@ -84,7 +84,8 @@
   - Education trainings (new): `/education/trainings`, `/education/trainings/risk-assessment`, `/education/trainings/uav-attacks` (+ `/{locale}/...` for prefixed locales)
 - Contact API body: `{ name, email, message, locale?, company?, privacyConsent: true }` (`locale` ∈ uk|en|de|es|fr|az|kk)
   - без `privacyConsent: true` → 400; honeypot `company` → `{ ok: true }` без доставки (згода не змінює honeypot-семантику)
-  - invalid → 400; bad origin → 403; unavailable webhook → 503; delivery fail → 502
+  - delivery: Brevo (`BREVO_*` + `CONTACT_ADMIN_EMAIL` або `ENROLLMENT_ADMIN_EMAIL`) → інакше `CONTACT_WEBHOOK_*`
+  - invalid → 400; bad origin → 403; unavailable (немає Brevo і webhook) → 503; delivery fail → 502
 - Public consent cookie: `esosh_consent` (JSON categories + `version` + `ts`); mirror `localStorage`; bump `CONSENT_POLICY_VERSION` → banner знову
 - `readConsentFromDocument` must return a **stable reference** (cached by raw string) — `useSyncExternalStore` getSnapshot; new object each call → React #185 / blank “This page couldn’t load”
 - Privacy/Cookie pages: `/privacy-policy`, `/cookie-policy` (+ `/en/...`); типовые тексты UA / international
@@ -105,7 +106,7 @@
 - Admin members registry: `GET /api/admin/members?q&status&level&industry&oshFunctions&minOshYears` → `{ items, stats, facets }`; статистика рахується по **відфільтрованому** набору; профіль з `members.profile` + fallback з останньої заявки
 - Admin application PATCH: `confirmed`/`confirmed_no_level` → member active; `rejected`/`needs_info` → member знову `candidate` (level null)
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
-- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_WEBHOOK_*`, `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
+- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_ADMIN_EMAIL` (опц., fallback `ENROLLMENT_ADMIN_EMAIL`), `CONTACT_WEBHOOK_*` (опц. fallback), `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`; **загрузка только после consent `communications`**
 - YouTube (trainings): YouTube IFrame API + `youtube-nocookie` через `YoutubeConsentEmbed`; **только после consent `marketing`**; forward-seek limited; quiz locked until video end; certificate CTA needs video done + score ≥ `passThresholdPercent` (client-side gate, not server auth)
 - Locale layout must pass client namespaces used by `"use client"` trees: `nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs` (missing namespace → raw `namespace.key` in UI)
@@ -130,7 +131,7 @@
 - Після `db:import-news` CMS перекриває legacy для тих самих slug; URL не змінюються
 
 ## Известные пробелы (продукт)
-1. Доставка контактної форми не налаштована без `CONTACT_WEBHOOK_URL`
+1. Доставка контактної форми: Brevo (як заявки) або `CONTACT_WEBHOOK_URL`; без обох → 503
 2. Текст питань тесту Кодексу — v1-заглушка; замінити офіційним банком ESOSH
 3. Кастомний домен через Wix — окремо
 4. Brevo Domains для `esosh.net` ще без DKIM/DMARC (deliverability warning у Brevo)
