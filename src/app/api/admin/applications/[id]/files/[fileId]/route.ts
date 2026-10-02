@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applicationFiles } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
-import { getEnrollmentBlob } from "@/lib/enrollment/files";
+import { getEnrollmentBlob, safeServeContentType } from "@/lib/enrollment/files";
 
 type Ctx = { params: Promise<{ id: string; fileId: string }> };
 
@@ -35,14 +35,17 @@ export async function GET(request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "blob_missing" }, { status: 404 });
   }
 
+  const served = safeServeContentType(file.contentType, file.originalName);
   const dispositionParam = new URL(request.url).searchParams.get("disposition");
-  const disposition = dispositionParam === "inline" ? "inline" : "attachment";
+  const disposition =
+    dispositionParam === "inline" && served.allowInline ? "inline" : "attachment";
   const encodedName = encodeURIComponent(file.originalName);
 
   return new NextResponse(blob.stream, {
     headers: {
-      "Content-Type": file.contentType || "application/octet-stream",
+      "Content-Type": served.contentType,
       "Content-Disposition": `${disposition}; filename*=UTF-8''${encodedName}`,
+      "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, no-store",
     },
   });

@@ -17,7 +17,17 @@ export type StoredEnrollmentFile = {
   sizeBytes: number;
 };
 
+export type EnrollmentSniffKind = "jpeg" | "png" | "pdf";
+
 export { ENROLLMENT_MAX_FILES, ENROLLMENT_MAX_TOTAL_BYTES };
+
+const SNIFF_TO_MIME: Record<EnrollmentSniffKind, string> = {
+  jpeg: "image/jpeg",
+  png: "image/png",
+  pdf: "application/pdf",
+};
+
+const SAFE_SERVE_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
 
 /** RU: Чи дозволений ключ multipart-файлу заявки. EN: Allowed enrollment multipart file keys. */
 export function isEnrollmentUploadFieldKey(key: string): boolean {
@@ -45,16 +55,55 @@ function blobAccessForWrite(): "public" | "private" {
   return "private";
 }
 
+/** RU: Нормалізація client MIME. EN: Normalize browser-declared MIME. */
+export function normalizeClientMime(type: string): string {
+  const t = type.trim().toLowerCase();
+  if (t === "image/jpg") return "image/jpeg";
+  return t;
+}
+
+/** RU: Канонічний MIME за magic bytes. EN: Canonical MIME from sniffed kind. */
+export function canonicalContentTypeFromSniff(sniffed: EnrollmentSniffKind): string {
+  return SNIFF_TO_MIME[sniffed];
+}
+
+function extMatchesSniff(name: string, sniffed: EnrollmentSniffKind): boolean {
+  const lower = name.toLowerCase();
+  if (sniffed === "pdf") return /\.pdf$/i.test(lower);
+  if (sniffed === "png") return /\.png$/i.test(lower);
+  return /\.jpe?g$/i.test(lower);
+}
+
 function extOk(name: string, kind: "photo" | "document"): boolean {
   const lower = name.toLowerCase();
   if (kind === "photo") return /\.(jpe?g|png)$/.test(lower);
   return /\.(pdf|jpe?g|png)$/.test(lower);
 }
 
+/**
+ * RU: MIME для відповіді адмін-проксі: лише безпечні типи; HTML/SVG ніколи.
+ * EN: Safe Content-Type for admin proxy; never HTML/SVG.
+ */
+export function safeServeContentType(
+  storedContentType: string | null | undefined,
+  originalName: string,
+): { contentType: string; allowInline: boolean } {
+  const stored = normalizeClientMime(storedContentType || "");
+  if (SAFE_SERVE_TYPES.has(stored)) {
+    return { contentType: stored, allowInline: true };
+  }
+  // Legacy bad rows (e.g. text/html + .pdf): trust extension only for safe remap.
+  const lower = originalName.toLowerCase();
+  if (/\.pdf$/i.test(lower)) return { contentType: "application/pdf", allowInline: true };
+  if (/\.png$/i.test(lower)) return { contentType: "image/png", allowInline: true };
+  if (/\.jpe?g$/i.test(lower)) return { contentType: "image/jpeg", allowInline: true };
+  return { contentType: "application/octet-stream", allowInline: false };
+}
+
 /** RU: Сигнатура файла (magic bytes). EN: Sniff file signature. */
 export async function sniffEnrollmentFileKind(
   file: File,
-): Promise<"jpeg" | "png" | "pdf" | null> {
+): Promise<EnrollmentSniffKind | null> {
   const buf = new Uint8Array(await file.slice(0, 8).arrayBuffer());
   if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "jpeg";
   if (
@@ -78,24 +127,20 @@ export async function sniffEnrollmentFileKind(
   return null;
 }
 
-/** RU: Перевірка типу/розміру файлу заявки. EN: Validate enrollment upload constraints. */
+/** RU: Перевірка розміру/розширення (без MIME-довіри до клієнта). EN: Size/extension checks. */
 export function validateEnrollmentFile(
   file: File,
   kind: "photo" | "document",
 ): string | null {
   const max = kind === "photo" ? PHOTO_MAX_BYTES : DOC_MAX_BYTES;
-  const allowed = kind === "photo" ? ALLOWED_PHOTO_TYPES : ALLOWED_DOC_TYPES;
   if (file.size <= 0 || file.size > max) return "too_large";
-  const type = file.type === "image/jpg" ? "image/jpeg" : file.type;
-  if (!allowed.has(type) && !allowed.has(file.type)) {
-    if (!extOk(file.name, kind)) return "bad_type";
-  }
+  if (!extOk(file.name, kind)) return "bad_type";
   return null;
 }
 
 /**
- * RU: Полная проверка файла включая magic bytes.
- * EN: Full file check including magic-byte sniff.
+ * RU: Повна перевірка: magic + узгодженість імені/MIME з sniff; тип зберігаємо лише з sniff.
+ * EN: Strict check — sniff wins; reject MIME/name mismatches.
  */
 export async function validateEnrollmentFileStrict(
   file: File,
@@ -103,12 +148,23 @@ export async function validateEnrollmentFileStrict(
 ): Promise<string | null> {
   const basic = validateEnrollmentFile(file, kind);
   if (basic) return basic;
+
   const sniffed = await sniffEnrollmentFileKind(file);
   if (!sniffed) return "bad_signature";
   if (kind === "photo" && sniffed === "pdf") return "bad_signature";
   if (kind === "document" && sniffed !== "pdf" && sniffed !== "jpeg" && sniffed !== "png") {
     return "bad_signature";
   }
+  if (!extMatchesSniff(file.name, sniffed)) return "bad_type";
+
+  const client = normalizeClientMime(file.type || "");
+  if (client) {
+    const expected = canonicalContentTypeFromSniff(sniffed);
+    if (client !== expected) return "bad_type";
+    const allowed = kind === "photo" ? ALLOWED_PHOTO_TYPES : ALLOWED_DOC_TYPES;
+    if (!allowed.has(client) && !allowed.has(file.type)) return "bad_type";
+  }
+
   return null;
 }
 
@@ -130,19 +186,22 @@ export async function putEnrollmentBlob(
 ): Promise<StoredEnrollmentFile> {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) throw new Error("blob_unavailable");
+  const sniffed = await sniffEnrollmentFileKind(file);
+  if (!sniffed) throw new Error("bad_signature");
+  const contentType = canonicalContentTypeFromSniff(sniffed);
   const access = blobAccessForWrite();
   const pathname = `enrollment/${applicationPublicId}/${fieldKey}-${createPublicId("APP").slice(4)}-${safeFileName(file.name)}`;
   const result = await put(pathname, file, {
     access,
     token,
-    contentType: file.type || undefined,
+    contentType,
     addRandomSuffix: false,
   });
   return {
     fieldKey,
     originalName: file.name,
     pathname: result.pathname,
-    contentType: file.type || "application/octet-stream",
+    contentType,
     sizeBytes: file.size,
   };
 }

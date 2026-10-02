@@ -94,6 +94,7 @@
   - Blob файлів заявок: **private за замовчуванням**; `ENROLLMENT_BLOB_ACCESS=public` лише явно
   - `testAnswers` у payload **не** зберігаються (лише `testScore` + `quizVersion`); `testPassedAt` лише при score ≥ 100
   - існуючий `members.primaryEmail`: нова заявка лінкується до картки, **PII картки не overwrite** з публічної анкети (`created: false`, `existingMemberLinked`, `requiresManualReview`); дані лише в `applications.payload`
+  - файли заявки: збережений `contentType` = sniff (pdf/jpeg/png); client MIME mismatch → `bad_type`; admin GET: `safeServeContentType` + `X-Content-Type-Options: nosniff`, без `text/html`
   - honeypot → `{ ok: true, honeypot: true }`; duplicate idempotency → `{ ok, duplicate, applicationPublicId, autoLevel, autoLevelLabelUk }`
 - Admin: `/admin/login` (username + password), session cookie `esosh_admin_session`, roles `admin` | `editor`; зміна пароля `/admin/security` → `POST /api/admin/password` (мін. 8 символів; інші сесії відкликаються)
   - Блокування write-API через `mustChangePassword` **вимкнено за замовчуванням**; увімкнути: `ADMIN_ENFORCE_PASSWORD_CHANGE=1` → тоді POST/PATCH/PUT/DELETE → `403 password_change_required`; GET списки дозволені

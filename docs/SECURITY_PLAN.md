@@ -11,6 +11,7 @@
 - [x] Production: запрет `ENROLLMENT_BLOB_ACCESS=public`
 - [x] Enrollment upload: magic-byte sniff (JPEG/PNG/PDF), лимит **20 файлов** и **40 МБ суммарно** на заявку (поверх лимитов 5 МБ фото / 10 МБ документ)
 - [x] Публичная анкета не перезаписывает существующую карточку `members` по email (только link + payload; merge — админом)
+- [x] Enrollment files: MIME только из magic bytes; mismatch client MIME → reject; admin proxy `nosniff` + никогда не отдаёт `text/html`
 
 ## Предложенные лимиты (к внедрению)
 

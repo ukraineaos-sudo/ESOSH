@@ -595,9 +595,22 @@ function fileFieldUk(fieldKey: string): string {
 /** RU: Чи можна відкрити файл inline у новій вкладці. EN: Whether browser can preview inline. */
 function canPreviewInBrowser(file: FileRow): boolean {
   const type = (file.contentType || "").toLowerCase();
-  if (type.startsWith("image/") || type === "application/pdf") return true;
-  const name = file.originalName.toLowerCase();
-  return /\.(png|jpe?g|gif|webp|pdf)$/i.test(name);
+  if (
+    type === "text/html" ||
+    type === "application/xhtml+xml" ||
+    type.includes("svg") ||
+    type.includes("javascript")
+  ) {
+    return false;
+  }
+  if (type === "application/pdf" || type === "image/jpeg" || type === "image/png") {
+    return true;
+  }
+  // Legacy empty/octet-stream only — never trust extension when MIME is hostile.
+  if (!type || type === "application/octet-stream") {
+    return /\.(png|jpe?g|pdf)$/i.test(file.originalName);
+  }
+  return false;
 }
 
 function actorUk(actorType: string): string {

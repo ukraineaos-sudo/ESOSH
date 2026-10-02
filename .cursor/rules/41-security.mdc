@@ -25,6 +25,7 @@ alwaysApply: false
 - Публичный `POST /api/enrollment` не должен перезаписывать существующую карточку `members` по известному email.
 - При совпадении primary email: новая `applications` + link на member; PII только в `payload`; merge профиля — админ/подтверждение владения.
 - `email_conflict` (secondary пересекается с чужой карточкой) → 409.
+- Файлы: тип только по magic bytes; несоответствие заявленного MIME → reject; выдача админу без `text/html`/`svg`, с `nosniff`.
 
 ## Секреты и окружение
 
