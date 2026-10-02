@@ -4,11 +4,14 @@ import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
 import { getAdminSession, passwordChangeRequiredResponse, requireAdmin } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /** RU: Видалення картки члена (заявки лишаються, member_id → null). EN: Delete member; unlink apps. */
 export async function DELETE(request: Request, ctx: Ctx) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !requireAdmin(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });

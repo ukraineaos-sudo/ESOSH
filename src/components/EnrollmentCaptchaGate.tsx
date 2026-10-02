@@ -18,12 +18,22 @@ export function EnrollmentCaptchaGate() {
     process.env.NODE_ENV === "production"
       ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || ""
       : "";
-  const [unlocked, setUnlocked] = useState(!siteKey);
+  const [unlocked, setUnlocked] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [widgetError, setWidgetError] = useState(false);
 
-  if (!siteKey) {
+  // Dev/local: captcha skipped (server also skips outside production).
+  if (process.env.NODE_ENV !== "production") {
     return <EnrollmentForm turnstileToken={null} />;
+  }
+
+  // Production without site key: do not open the form (server fails closed without SECRET too).
+  if (!siteKey) {
+    return (
+      <p className="site-form-error" role="alert">
+        {t("captcha.configUnavailable")}
+      </p>
+    );
   }
 
   if (!unlocked) {

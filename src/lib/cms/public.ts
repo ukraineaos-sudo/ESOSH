@@ -79,7 +79,11 @@ export async function getCmsNews(
       .limit(1);
     const row = rows[0];
     if (!row) return null;
-    if (row.status !== "published") {
+    if (row.status === "deleted") {
+      if (!opts?.preview) return null;
+      const user = await getAdminSession();
+      if (!user) return null;
+    } else if (row.status !== "published") {
       if (!opts?.preview) return null;
       const user = await getAdminSession();
       if (!user) return null;
@@ -97,6 +101,31 @@ export async function getCmsNews(
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * RU: Наявність CMS-ряду для slug (без preview). unpublished/deleted → не fallback на TSX.
+ * EN: CMS row presence for slug; unpublished blocks legacy TSX fallback.
+ */
+export async function getCmsNewsPresence(
+  locale: string,
+  slug: string,
+): Promise<"missing" | "published" | "unpublished"> {
+  const db = getDb();
+  if (!db) return "missing";
+  try {
+    const rows = await db
+      .select({ status: newsPosts.status })
+      .from(newsPosts)
+      .where(and(eq(newsPosts.locale, locale), eq(newsPosts.slug, slug)))
+      .limit(1);
+    const row = rows[0];
+    if (!row) return "missing";
+    if (row.status === "published") return "published";
+    return "unpublished";
+  } catch {
+    return "missing";
   }
 }
 

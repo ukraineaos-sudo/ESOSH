@@ -30,17 +30,22 @@ export function getTurnstileSiteKey(): string | null {
 }
 
 /**
- * RU: Перевірити токен Turnstile на сайті Cloudflare.
- * EN: Verify a Turnstile token with Cloudflare siteverify.
+ * RU: Перевірити токен Turnstile. У production без SECRET — fail-closed.
+ * EN: Verify Turnstile token; production without SECRET fails closed.
  */
 export async function verifyTurnstileToken(
   token: string | null | undefined,
   remoteip?: string | null,
 ): Promise<TurnstileVerifyResult> {
-  if (!isTurnstileEnforced()) {
+  if (process.env.NODE_ENV !== "production") {
     return { ok: true };
   }
-  const secret = process.env.TURNSTILE_SECRET_KEY!.trim();
+
+  const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
+  if (!secret) {
+    return { ok: false, error: "captcha_unavailable" };
+  }
+
   if (!token || typeof token !== "string" || token.length < 10 || token.length > 2048) {
     return { ok: false, error: "captcha_required" };
   }

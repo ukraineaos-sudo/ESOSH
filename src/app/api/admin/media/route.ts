@@ -4,6 +4,7 @@ import { desc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { mediaAssets } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список медиа. EN: List media assets. */
 export async function GET() {
@@ -17,6 +18,8 @@ export async function GET() {
 
 /** RU: Загрузка файла в Blob. EN: Upload a file to Vercel Blob. */
 export async function POST(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);

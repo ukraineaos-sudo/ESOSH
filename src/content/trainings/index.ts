@@ -23,6 +23,9 @@ export { uavAttacksTraining } from "./uav-attacks";
 export type {
   LocaleCode,
   LocalizedString,
+  PublicQuizQuestion,
+  PublicTrainingDetail,
+  PublicTrainingModule,
   QuizOptionId,
   QuizQuestion,
   QuizText,

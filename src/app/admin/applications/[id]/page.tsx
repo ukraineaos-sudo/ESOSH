@@ -9,14 +9,14 @@ import {
   applications,
   members,
 } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 
 type Props = { params: Promise<{ id: string }> };
 
 /** RU: Картка заявки. EN: Application detail page. */
 export default async function AdminApplicationDetailPage({ params }: Props) {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) redirect("/admin/login");
+  if (!user || !canManageRegistry(user)) redirect("/admin/login");
 
   const { id: idRaw } = await params;
   const id = Number(idRaw);

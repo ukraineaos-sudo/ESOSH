@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790943209872,
+      "tag": "0000_admin_cms",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790943209873,
+      "tag": "0001_admin_username",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790943209874,
+      "tag": "0002_rate_limit_buckets",
+      "breakpoints": true
+    }
+  ]
+}

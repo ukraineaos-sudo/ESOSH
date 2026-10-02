@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { count, desc, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 import {
   collectIndustryFacets,
   computeMemberRegistryStats,
@@ -18,7 +18,7 @@ import {
 /** RU: Реєстр членів зі статистикою та фільтрами. EN: Members registry with stats/filters. */
 export async function GET(request: Request) {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const db = getDb();

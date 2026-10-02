@@ -21,8 +21,7 @@ export const DOC_INVENTORY: Record<LocaleDocId, readonly AppLocale[]> = {
   terms: ["uk", "en"],
   offer: ["uk", "en"],
   "trainings/uav-attacks-certificate": ["uk", "en"],
-  // Real named blank not ready yet — do not advertise stub files.
-  "trainings/risk-assessment-certificate": [],
+  "trainings/risk-assessment-certificate": ["uk", "en"],
 };
 
 export type LocaleDocResolution =

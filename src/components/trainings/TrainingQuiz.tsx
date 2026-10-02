@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type {
   LocaleCode,
+  PublicQuizQuestion,
   QuizOptionId,
-  QuizQuestion,
   TrainingQuizUi,
 } from "@/content/trainings/types";
 import { pickLocalized, pickQuizText, QUIZ_OPTION_IDS } from "@/content/trainings/types";
@@ -23,93 +23,150 @@ export type TrainingQuizResult = {
   score: number;
   total: number;
   scorePercent: number;
+  answers: Record<string, QuizOptionId>;
+  certificateToken?: string | null;
 } | null;
 
 type Props = {
   locale: LocaleCode;
-  questions: QuizQuestion[];
+  slug: string;
+  moduleId: string;
+  questions: PublicQuizQuestion[];
   ui: TrainingQuizUi;
   /** When true, answers cannot be changed (video not finished). */
   locked?: boolean;
   passThresholdPercent?: number;
+  /** Other modules' answers for overall unlock token. */
+  siblingAnswers?: Record<string, Record<string, string>>;
   onResultChange?: (result: TrainingQuizResult) => void;
 };
 
 type Answers = Record<number, QuizOptionId | undefined>;
 
-function optionIdsForQuestion(q: QuizQuestion): QuizOptionId[] {
+function optionIdsForQuestion(q: PublicQuizQuestion): QuizOptionId[] {
   return QUIZ_OPTION_IDS.filter((id) => q.options[id] != null);
 }
 
-/** RU: Квіз 3–5 варіантів; блокується до перегляду відео. EN: Quiz with 3–5 options; locked until video done. */
+/** RU: Квіз 3–5 варіантів; оцінка на сервері. EN: Quiz with server-side scoring. */
 export function TrainingQuiz({
   locale,
+  slug,
+  moduleId,
   questions,
   ui,
   locked = false,
   passThresholdPercent = DEFAULT_PASS_THRESHOLD,
+  siblingAnswers,
   onResultChange,
 }: Props) {
   const t = useTranslations("trainings");
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
   const [showIncomplete, setShowIncomplete] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [scoreError, setScoreError] = useState(false);
+  const [results, setResults] = useState<{
+    score: number;
+    total: number;
+    scorePercent: number;
+    byId: Record<number, boolean>;
+    correctById: Record<number, QuizOptionId>;
+  } | null>(null);
   const optionPrefix = { ...DEFAULT_OPTION_PREFIX, ...ui.optionPrefix };
   const onResultChangeRef = useRef(onResultChange);
   onResultChangeRef.current = onResultChange;
 
-  const results = useMemo(() => {
-    if (!submitted) return null;
-    let score = 0;
-    const byId: Record<number, boolean> = {};
-    for (const q of questions) {
-      const ok = answers[q.id] === q.correct;
-      byId[q.id] = ok;
-      if (ok) score += 1;
-    }
-    const total = questions.length;
-    const scorePercent = total > 0 ? (score / total) * 100 : 0;
-    return { score, total, scorePercent, byId };
-  }, [answers, questions, submitted]);
-
-  useEffect(() => {
-    const cb = onResultChangeRef.current;
-    if (!cb) return;
-    if (!results) {
-      cb(null);
-      return;
-    }
-    cb({
-      score: results.score,
-      total: results.total,
-      scorePercent: results.scorePercent,
-    });
-  }, [results]);
-
   void passThresholdPercent;
 
+  function emitResult(next: TrainingQuizResult) {
+    onResultChangeRef.current?.(next);
+  }
+
   function onSelect(questionId: number, option: QuizOptionId) {
-    if (submitted || locked) return;
+    if (submitted || locked || submitting) return;
     setShowIncomplete(false);
+    setScoreError(false);
     setAnswers((prev) => ({ ...prev, [questionId]: option }));
   }
 
-  function onSubmit() {
-    if (locked) return;
+  async function onSubmit() {
+    if (locked || submitting) return;
     const complete = questions.every((q) => answers[q.id] != null);
     if (!complete) {
       setShowIncomplete(true);
       return;
     }
     setShowIncomplete(false);
-    setSubmitted(true);
+    setScoreError(false);
+    setSubmitting(true);
+
+    const payloadAnswers: Record<string, QuizOptionId> = {};
+    for (const q of questions) {
+      const selected = answers[q.id];
+      if (selected) payloadAnswers[String(q.id)] = selected;
+    }
+
+    try {
+      const allModuleAnswers = {
+        ...(siblingAnswers || {}),
+        [moduleId]: payloadAnswers,
+      };
+      const response = await fetch(`/api/trainings/${encodeURIComponent(slug)}/score`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleId,
+          answers: payloadAnswers,
+          allModuleAnswers,
+        }),
+      });
+      if (!response.ok) {
+        setScoreError(true);
+        return;
+      }
+      const data = (await response.json()) as {
+        ok?: boolean;
+        score?: number;
+        total?: number;
+        scorePercent?: number;
+        byId?: Record<number, boolean>;
+        correctById?: Record<number, QuizOptionId>;
+        certificateToken?: string | null;
+      };
+      if (!data.ok || typeof data.score !== "number" || typeof data.total !== "number") {
+        setScoreError(true);
+        return;
+      }
+      setResults({
+        score: data.score,
+        total: data.total,
+        scorePercent: typeof data.scorePercent === "number" ? data.scorePercent : 0,
+        byId: data.byId || {},
+        correctById: data.correctById || {},
+      });
+      setSubmitted(true);
+      emitResult({
+        score: data.score,
+        total: data.total,
+        scorePercent: typeof data.scorePercent === "number" ? data.scorePercent : 0,
+        answers: payloadAnswers,
+        certificateToken: data.certificateToken,
+      });
+    } catch {
+      setScoreError(true);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function onReset() {
-    if (locked) return;
+    if (locked || submitting) return;
     setAnswers({});
     setSubmitted(false);
     setShowIncomplete(false);
+    setScoreError(false);
+    setResults(null);
+    emitResult(null);
   }
 
   const scoreTemplate = pickLocalized(ui.scoreLabel, locale);
@@ -143,6 +200,7 @@ export function TrainingQuiz({
         {questions.map((q) => {
           const selected = answers[q.id];
           const isCorrect = results?.byId[q.id];
+          const correctOption = results?.correctById[q.id];
           const statusClass =
             submitted && isCorrect === true
               ? " is-correct"
@@ -161,8 +219,8 @@ export function TrainingQuiz({
                   const optionText = pickQuizText(optionMap, locale);
                   const id = `q${q.id}-${optionId}`;
                   const pickedWrong =
-                    submitted && selected === optionId && optionId !== q.correct;
-                  const isKey = submitted && optionId === q.correct;
+                    submitted && selected === optionId && optionId !== correctOption;
+                  const isKey = submitted && optionId === correctOption;
                   return (
                     <label
                       key={optionId}
@@ -177,7 +235,7 @@ export function TrainingQuiz({
                         name={`q-${q.id}`}
                         value={optionId}
                         checked={selected === optionId}
-                        disabled={locked || submitted}
+                        disabled={locked || submitted || submitting}
                         onChange={() => onSelect(q.id, optionId)}
                       />
                       <span>
@@ -206,6 +264,12 @@ export function TrainingQuiz({
         </p>
       ) : null}
 
+      {scoreError ? (
+        <p className="training-quiz__incomplete regular-s" role="alert">
+          {t("quizScoreError")}
+        </p>
+      ) : null}
+
       {scoreText ? (
         <p className="training-quiz__score regular-m" role="status">
           {scoreText}
@@ -214,8 +278,13 @@ export function TrainingQuiz({
 
       <div className="training-quiz__actions">
         {!submitted ? (
-          <button type="button" className="btn is--primary w-button" onClick={onSubmit} disabled={locked}>
-            {pickLocalized(ui.submit, locale)}
+          <button
+            type="button"
+            className="btn is--primary w-button"
+            onClick={() => void onSubmit()}
+            disabled={locked || submitting}
+          >
+            {submitting ? t("quizScoring") : pickLocalized(ui.submit, locale)}
           </button>
         ) : (
           <button type="button" className="btn is--primary w-button" onClick={onReset} disabled={locked}>

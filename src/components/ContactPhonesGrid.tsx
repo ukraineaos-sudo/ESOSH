@@ -1,16 +1,20 @@
 import { getContactSettings } from "@/lib/site-settings";
+import type { AppLocale } from "@/lib/locale";
 
 /** RU: Карточки телефонов/email из settings. EN: Contact cards from site settings. */
 export async function ContactPhonesGrid({
   locale,
   labels,
 }: {
-  locale: "uk" | "en";
+  locale: AppLocale;
   labels: { phone: string; email: string };
 }) {
   const settings = await getContactSettings();
   const phoneIcon = "/images/contact-us/Phone-db61c784.svg";
   const mailIcon = "/images/contact-us/Mail-162a9ef8.svg";
+  // Address fields exist only as uk/en in settings — non-uk locales show the EN address when present.
+  const address = locale === "uk" ? settings.addressUk : settings.addressEn;
+
   return (
     <div className="w-layout-grid is--grid-3-columns--a-1-column-small-spacing">
       {settings.phones.slice(0, 2).map((phone) => (
@@ -38,14 +42,9 @@ export async function ContactPhonesGrid({
           <h3 className="h3">{settings.email}</h3>
         </div>
       </a>
-      {locale === "uk" && settings.addressUk ? (
+      {address ? (
         <div className="regular-l" style={{ gridColumn: "1 / -1" }}>
-          {settings.addressUk}
-        </div>
-      ) : null}
-      {locale === "en" && settings.addressEn ? (
-        <div className="regular-l" style={{ gridColumn: "1 / -1" }}>
-          {settings.addressEn}
+          {address}
         </div>
       ) : null}
     </div>

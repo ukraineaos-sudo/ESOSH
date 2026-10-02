@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { changeAdminPassword } from "@/lib/admin/auth";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Зміна пароля поточного користувача. EN: Change password for the signed-in admin. */
 export async function POST(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const body = await request.json().catch(() => null);
   if (
     !body ||

@@ -206,6 +206,11 @@ export function canEditContent(user: AdminSessionUser): boolean {
   return user.role === "admin" || user.role === "editor";
 }
 
+/** RU: Реєстр заявок/членів — лише admin. EN: Applications/members registry — admin only. */
+export function canManageRegistry(user: AdminSessionUser): boolean {
+  return user.role === "admin";
+}
+
 /**
  * RU: Блокує write-API, поки не змінено початковий пароль.
  * EN: Block mutating admin APIs until bootstrap password is changed.

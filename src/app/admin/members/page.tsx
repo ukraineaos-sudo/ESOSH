@@ -11,12 +11,12 @@ import {
 } from "@/lib/admin/member-registry";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 
 /** RU: Реєстр учасників зі статистикою. EN: Members registry with stats. */
 export default async function AdminMembersPage() {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) redirect("/admin/login");
+  if (!user || !canManageRegistry(user)) redirect("/admin/login");
 
   let items: MemberRegistryItem[] = [];
   let loadError: "unavailable" | null = null;

@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
+import { csvCell } from "@/lib/csv";
 import { LEVEL_LABELS_UK, STATUS_LABELS_UK } from "@/lib/enrollment/levels";
 
 /** RU: CSV-експорт заявок (UTF-8 BOM). EN: CSV export with UA charset. */
 export async function GET() {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const db = getDb();
@@ -54,12 +55,6 @@ export async function GET() {
     "created_at",
   ];
 
-  const escape = (value: unknown) => {
-    const s = value == null ? "" : String(value);
-    if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-    return s;
-  };
-
   const lines = [header.join(",")];
   for (const row of rows) {
     const auto = row.autoLevel as keyof typeof LEVEL_LABELS_UK | null;
@@ -84,7 +79,7 @@ export async function GET() {
         row.country || "",
         row.createdAt?.toISOString?.() || "",
       ]
-        .map(escape)
+        .map(csvCell)
         .join(","),
     );
   }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { classifyEnrollment, COMPANY_SIZES, COURSE_TYPES, CPD_STATUSES, EDUCATION_LEVELS } from "@/lib/enrollment/classify";
 import { scoreCodexQuiz } from "@/lib/enrollment/quiz";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 const previewSchema = z.object({
   oshFunctions: z.boolean(),
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
   if (origin && origin !== new URL(request.url).origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
   }
+  const limited = await assertRateLimit(request, "enrollment_preview");
+  if (limited) return limited;
   let json: unknown;
   try {
     json = await request.json();

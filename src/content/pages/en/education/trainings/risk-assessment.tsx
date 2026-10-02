@@ -2,10 +2,11 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { riskAssessmentTraining } from "@/content/trainings";
+import { toPublicTraining } from "@/lib/trainings/public";
 
 /** RU: Деталь тренінгу «Оцінка ризиків» (EN). EN: Risk-assessment training detail. */
 export default function PageContent() {
-  const training = riskAssessmentTraining;
+  const training = toPublicTraining(riskAssessmentTraining);
 
   return (
     <>

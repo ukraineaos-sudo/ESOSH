@@ -1,5 +1,16 @@
 import type { LeadershipPerson } from "@/lib/cms/leadership";
 import { listPublishedLeadership } from "@/lib/cms/leadership";
+import type { AppLocale } from "@/lib/locale";
+
+const SECTION_TITLE: Record<AppLocale, string> = {
+  uk: "Керівний склад",
+  en: "The management team",
+  de: "Das Führungsteam",
+  es: "El equipo directivo",
+  fr: "L’équipe de direction",
+  az: "Rəhbərlik heyəti",
+  kk: "Басшылық құрамы",
+};
 
 /** Fallback when DB empty / unavailable — mirrors legacy about-esosh capture. */
 const LEGACY: Omit<LeadershipPerson, "id" | "sortOrder" | "status">[] = [
@@ -54,7 +65,7 @@ const LEGACY: Omit<LeadershipPerson, "id" | "sortOrder" | "status">[] = [
 ];
 
 /** RU: Сітка керівного складу на Про ESOSH. EN: Leadership grid on About. */
-export async function LeadershipSection({ locale }: { locale: "uk" | "en" }) {
+export async function LeadershipSection({ locale }: { locale: AppLocale }) {
   const fromDb = await listPublishedLeadership();
   const people =
     fromDb.length > 0
@@ -66,7 +77,8 @@ export async function LeadershipSection({ locale }: { locale: "uk" | "en" }) {
           ...p,
         }));
 
-  const title = locale === "en" ? "The management team" : "Керівний склад";
+  const title = SECTION_TITLE[locale];
+  const preferEn = locale !== "uk";
 
   return (
     <section className="section is--margin-top-144--t-128--m-104">
@@ -74,8 +86,12 @@ export async function LeadershipSection({ locale }: { locale: "uk" | "en" }) {
         <h2 className="h2 is--margin-bottom-40">{title}</h2>
         <div className="w-layout-grid is--grid-3columns--t-2--m-1">
           {people.map((person) => {
-            const name = locale === "en" ? person.nameEn || person.nameUk : person.nameUk || person.nameEn;
-            const role = locale === "en" ? person.roleEn || person.roleUk : person.roleUk || person.roleEn;
+            const name = preferEn
+              ? person.nameEn || person.nameUk
+              : person.nameUk || person.nameEn;
+            const role = preferEn
+              ? person.roleEn || person.roleUk
+              : person.roleUk || person.roleEn;
             const imgClass = [
               "image",
               "is--w-100p",

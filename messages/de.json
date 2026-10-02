@@ -94,13 +94,13 @@
     "fileNotRestored": "Dateien werden nach dem Aktualisieren oder Schließen des Tabs nicht wiederhergestellt — laden Sie sie bei Bedarf erneut hoch.",
     "attachments": {
       "title": "Dokumente (optional)",
-      "hint": "Sie können ein Foto, Diplom, Zertifikate oder Erfahrungsnachweise hinzufügen — oder überspringen. PDF/JPG/PNG, bis 10 MB pro Datei. Dokumente beschleunigen die Prüfung, sind aber nicht Pflicht.",
+      "hint": "Sie können ein Foto, Diplom, Zertifikate oder Erfahrungsnachweise hinzufügen — oder überspringen. PDF/JPG/PNG, bis 3 MB pro Datei. Dokumente beschleunigen die Prüfung, sind aber nicht Pflicht.",
       "drop": "Dateien hierher ziehen oder vom Gerät auswählen",
       "browse": "Dateien auswählen",
       "remove": "Entfernen",
       "empty": "Noch keine Dateien — Sie können ohne sie einreichen.",
       "errorTooMany": "Zu viele Dateien (maximal 20).",
-      "errorTotalSize": "Gesamtgröße der Dateien überschreitet 40 MB.",
+      "errorTotalSize": "Gesamtgröße der Dateien überschreitet 4 MB.",
       "errorFile": "Einige Dateien wurden übersprungen: nur PDF/JPG/PNG innerhalb der Größengrenze sind erlaubt."
     },
     "oshExpand": "Arbeitssicherheit und Gesundheitsschutz",
@@ -127,7 +127,7 @@
       "email": "E-Mail",
       "secondaryEmail": "Weitere E-Mail",
       "profileUrl": "LinkedIn / Profil",
-      "photo": "Foto (JPG/PNG, bis 5 MB)",
+      "photo": "Foto (JPG/PNG, bis 2 MB)",
       "jobTitle": "Position",
       "organization": "Organisation",
       "industry": "Branche",
@@ -136,7 +136,7 @@
       "totalYears": "Gesamte Berufsjahre",
       "oshYears": "Jahre OSH-Erfahrung",
       "responsibilities": "Hauptaufgaben",
-      "experienceFiles": "Erfahrungsnachweis (PDF/JPG/PNG, bis 10 MB)",
+      "experienceFiles": "Erfahrungsnachweis (PDF/JPG/PNG, bis 3 MB)",
       "educationLevel": "Höchster Bildungsabschluss",
       "profileEducation": "Ist Ihre Ausbildung für OSH relevant?",
       "institution": "Bildungseinrichtung",
@@ -264,11 +264,11 @@
       "emailConflict": "Diese E-Mails sind bereits mit unterschiedlichen Datensätzen verknüpft. Bitte kontaktieren Sie einen Administrator.",
       "certificateRequired": "Für den angegebenen Kurs ist eine Zertifikatsdatei erforderlich.",
       "certificateRequiredShort": "Zertifikat hinzufügen",
-      "too_large": "Datei zu groß (PDF/JPG/PNG: bis 10 MB).",
+      "too_large": "Datei zu groß (PDF/JPG/PNG: bis 3 MB).",
       "bad_type": "Nicht unterstützter Dateityp. Erlaubt: PDF, JPG, PNG.",
       "bad_signature": "Dateiformatprüfung fehlgeschlagen. Laden Sie ein gültiges PDF/JPG/PNG hoch.",
       "too_many_files": "Zu viele Dateien (maximal 20).",
-      "total_too_large": "Gesamtgröße der Dateien überschreitet 40 MB.",
+      "total_too_large": "Gesamtgröße der Dateien überschreitet 4 MB.",
       "invalidFields": "Der Server hat einige Felder abgelehnt. Öffnen Sie einen Eintrag in der Liste unten.",
       "captcha_required": "Schließen Sie die „Ich bin kein Roboter“-Prüfung vor dem Senden ab.",
       "captcha_invalid": "Prüfung fehlgeschlagen. Widget aktualisieren und erneut versuchen.",
@@ -281,7 +281,8 @@
       "gateHint": "Bevor Sie das Formular ausfüllen, schließen Sie eine kurze Cloudflare-Prüfung ab. Das schützt vor Spam und automatischen Anträgen.",
       "stepConfirm": "Prüfung vor dem Senden bestätigen",
       "required": "Schließen Sie die Prüfung ab, um den Antrag zu senden.",
-      "widgetError": "Prüfung konnte nicht geladen werden. Seite aktualisieren oder challenges.cloudflare.com im Werbeblocker zulassen."
+      "widgetError": "Prüfung konnte nicht geladen werden. Seite aktualisieren oder challenges.cloudflare.com im Werbeblocker zulassen.",
+      "configUnavailable": "Das Formular ist vorübergehend nicht verfügbar: Bot-Schutz ist nicht konfiguriert. Schreiben Sie an office@esosh.net."
     },
     "success": {
       "thanks": "Vielen Dank!",
@@ -323,7 +324,10 @@
     "youtubeEnableHint": "Aktivieren Sie Marketing, speichern Sie — dann erscheint der Player auf dieser Seite.",
     "youtubeSeekHint": "Vorspulen ist begrenzt: Video bis zum Ende ansehen, um das Quiz freizuschalten.",
     "youtubeWatched": "Video angesehen",
-    "youtubeLoading": "Player wird geladen…"
+    "youtubeLoading": "Player wird geladen…",
+    "quizScoreError": "Antworten konnten nicht geprüft werden. Bitte erneut versuchen.",
+    "quizScoring": "Wird geprüft…",
+    "certificateParticipationNote": "Dies ist eine Teilnahmebescheinigung, keine Qualifikationsbescheinigung."
   },
   "content": {
     "pendingTitle": "Seitenübersetzung in Arbeit",

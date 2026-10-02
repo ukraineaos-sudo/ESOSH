@@ -94,13 +94,13 @@
     "fileNotRestored": "Files are not restored after a page refresh or closing the tab — please upload them again if needed.",
     "attachments": {
       "title": "Documents (optional)",
-      "hint": "You may add a photo, diploma, certificates, or proof of experience — or skip. PDF/JPG/PNG, up to 10 MB per file. Documents speed up review but are not required.",
+      "hint": "You may add a photo, diploma, certificates, or proof of experience — or skip. PDF/JPG/PNG, up to 3 MB per file. Documents speed up review but are not required.",
       "drop": "Drag and drop files here, or choose from your device",
       "browse": "Choose files",
       "remove": "Remove",
       "empty": "No files yet — you can submit without them.",
       "errorTooMany": "Too many files (maximum 20).",
-      "errorTotalSize": "Total file size exceeds 40 MB.",
+      "errorTotalSize": "Total file size exceeds 4 MB.",
       "errorFile": "Some files were skipped: only PDF/JPG/PNG within the size limit are allowed."
     },
     "oshExpand": "occupational safety and health",
@@ -127,7 +127,7 @@
       "email": "Email",
       "secondaryEmail": "Secondary email",
       "profileUrl": "LinkedIn / profile",
-      "photo": "Photo (JPG/PNG, up to 5 MB)",
+      "photo": "Photo (JPG/PNG, up to 2 MB)",
       "jobTitle": "Job title",
       "organization": "Organisation",
       "industry": "Industry",
@@ -136,7 +136,7 @@
       "totalYears": "Total years of experience",
       "oshYears": "Years of OSH experience",
       "responsibilities": "Main responsibilities",
-      "experienceFiles": "Proof of experience (PDF/JPG/PNG, up to 10 MB)",
+      "experienceFiles": "Proof of experience (PDF/JPG/PNG, up to 3 MB)",
       "educationLevel": "Highest education level",
       "profileEducation": "Is your education relevant to OSH?",
       "institution": "Educational institution",
@@ -264,11 +264,11 @@
       "emailConflict": "These emails are already linked to different records. Please contact an administrator.",
       "certificateRequired": "A certificate file is required for the declared course.",
       "certificateRequiredShort": "Add a certificate",
-      "too_large": "File is too large (PDF/JPG/PNG: up to 10 MB).",
+      "too_large": "File is too large (PDF/JPG/PNG: up to 3 MB).",
       "bad_type": "Unsupported file type. Allowed: PDF, JPG, PNG.",
       "bad_signature": "File failed format checks. Upload a valid PDF/JPG/PNG.",
       "too_many_files": "Too many files (maximum 20).",
-      "total_too_large": "Total file size exceeds 40 MB.",
+      "total_too_large": "Total file size exceeds 4 MB.",
       "invalidFields": "The server rejected some fields. Open an item in the list below.",
       "captcha_required": "Complete the “I’m not a robot” check before submitting.",
       "captcha_invalid": "Verification failed. Refresh the widget and try again.",
@@ -281,7 +281,8 @@
       "gateHint": "Before filling the application, complete a short Cloudflare check. This protects against spam and automated submissions.",
       "stepConfirm": "Confirm the check before submitting",
       "required": "Complete the check to submit the application.",
-      "widgetError": "Could not load the check. Refresh the page or allow challenges.cloudflare.com in your ad blocker."
+      "widgetError": "Could not load the check. Refresh the page or allow challenges.cloudflare.com in your ad blocker.",
+      "configUnavailable": "The application form is temporarily unavailable: bot protection is not configured. Email office@esosh.net."
     },
     "success": {
       "thanks": "Thank you!",
@@ -323,7 +324,10 @@
     "youtubeEnableHint": "Enable Marketing, save your choice, and the player will appear on this page.",
     "youtubeSeekHint": "Forward seeking is limited: watch the video to the end to unlock the quiz.",
     "youtubeWatched": "Video watched",
-    "youtubeLoading": "Loading player…"
+    "youtubeLoading": "Loading player…",
+    "quizScoreError": "Could not score your answers. Please try again.",
+    "quizScoring": "Checking…",
+    "certificateParticipationNote": "This is a participation certificate, not a professional qualification attestation."
   },
   "content": {
     "pendingTitle": "Page translation in progress",

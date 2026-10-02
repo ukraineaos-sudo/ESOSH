@@ -94,13 +94,13 @@
     "fileNotRestored": "Los archivos no se restauran tras actualizar o cerrar la pestaña — cárguelos de nuevo si es necesario.",
     "attachments": {
       "title": "Documentos (opcional)",
-      "hint": "Puede añadir una foto, diploma, certificados o prueba de experiencia — o omitirlo. PDF/JPG/PNG, hasta 10 MB por archivo. Los documentos agilizan la revisión, pero no son obligatorios.",
+      "hint": "Puede añadir una foto, diploma, certificados o prueba de experiencia — o omitirlo. PDF/JPG/PNG, hasta 3 MB por archivo. Los documentos agilizan la revisión, pero no son obligatorios.",
       "drop": "Arrastre archivos aquí o elíjalos del dispositivo",
       "browse": "Elegir archivos",
       "remove": "Quitar",
       "empty": "Aún no hay archivos — puede enviar sin ellos.",
       "errorTooMany": "Demasiados archivos (máximo 20).",
-      "errorTotalSize": "El tamaño total de archivos supera 40 MB.",
+      "errorTotalSize": "El tamaño total de archivos supera 4 MB.",
       "errorFile": "Se omitieron algunos archivos: solo se permiten PDF/JPG/PNG dentro del límite de tamaño."
     },
     "oshExpand": "seguridad y salud en el trabajo",
@@ -127,7 +127,7 @@
       "email": "Correo electrónico",
       "secondaryEmail": "Correo secundario",
       "profileUrl": "LinkedIn / perfil",
-      "photo": "Foto (JPG/PNG, hasta 5 MB)",
+      "photo": "Foto (JPG/PNG, hasta 2 MB)",
       "jobTitle": "Cargo",
       "organization": "Organización",
       "industry": "Sector",
@@ -136,7 +136,7 @@
       "totalYears": "Años totales de experiencia",
       "oshYears": "Años de experiencia en SST",
       "responsibilities": "Responsabilidades principales",
-      "experienceFiles": "Prueba de experiencia (PDF/JPG/PNG, hasta 10 MB)",
+      "experienceFiles": "Prueba de experiencia (PDF/JPG/PNG, hasta 3 MB)",
       "educationLevel": "Nivel educativo más alto",
       "profileEducation": "¿Su educación es pertinente para SST?",
       "institution": "Institución educativa",
@@ -264,11 +264,11 @@
       "emailConflict": "Estos correos ya están vinculados a registros distintos. Contacte a un administrador.",
       "certificateRequired": "Se requiere un archivo de certificado para el curso declarado.",
       "certificateRequiredShort": "Añada un certificado",
-      "too_large": "Archivo demasiado grande (PDF/JPG/PNG: hasta 10 MB).",
+      "too_large": "Archivo demasiado grande (PDF/JPG/PNG: hasta 3 MB).",
       "bad_type": "Tipo de archivo no admitido. Permitidos: PDF, JPG, PNG.",
       "bad_signature": "El archivo no pasó la comprobación de formato. Cargue un PDF/JPG/PNG válido.",
       "too_many_files": "Demasiados archivos (máximo 20).",
-      "total_too_large": "El tamaño total de archivos supera 40 MB.",
+      "total_too_large": "El tamaño total de archivos supera 4 MB.",
       "invalidFields": "El servidor rechazó algunos campos. Abra un elemento de la lista siguiente.",
       "captcha_required": "Complete la verificación «No soy un robot» antes de enviar.",
       "captcha_invalid": "La verificación falló. Actualice el widget e inténtelo de nuevo.",
@@ -281,7 +281,8 @@
       "gateHint": "Antes de rellenar la solicitud, complete una breve verificación de Cloudflare. Protege contra spam y envíos automáticos.",
       "stepConfirm": "Confirme la verificación antes de enviar",
       "required": "Complete la verificación para enviar la solicitud.",
-      "widgetError": "No se pudo cargar la verificación. Actualice la página o permita challenges.cloudflare.com en el bloqueador de anuncios."
+      "widgetError": "No se pudo cargar la verificación. Actualice la página o permita challenges.cloudflare.com en el bloqueador de anuncios.",
+      "configUnavailable": "El formulario no está disponible temporalmente: la protección anti-bots no está configurada. Escriba a office@esosh.net."
     },
     "success": {
       "thanks": "¡Gracias!",
@@ -323,7 +324,10 @@
     "youtubeEnableHint": "Active Marketing, guarde la elección y el reproductor aparecerá en esta página.",
     "youtubeSeekHint": "El avance está limitado: vea el vídeo hasta el final para desbloquear el cuestionario.",
     "youtubeWatched": "Vídeo visto",
-    "youtubeLoading": "Cargando reproductor…"
+    "youtubeLoading": "Cargando reproductor…",
+    "quizScoreError": "No se pudieron comprobar las respuestas. Inténtelo de nuevo.",
+    "quizScoring": "Comprobando…",
+    "certificateParticipationNote": "Este es un certificado de participación, no una acreditación de cualificación."
   },
   "content": {
     "pendingTitle": "Traducción de la página en curso",

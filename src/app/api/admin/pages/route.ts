@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { pages } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { emptyBlocks } from "@/lib/cms/blocks";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список CMS-страниц. EN: List CMS pages. */
 export async function GET() {
@@ -17,6 +18,8 @@ export async function GET() {
 
 /** RU: Создать/обновить CMS-страницу. EN: Upsert a CMS page document. */
 export async function POST(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);

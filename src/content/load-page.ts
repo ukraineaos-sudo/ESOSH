@@ -27,8 +27,7 @@ export async function getPage(
     return (await pageLoaders[path as keyof typeof pageLoaders]()).default;
   }
 
-  // Honest pending when uk/en sibling exists but this locale has no loader
-  // (e.g. trainings still uk/en-only after CONTENT_LOCALES expanded).
+  // Honest pending when a uk/en sibling exists but this locale has no loader yet.
   if (isAppLocale(locale)) {
     const ukPath = localizedPath("uk", route);
     const enPath = localizedPath("en", route);

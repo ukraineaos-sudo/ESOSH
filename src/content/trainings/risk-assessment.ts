@@ -4,30 +4,65 @@ const quizUi: TrainingQuizUi = {
   title: {
     uk: "Перевірка знань",
     en: "Knowledge check",
+    de: "Wissenscheck",
+    es: "Comprobación de conocimientos",
+    fr: "Contrôle des connaissances",
+    az: "Bilik yoxlaması",
+    kk: "Білім тексерісі",
   },
   submit: {
     uk: "Перевірити відповіді",
     en: "Check answers",
+    de: "Antworten prüfen",
+    es: "Comprobar respuestas",
+    fr: "Vérifier les réponses",
+    az: "Cavabları yoxla",
+    kk: "Жауаптарды тексеру",
   },
   reset: {
     uk: "Спробувати ще раз",
     en: "Try again",
+    de: "Erneut versuchen",
+    es: "Intentar de nuevo",
+    fr: "Réessayer",
+    az: "Yenidən cəhd edin",
+    kk: "Қайта көру",
   },
   incomplete: {
     uk: "Оберіть відповідь на кожне запитання, щоб перевірити результат.",
     en: "Select an answer for every question to check your result.",
+    de: "Wählen Sie für jede Frage eine Antwort, um Ihr Ergebnis zu prüfen.",
+    es: "Seleccione una respuesta para cada pregunta para comprobar su resultado.",
+    fr: "Sélectionnez une réponse pour chaque question afin de vérifier votre résultat.",
+    az: "Nəticəni yoxlamaq üçün hər suala cavab seçin.",
+    kk: "Нәтижені тексеру үшін әр сұраққа жауап таңдаңыз.",
   },
   scoreLabel: {
     uk: "Результат: {score} з {total}",
     en: "Score: {score} of {total}",
+    de: "Ergebnis: {score} von {total}",
+    es: "Resultado: {score} de {total}",
+    fr: "Score : {score} sur {total}",
+    az: "Nəticə: {score} / {total}",
+    kk: "Нәтиже: {score} / {total}",
   },
   correctLabel: {
     uk: "Правильно",
     en: "Correct",
+    de: "Richtig",
+    es: "Correcto",
+    fr: "Correct",
+    az: "Düzgün",
+    kk: "Дұрыс",
   },
   wrongLabel: {
     uk: "Неправильно",
     en: "Incorrect",
+    de: "Falsch",
+    es: "Incorrecto",
+    fr: "Incorrect",
+    az: "Yanlış",
+    kk: "Қате",
   },
 };
 
@@ -51,8 +86,8 @@ function q(
 }
 
 /**
- * RU: Курс «Оцінка ризиків» — 3 модулі, відео + тест (uk), сертифікат пізніше.
- * EN: Risk-assessment course — 3 modules; quiz in uk (video language).
+ * RU: Курс «Оцінка ризиків» — 3 модулі, відео + тест (uk), сертифікат uk/en.
+ * EN: Risk-assessment course — 3 modules; quiz stays uk (video language); cert uk/en PDFs.
  */
 export const riskAssessmentTraining: TrainingDetail = {
   slug: "risk-assessment",
@@ -75,6 +110,7 @@ export const riskAssessmentTraining: TrainingDetail = {
     az: "Təhlükəsizlik mədəniyyəti, sistemli risk qiymətləndirilməsi və nəzarət tədbirlərinin iyerarxiyası üzrə üç modul. Hər videodan sonra — 5 suallıq test (ukraynaca, video ilə eyni).",
     kk: "Қауіпсіздік мәдениеті, жүйелі тәуекел бағалауы және бақылау шаралары иерархиясы бойынша үш модуль. Әр бейнеден кейін — 5 сұрақты тест (украин тілінде, бейнемен бірдей).",
   },
+  certificateDocId: "trainings/risk-assessment-certificate",
   passThresholdPercent: 75,
   quizUi,
   modules: [
@@ -83,10 +119,20 @@ export const riskAssessmentTraining: TrainingDetail = {
       title: {
         uk: "Частина 1. Культура безпеки та свідоме мислення",
         en: "Part 1. Safety culture and mindful thinking",
+        de: "Teil 1. Sicherheitskultur und bewusstes Denken",
+        es: "Parte 1. Cultura de seguridad y pensamiento consciente",
+        fr: "Partie 1. Culture de sécurité et pensée attentive",
+        az: "Hissə 1. Təhlükəsizlik mədəniyyəti və şüurlu düşüncə",
+        kk: "1-бөлім. Қауіпсіздік мәдениеті және саналы ойлау",
       },
       videoTitle: {
         uk: "Відео · Частина 1 з 3 — Культура безпеки",
         en: "Video · Part 1 of 3 — Safety culture",
+        de: "Video · Teil 1 von 3 — Sicherheitskultur",
+        es: "Vídeo · Parte 1 de 3 — Cultura de seguridad",
+        fr: "Vidéo · Partie 1 sur 3 — Culture de sécurité",
+        az: "Video · 3-dən 1-ci hissə — Təhlükəsizlik mədəniyyəti",
+        kk: "Бейне · 3-тің 1-бөлімі — Қауіпсіздік мәдениеті",
       },
       youtubeId: "bNO7uJzgt1A",
       quiz: [
@@ -152,10 +198,20 @@ export const riskAssessmentTraining: TrainingDetail = {
       title: {
         uk: "Частина 2. Системна оцінка та матриця ризиків",
         en: "Part 2. Systematic assessment and the risk matrix",
+        de: "Teil 2. Systematische Bewertung und Risikomatrix",
+        es: "Parte 2. Evaluación sistemática y matriz de riesgos",
+        fr: "Partie 2. Évaluation systématique et matrice des risques",
+        az: "Hissə 2. Sistemli qiymətləndirmə və risk matrisi",
+        kk: "2-бөлім. Жүйелі бағалау және тәуекел матрицасы",
       },
       videoTitle: {
         uk: "Відео · Частина 2 з 3 — Системна оцінка ризиків",
         en: "Video · Part 2 of 3 — Systematic risk assessment",
+        de: "Video · Teil 2 von 3 — Systematische Risikobewertung",
+        es: "Vídeo · Parte 2 de 3 — Evaluación sistemática de riesgos",
+        fr: "Vidéo · Partie 2 sur 3 — Évaluation systématique des risques",
+        az: "Video · 3-dən 2-ci hissə — Sistemli risk qiymətləndirilməsi",
+        kk: "Бейне · 3-тің 2-бөлімі — Жүйелі тәуекел бағалауы",
       },
       youtubeId: "A6u6r8lRBTc",
       quiz: [
@@ -221,10 +277,20 @@ export const riskAssessmentTraining: TrainingDetail = {
       title: {
         uk: "Частина 3. Ієрархія заходів контролю та дії на практиці",
         en: "Part 3. Hierarchy of controls and action in practice",
+        de: "Teil 3. Hierarchie der Kontrollmaßnahmen und Handeln in der Praxis",
+        es: "Parte 3. Jerarquía de controles y actuación en la práctica",
+        fr: "Partie 3. Hiérarchie des mesures de contrôle et action en pratique",
+        az: "Hissə 3. Nəzarət tədbirlərinin iyerarxiyası və praktikada hərəkət",
+        kk: "3-бөлім. Бақылау шаралары иерархиясы және практикадағы әрекет",
       },
       videoTitle: {
         uk: "Відео · Частина 3 з 3 — Ієрархія заходів контролю",
         en: "Video · Part 3 of 3 — Hierarchy of controls",
+        de: "Video · Teil 3 von 3 — Hierarchie der Kontrollmaßnahmen",
+        es: "Vídeo · Parte 3 de 3 — Jerarquía de controles",
+        fr: "Vidéo · Partie 3 sur 3 — Hiérarchie des mesures de contrôle",
+        az: "Video · 3-dən 3-cü hissə — Nəzarət tədbirlərinin iyerarxiyası",
+        kk: "Бейне · 3-тің 3-бөлімі — Бақылау шаралары иерархиясы",
       },
       youtubeId: "xFZQaBMh3fA",
       quiz: [

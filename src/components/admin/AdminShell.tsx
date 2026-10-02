@@ -5,7 +5,12 @@ import type { ReactNode } from "react";
 import { AdminNewAppsBadge } from "@/components/admin/AdminNewAppsBadge";
 import { getDb } from "@/db";
 import { applications } from "@/db/schema";
-import { getAdminSession, isPasswordChangeEnforced, type AdminRole } from "@/lib/admin/auth";
+import {
+  canManageRegistry,
+  getAdminSession,
+  isPasswordChangeEnforced,
+  type AdminRole,
+} from "@/lib/admin/auth";
 
 const rooms = [
   { href: "/admin", label: "Огляд", group: "main", icon: "⌂" },
@@ -83,7 +88,8 @@ export async function AdminShell({
 }) {
   const user = await getAdminSession();
   if (!user) redirect("/admin/login");
-  const newApps = await loadNewAppsCount();
+  const registryAccess = canManageRegistry(user);
+  const newApps = registryAccess ? await loadNewAppsCount() : 0;
 
   return (
     <div className="admin-shell">
@@ -116,19 +122,23 @@ export async function AdminShell({
                 current={pathname.startsWith(room.href)}
               />
             ))}
-          <div className="admin-nav-label">Реєстри</div>
-          {rooms
-            .filter((r) => r.group === "crm")
-            .map((room) => (
-              <NavLink
-                key={room.href}
-                href={room.href}
-                label={room.label}
-                icon={room.icon}
-                current={pathname.startsWith(room.href)}
-                badge={"badgeKey" in room && room.badgeKey === "newApps" ? newApps : undefined}
-              />
-            ))}
+          {registryAccess ? (
+            <>
+              <div className="admin-nav-label">Реєстри</div>
+              {rooms
+                .filter((r) => r.group === "crm")
+                .map((room) => (
+                  <NavLink
+                    key={room.href}
+                    href={room.href}
+                    label={room.label}
+                    icon={room.icon}
+                    current={pathname.startsWith(room.href)}
+                    badge={"badgeKey" in room && room.badgeKey === "newApps" ? newApps : undefined}
+                  />
+                ))}
+            </>
+          ) : null}
           <div className="admin-nav-label">Система</div>
           {rooms
             .filter((r) => r.group === "settings")
@@ -149,7 +159,7 @@ export async function AdminShell({
             <h1>{title}</h1>
           </div>
           <div className="admin-chrome__ops">
-            <AdminNewAppsBadge initialCount={newApps} />
+            {registryAccess ? <AdminNewAppsBadge initialCount={newApps} /> : null}
             <Link className="admin-chrome-link" href="/" target="_blank" rel="noreferrer">
               На сайт
             </Link>

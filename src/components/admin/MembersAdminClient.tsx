@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { AdminConfirmDelete } from "@/components/admin/AdminConfirmDelete";
 import { ADMIN_DELETE_CONFIRM } from "@/lib/admin/confirm-delete";
 import type { MemberRegistryItem, MemberRegistryStats } from "@/lib/admin/member-registry";
+import { csvCell } from "@/lib/csv";
 import {
   LEVEL_CODES,
   LEVEL_LABELS_UK,
@@ -159,7 +160,7 @@ export function MembersAdminClient({
           item.country || "",
           item.city || "",
         ]
-          .map(csvEscape)
+          .map(csvCell)
           .join(","),
       ),
     ];
@@ -421,8 +422,3 @@ function shortLevelLabel(code: LevelCode): string {
   return "Спільнота";
 }
 
-function csvEscape(value: string | number): string {
-  const raw = String(value);
-  if (/[",\n]/.test(raw)) return `"${raw.replace(/"/g, '""')}"`;
-  return raw;
-}

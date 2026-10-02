@@ -5,6 +5,7 @@ import {
   applicationEvents,
   applicationFiles,
   applications,
+  members,
 } from "@/db/schema";
 import { classifyEnrollment } from "@/lib/enrollment/classify";
 import {
@@ -21,6 +22,7 @@ import { deliverEnrollmentNotify } from "@/lib/enrollment/notify";
 import { CODEX_QUIZ_VERSION, scoreCodexQuiz } from "@/lib/enrollment/quiz";
 import { enrollmentPayloadSchema } from "@/lib/enrollment/schema";
 import { resolveAdminOrigin } from "@/lib/site";
+import { assertRateLimit } from "@/lib/rate-limit";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
@@ -46,6 +48,9 @@ export async function POST(request: Request) {
   if (origin && origin !== new URL(request.url).origin) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
   }
+
+  const limited = await assertRateLimit(request, "enrollment");
+  if (limited) return limited;
 
   const db = getDb();
   if (!db) {
@@ -186,17 +191,20 @@ export async function POST(request: Request) {
   void _honeypot;
   void _answers;
 
-  let member: { memberId: number; publicId: string; created: boolean };
-  let app: typeof applications.$inferSelect;
+  let member: { memberId: number; publicId: string; created: boolean } | null = null;
+  let app: typeof applications.$inferSelect | null = null;
+  let createdMemberId: number | null = null;
+  let createdApplicationId: number | null = null;
 
   try {
-    // neon-http: інтерактивних TX немає — послідовні записи + cleanup Blob при помилці.
+    // neon-http: інтерактивних TX немає — послідовні записи + compensating rollback при помилці.
     member = await upsertMemberFromEnrollment(db, parsed.data, {
       country: parsed.data.country,
       city: parsed.data.city,
       middleName: parsed.data.middleName || null,
       lastApplicationId: applicationPublicId,
     });
+    if (member.created) createdMemberId = member.memberId;
 
     const linkedExistingMember = !member.created;
     const requiresManualReview =
@@ -234,11 +242,12 @@ export async function POST(request: Request) {
       })
       .returning();
     app = createdApp;
+    createdApplicationId = createdApp.id;
 
     if (storedFiles.length > 0) {
       await db.insert(applicationFiles).values(
         storedFiles.map((f) => ({
-          applicationId: app.id,
+          applicationId: app!.id,
           fieldKey: f.fieldKey,
           originalName: f.originalName,
           pathname: f.pathname,
@@ -266,6 +275,23 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     await deleteEnrollmentBlobs(storedFiles.map((f) => f.pathname));
+
+    // Compensating rollback: drop this request's application (+ cascade files/events).
+    // Delete member only if it was created in this request (never shared pre-existing).
+    try {
+      if (createdApplicationId != null) {
+        await db.delete(applications).where(eq(applications.id, createdApplicationId));
+      }
+      if (createdMemberId != null) {
+        await db.delete(members).where(eq(members.id, createdMemberId));
+      }
+    } catch (compensateError) {
+      console.error(
+        "[enrollment] compensate failed",
+        compensateError instanceof Error ? compensateError.message : "error",
+      );
+    }
+
     if (error instanceof Error && error.message === "email_conflict") {
       return NextResponse.json({ ok: false, error: "email_conflict" }, { status: 409 });
     }
@@ -291,6 +317,11 @@ export async function POST(request: Request) {
       }
     }
     throw error;
+  }
+
+  if (!app || !member) {
+    await deleteEnrollmentBlobs(storedFiles.map((f) => f.pathname));
+    return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   }
 
   const siteUrl = resolveAdminOrigin(request);

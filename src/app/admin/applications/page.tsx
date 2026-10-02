@@ -3,13 +3,13 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { ApplicationsAdminClient } from "@/components/admin/ApplicationsAdminClient";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 import { desc, eq, sql } from "drizzle-orm";
 
 /** RU: Реєстр заявок на вступ. EN: Enrollment applications registry. */
 export default async function AdminApplicationsPage() {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) redirect("/admin/login");
+  if (!user || !canManageRegistry(user)) redirect("/admin/login");
 
   let items: {
     id: number;

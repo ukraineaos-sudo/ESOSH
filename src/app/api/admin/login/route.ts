@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { loginAdmin } from "@/lib/admin/auth";
+import { assertRateLimit } from "@/lib/rate-limit";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Вход в админку по логіну. EN: Admin login endpoint (username). */
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
-    return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
-  }
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
+
+  const limited = await assertRateLimit(request, "admin_login");
+  if (limited) return limited;
 
   const body = await request.json().catch(() => null);
   const username =

@@ -3,6 +3,7 @@ import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { leadershipPeople } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список керівного складу. EN: List leadership people. */
 export async function GET() {
@@ -19,6 +20,8 @@ export async function GET() {
 
 /** RU: Створити картку. EN: Create leadership card. */
 export async function POST(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);
@@ -59,6 +62,8 @@ export async function POST(request: Request) {
 
 /** RU: Оновити картку. EN: Update leadership card. */
 export async function PUT(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);

@@ -485,7 +485,12 @@
     "locale": "en",
     "alternates": {
       "uk": "/education/trainings/uav-attacks",
-      "en": "/en/education/trainings/uav-attacks"
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
     },
     "image": null
   },
@@ -495,7 +500,12 @@
     "locale": "uk",
     "alternates": {
       "uk": "/education/trainings/uav-attacks",
-      "en": "/en/education/trainings/uav-attacks"
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
     },
     "image": null
   },
@@ -505,7 +515,12 @@
     "locale": "en",
     "alternates": {
       "uk": "/education/trainings/risk-assessment",
-      "en": "/en/education/trainings/risk-assessment"
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
     },
     "image": null
   },
@@ -515,7 +530,12 @@
     "locale": "uk",
     "alternates": {
       "uk": "/education/trainings/risk-assessment",
-      "en": "/en/education/trainings/risk-assessment"
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
     },
     "image": null
   },
@@ -1749,8 +1769,8 @@
     "image": null
   },
   "/es/education/trainings": {
-    "title": "ESOSH — Trainings",
-    "description": "Short video trainings on safety and emergency actions.",
+    "title": "ESOSH — Entrenamientos",
+    "description": "Capacitaciones breves en video sobre acciones de seguridad y emergencia.",
     "locale": "es",
     "alternates": {
       "uk": "/education/trainings",
@@ -1764,8 +1784,8 @@
     "image": null
   },
   "/fr/education/trainings": {
-    "title": "ESOSH — Trainings",
-    "description": "Short video trainings on safety and emergency actions.",
+    "title": "ESOSH — Formations",
+    "description": "Courtes formations vidéo sur les actions de sécurité et d’urgence.",
     "locale": "fr",
     "alternates": {
       "uk": "/education/trainings",
@@ -1779,8 +1799,8 @@
     "image": null
   },
   "/az/education/trainings": {
-    "title": "ESOSH — Trainings",
-    "description": "Short video trainings on safety and emergency actions.",
+    "title": "ESOSH — Təlimlər",
+    "description": "Təhlükəsizlik və fövqəladə hallarda hərəkətlər üzrə qısa video təlimlər.",
     "locale": "az",
     "alternates": {
       "uk": "/education/trainings",
@@ -1794,8 +1814,8 @@
     "image": null
   },
   "/kk/education/trainings": {
-    "title": "ESOSH — Trainings",
-    "description": "Short video trainings on safety and emergency actions.",
+    "title": "ESOSH — Тренингтер",
+    "description": "Қауіпсіздік және төтенше жағдайдағы әрекеттер бойынша қысқа бейне тренингтер.",
     "locale": "kk",
     "alternates": {
       "uk": "/education/trainings",
@@ -4425,6 +4445,156 @@
       "fr": "/fr/privacy-policy",
       "az": "/az/privacy-policy",
       "kk": "/kk/privacy-policy"
+    },
+    "image": null
+  },
+  "/de/education/trainings/uav-attacks": {
+    "title": "ESOSH — Verhalten bei UAV-Angriffen",
+    "description": "Videoschulung zu sicherem Verhalten von Zivilpersonen bei Drohnenangriffen, mit Wissenscheck.",
+    "locale": "de",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
+  "/es/education/trainings/uav-attacks": {
+    "title": "ESOSH — Actuación durante ataques con UAV",
+    "description": "Formación en vídeo sobre actuaciones de seguridad de civiles durante ataques con drones, con comprobación de conocimientos.",
+    "locale": "es",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
+  "/fr/education/trainings/uav-attacks": {
+    "title": "ESOSH — Conduite à tenir lors d’attaques par UAV",
+    "description": "Formation vidéo sur les actions de sécurité des civils lors d’attaques de drones, avec contrôle des connaissances.",
+    "locale": "fr",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
+  "/az/education/trainings/uav-attacks": {
+    "title": "ESOSH — PİA hücumları zamanı hərəkətlər",
+    "description": "PİA hücumları zamanı mülki şəxslərin təhlükəsiz hərəkətləri üzrə video təlim, bilik yoxlaması ilə.",
+    "locale": "az",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
+  "/kk/education/trainings/uav-attacks": {
+    "title": "ESOSH — UAV шабуылдары кезіндегі әрекеттер",
+    "description": "Ұшқышсыз ұшақтар шабуылы кезінде бейбіт тұрғындардың қауіпсіз әрекеттері бойынша бейне тренинг, білім тексерісімен.",
+    "locale": "kk",
+    "alternates": {
+      "uk": "/education/trainings/uav-attacks",
+      "en": "/en/education/trainings/uav-attacks",
+      "de": "/de/education/trainings/uav-attacks",
+      "es": "/es/education/trainings/uav-attacks",
+      "fr": "/fr/education/trainings/uav-attacks",
+      "az": "/az/education/trainings/uav-attacks",
+      "kk": "/kk/education/trainings/uav-attacks"
+    },
+    "image": null
+  },
+  "/de/education/trainings/risk-assessment": {
+    "title": "ESOSH — Risikobewertung. Basiskurs",
+    "description": "Drei kurze Module zur Risikobewertung mit Wissenscheck und Zertifikat.",
+    "locale": "de",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/es/education/trainings/risk-assessment": {
+    "title": "ESOSH — Evaluación de riesgos. Curso básico",
+    "description": "Tres módulos breves sobre evaluación de riesgos con comprobación de conocimientos y certificado.",
+    "locale": "es",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/fr/education/trainings/risk-assessment": {
+    "title": "ESOSH — Évaluation des risques. Cours de base",
+    "description": "Trois modules courts sur l’évaluation des risques avec contrôle des connaissances et certificat.",
+    "locale": "fr",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/az/education/trainings/risk-assessment": {
+    "title": "ESOSH — Risklərin qiymətləndirilməsi. Əsas kurs",
+    "description": "Risk qiymətləndirilməsi üzrə üç qısa modul, bilik yoxlaması və sertifikat.",
+    "locale": "az",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/kk/education/trainings/risk-assessment": {
+    "title": "ESOSH — Тәуекелді бағалау. Негізгі курс",
+    "description": "Тәуекелді бағалау бойынша үш қысқа модуль, білім тексерісі және сертификат.",
+    "locale": "kk",
+    "alternates": {
+      "uk": "/education/trainings/risk-assessment",
+      "en": "/en/education/trainings/risk-assessment",
+      "de": "/de/education/trainings/risk-assessment",
+      "es": "/es/education/trainings/risk-assessment",
+      "fr": "/fr/education/trainings/risk-assessment",
+      "az": "/az/education/trainings/risk-assessment",
+      "kk": "/kk/education/trainings/risk-assessment"
     },
     "image": null
   }

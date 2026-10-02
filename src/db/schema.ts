@@ -155,3 +155,10 @@ export const applicationEvents = pgTable("application_events", {
   meta: jsonb("meta").notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** RU: Ковзні вікна rate limit (без Redis). EN: Sliding-window rate limit buckets. */
+export const rateLimitBuckets = pgTable("rate_limit_buckets", {
+  key: varchar("key", { length: 191 }).primaryKey(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  count: integer("count").notNull().default(0),
+});

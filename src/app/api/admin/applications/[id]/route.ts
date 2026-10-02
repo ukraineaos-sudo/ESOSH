@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   applicationEvents,
@@ -7,7 +7,7 @@ import {
   applications,
   members,
 } from "@/db/schema";
-import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
 import {
   APPLICATION_STATUSES,
@@ -15,16 +15,21 @@ import {
   type ApplicationStatus,
   type LevelCode,
 } from "@/lib/enrollment/levels";
+import {
+  memberFieldsAfterConfirm,
+  shouldDemoteMemberAfterApplicationDecision,
+} from "@/lib/enrollment/member-status";
 import { deleteEnrollmentBlobs } from "@/lib/enrollment/files";
 import { deliverEnrollmentNotify } from "@/lib/enrollment/notify";
 import type { AppLocale } from "@/i18n/routing";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /** RU: Картка заявки. EN: Application detail. */
 export async function GET(_request: Request, ctx: Ctx) {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const db = getDb();
@@ -66,8 +71,10 @@ export async function GET(_request: Request, ctx: Ctx) {
 
 /** RU: Оновлення статусу/рівня/коментаря. EN: Update status/level/comment. */
 export async function PATCH(request: Request, ctx: Ctx) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const passwordBlock = passwordChangeRequiredResponse(user);
@@ -148,27 +155,38 @@ export async function PATCH(request: Request, ctx: Ctx) {
     .returning();
 
   if (row.member && (resolvedStatus === "confirmed" || resolvedStatus === "confirmed_no_level")) {
+    const fields = memberFieldsAfterConfirm(
+      resolvedStatus,
+      updated.approvedLevel,
+      updated.autoLevel,
+    );
     await db
       .update(members)
       .set({
-        status: resolvedStatus === "confirmed" ? "active" : "active_no_level",
-        level:
-          resolvedStatus === "confirmed"
-            ? updated.approvedLevel || updated.autoLevel
-            : "community",
+        status: fields.status,
+        level: fields.level,
         updatedAt: new Date(),
       })
       .where(eq(members.id, row.member.id));
   } else if (row.member && (resolvedStatus === "rejected" || resolvedStatus === "needs_info")) {
-    // Reject / needs_info: картка знову кандидат (мінімальний відкат після confirm).
-    await db
-      .update(members)
-      .set({
-        status: "candidate",
-        level: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(members.id, row.member.id));
+    const siblingStatuses = await db
+      .select({ status: applications.status })
+      .from(applications)
+      .where(and(eq(applications.memberId, row.member.id), ne(applications.id, id)));
+    const mayDemote = shouldDemoteMemberAfterApplicationDecision({
+      decidedStatus: resolvedStatus as ApplicationStatus,
+      otherApplicationStatuses: siblingStatuses.map((s) => s.status as ApplicationStatus),
+    });
+    if (mayDemote) {
+      await db
+        .update(members)
+        .set({
+          status: "candidate",
+          level: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(members.id, row.member.id));
+    }
   }
 
   await db.insert(applicationEvents).values({
@@ -202,8 +220,10 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
 /** RU: Видалення заявки (файли/події каскадом; картка члена лишається). EN: Delete application; keep member. */
 export async function DELETE(request: Request, ctx: Ctx) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const passwordBlock = passwordChangeRequiredResponse(user);

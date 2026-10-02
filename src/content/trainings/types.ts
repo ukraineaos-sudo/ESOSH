@@ -25,7 +25,7 @@ export function pickLocalized(
 }
 
 /**
- * Quiz copy follows the video language (uk for current courses).
+ * Quiz copy preferably matches the video language (uk for risk-assessment videos).
  * Other locales optional; missing → show uk (not a silent marketing-page swap).
  */
 export type QuizText = { uk: string } & Partial<Record<LocaleCode, string>>;
@@ -49,6 +49,9 @@ export type QuizQuestion = {
   correct: QuizOptionId;
 };
 
+/** Client-safe question (answer key stays server-side). */
+export type PublicQuizQuestion = Omit<QuizQuestion, "correct">;
+
 export type TrainingQuizUi = {
   title: LocalizedString;
   submit: LocalizedString;
@@ -70,6 +73,10 @@ export type TrainingModule = {
   quiz: QuizQuestion[];
 };
 
+export type PublicTrainingModule = Omit<TrainingModule, "quiz"> & {
+  quiz: PublicQuizQuestion[];
+};
+
 export type TrainingDetail = {
   slug: string;
   href: string;
@@ -86,6 +93,10 @@ export type TrainingDetail = {
   certificatePdf?: LocalizedString;
   /** Minimum overall score percent to unlock certificate (default 80). */
   passThresholdPercent?: number;
+};
+
+export type PublicTrainingDetail = Omit<TrainingDetail, "modules"> & {
+  modules: PublicTrainingModule[];
 };
 
 export type TrainingListItem = {

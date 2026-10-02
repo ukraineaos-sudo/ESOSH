@@ -94,13 +94,13 @@
     "fileNotRestored": "Les fichiers ne sont pas restaurés après un rafraîchissement ou la fermeture de l’onglet — téléversez-les à nouveau si besoin.",
     "attachments": {
       "title": "Documents (facultatif)",
-      "hint": "Vous pouvez ajouter une photo, un diplôme, des certificats ou une preuve d’expérience — ou passer. PDF/JPG/PNG, jusqu’à 10 Mo par fichier. Les documents accélèrent l’examen mais ne sont pas obligatoires.",
+      "hint": "Vous pouvez ajouter une photo, un diplôme, des certificats ou une preuve d’expérience — ou passer. PDF/JPG/PNG, jusqu’à 3 Mo par fichier. Les documents accélèrent l’examen mais ne sont pas obligatoires.",
       "drop": "Glissez-déposez des fichiers ici, ou choisissez-les sur l’appareil",
       "browse": "Choisir des fichiers",
       "remove": "Retirer",
       "empty": "Aucun fichier pour l’instant — vous pouvez soumettre sans.",
       "errorTooMany": "Trop de fichiers (maximum 20).",
-      "errorTotalSize": "La taille totale des fichiers dépasse 40 Mo.",
+      "errorTotalSize": "La taille totale des fichiers dépasse 4 Mo.",
       "errorFile": "Certains fichiers ont été ignorés : seuls PDF/JPG/PNG dans la limite de taille sont autorisés."
     },
     "oshExpand": "santé et sécurité au travail",
@@ -127,7 +127,7 @@
       "email": "E-mail",
       "secondaryEmail": "E-mail secondaire",
       "profileUrl": "LinkedIn / profil",
-      "photo": "Photo (JPG/PNG, jusqu’à 5 Mo)",
+      "photo": "Photo (JPG/PNG, jusqu’à 2 Mo)",
       "jobTitle": "Poste",
       "organization": "Organisation",
       "industry": "Secteur",
@@ -136,7 +136,7 @@
       "totalYears": "Années d’expérience totales",
       "oshYears": "Années d’expérience SST",
       "responsibilities": "Responsabilités principales",
-      "experienceFiles": "Preuve d’expérience (PDF/JPG/PNG, jusqu’à 10 Mo)",
+      "experienceFiles": "Preuve d’expérience (PDF/JPG/PNG, jusqu’à 3 Mo)",
       "educationLevel": "Niveau d’études le plus élevé",
       "profileEducation": "Votre formation est-elle pertinente pour la SST ?",
       "institution": "Établissement d’enseignement",
@@ -264,11 +264,11 @@
       "emailConflict": "Ces e-mails sont déjà liés à des dossiers différents. Contactez un administrateur.",
       "certificateRequired": "Un fichier de certificat est requis pour le cours déclaré.",
       "certificateRequiredShort": "Ajoutez un certificat",
-      "too_large": "Fichier trop volumineux (PDF/JPG/PNG : jusqu’à 10 Mo).",
+      "too_large": "Fichier trop volumineux (PDF/JPG/PNG : jusqu’à 3 Mo).",
       "bad_type": "Type de fichier non pris en charge. Autorisés : PDF, JPG, PNG.",
       "bad_signature": "Le fichier a échoué aux contrôles de format. Téléversez un PDF/JPG/PNG valide.",
       "too_many_files": "Trop de fichiers (maximum 20).",
-      "total_too_large": "La taille totale des fichiers dépasse 40 Mo.",
+      "total_too_large": "La taille totale des fichiers dépasse 4 Mo.",
       "invalidFields": "Le serveur a rejeté certains champs. Ouvrez un élément de la liste ci-dessous.",
       "captcha_required": "Terminez la vérification « Je ne suis pas un robot » avant d’envoyer.",
       "captcha_invalid": "Échec de la vérification. Actualisez le widget et réessayez.",
@@ -281,7 +281,8 @@
       "gateHint": "Avant de remplir la candidature, effectuez une courte vérification Cloudflare. Cela protège contre le spam et les envois automatiques.",
       "stepConfirm": "Confirmez la vérification avant l’envoi",
       "required": "Terminez la vérification pour envoyer la candidature.",
-      "widgetError": "Impossible de charger la vérification. Actualisez la page ou autorisez challenges.cloudflare.com dans votre bloqueur de publicités."
+      "widgetError": "Impossible de charger la vérification. Actualisez la page ou autorisez challenges.cloudflare.com dans votre bloqueur de publicités.",
+      "configUnavailable": "Le formulaire est temporairement indisponible : la protection anti-bots n'est pas configurée. Écrivez à office@esosh.net."
     },
     "success": {
       "thanks": "Merci !",
@@ -323,7 +324,10 @@
     "youtubeEnableHint": "Activez Marketing, enregistrez — le lecteur apparaîtra sur cette page.",
     "youtubeSeekHint": "L’avance rapide est limitée : regardez la vidéo jusqu’à la fin pour débloquer le quiz.",
     "youtubeWatched": "Vidéo visionnée",
-    "youtubeLoading": "Chargement du lecteur…"
+    "youtubeLoading": "Chargement du lecteur…",
+    "quizScoreError": "Impossible de vérifier les réponses. Réessayez.",
+    "quizScoring": "Vérification…",
+    "certificateParticipationNote": "Il s’agit d’un certificat de participation, non d’une attestation de qualification."
   },
   "content": {
     "pendingTitle": "Traduction de la page en cours",

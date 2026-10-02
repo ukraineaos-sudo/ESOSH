@@ -94,13 +94,13 @@
     "fileNotRestored": "Səhifə yenilənəndə və ya tab bağlananda fayllar bərpa olunmur — lazımdırsa yenidən yükləyin.",
     "attachments": {
       "title": "Sənədlər (istəyə görə)",
-      "hint": "Foto, diplom, sertifikat və ya təcrübə təsdiqi əlavə edə və ya keçə bilərsiniz. PDF/JPG/PNG, hər fayl üçün ən çox 10 MB. Sənədlər baxışı sürətləndirir, amma məcburi deyil.",
+      "hint": "Foto, diplom, sertifikat və ya təcrübə təsdiqi əlavə edə və ya keçə bilərsiniz. PDF/JPG/PNG, hər fayl üçün ən çox 3 MB. Sənədlər baxışı sürətləndirir, amma məcburi deyil.",
       "drop": "Faylları bura çəkin və ya cihazdan seçin",
       "browse": "Faylları seçin",
       "remove": "Sil",
       "empty": "Hələ fayl yoxdur — onsuz da göndərə bilərsiniz.",
       "errorTooMany": "Həddindən artıq fayl (maksimum 20).",
-      "errorTotalSize": "Faylların ümumi ölçüsü 40 MB-ı keçir.",
+      "errorTotalSize": "Faylların ümumi ölçüsü 4 MB-ı keçir.",
       "errorFile": "Bəzi fayllar atlandı: yalnız ölçü limitindəki PDF/JPG/PNG icazəlidir."
     },
     "oshExpand": "əməyin mühafizəsi və peşə sağlamlığı",
@@ -127,7 +127,7 @@
       "email": "E-poçt",
       "secondaryEmail": "Əlavə e-poçt",
       "profileUrl": "LinkedIn / profil",
-      "photo": "Foto (JPG/PNG, ən çox 5 MB)",
+      "photo": "Foto (JPG/PNG, ən çox 2 MB)",
       "jobTitle": "Vəzifə",
       "organization": "Təşkilat",
       "industry": "Sahə",
@@ -136,7 +136,7 @@
       "totalYears": "Ümumi staj (il)",
       "oshYears": "ƏMH sahəsində staj (il)",
       "responsibilities": "Əsas vəzifələr",
-      "experienceFiles": "Staj təsdiqi (PDF/JPG/PNG, ən çox 10 MB)",
+      "experienceFiles": "Staj təsdiqi (PDF/JPG/PNG, ən çox 3 MB)",
       "educationLevel": "Ən yüksək təhsil səviyyəsi",
       "profileEducation": "Təhsiliniz ƏMH üçün uyğundurmu?",
       "institution": "Təhsil müəssisəsi",
@@ -264,11 +264,11 @@
       "emailConflict": "Bu e-poçtlar artıq fərqli qeydlərə bağlıdır. Administratorla əlaqə saxlayın.",
       "certificateRequired": "Elan olunan kurs üçün sertifikat faylı tələb olunur.",
       "certificateRequiredShort": "Sertifikat əlavə edin",
-      "too_large": "Fayl çox böyükdür (PDF/JPG/PNG: ən çox 10 MB).",
+      "too_large": "Fayl çox böyükdür (PDF/JPG/PNG: ən çox 3 MB).",
       "bad_type": "Dəstəklənməyən fayl növü. İcazə: PDF, JPG, PNG.",
       "bad_signature": "Fayl format yoxlamasından keçmədi. Düzgün PDF/JPG/PNG yükləyin.",
       "too_many_files": "Həddindən artıq fayl (maksimum 20).",
-      "total_too_large": "Faylların ümumi ölçüsü 40 MB-ı keçir.",
+      "total_too_large": "Faylların ümumi ölçüsü 4 MB-ı keçir.",
       "invalidFields": "Server bəzi sahələri rədd etdi. Aşağıdakı siyahıdan elementi açın.",
       "captcha_required": "Göndərməzdən əvvəl «mən robot deyiləm» yoxlamasını tamamlayın.",
       "captcha_invalid": "Yoxlama uğursuz oldu. Vidjeti yeniləyin və yenidən cəhd edin.",
@@ -281,7 +281,8 @@
       "gateHint": "Anketi doldurmazdan əvvəl qısa Cloudflare yoxlamasını keçin. Bu spam və avtomatik müraciətlərdən qoruyur.",
       "stepConfirm": "Göndərməzdən əvvəl yoxlamanı təsdiqləyin",
       "required": "Müraciəti göndərmək üçün yoxlamanı tamamlayın.",
-      "widgetError": "Yoxlama yüklənmədi. Səhifəni yeniləyin və ya challenges.cloudflare.com ünvanını reklam bloklayıcıda icazə verin."
+      "widgetError": "Yoxlama yüklənmədi. Səhifəni yeniləyin və ya challenges.cloudflare.com ünvanını reklam bloklayıcıda icazə verin.",
+      "configUnavailable": "Forma müvəqqəti əlçatan deyil: bot mühafizəsi qurulmayıb. office@esosh.net ünvanına yazın."
     },
     "success": {
       "thanks": "Təşəkkür edirik!",
@@ -323,7 +324,10 @@
     "youtubeEnableHint": "Marketinqi aktiv edin, seçimi yadda saxlayın — pleyer bu səhifədə görünəcək.",
     "youtubeSeekHint": "İrəli sürüşdürmə məhduddur: testi açmaq üçün videonu sona qədər izləyin.",
     "youtubeWatched": "Video izlənilib",
-    "youtubeLoading": "Pleyer yüklənir…"
+    "youtubeLoading": "Pleyer yüklənir…",
+    "quizScoreError": "Cavabları yoxlamaq mümkün olmadı. Yenidən cəhd edin.",
+    "quizScoring": "Yoxlanılır…",
+    "certificateParticipationNote": "Bu iştirak sertifikatıdır, peşə ixtisas attestatı deyil."
   },
   "content": {
     "pendingTitle": "Səhifə tərcüməsi hazırlanır",

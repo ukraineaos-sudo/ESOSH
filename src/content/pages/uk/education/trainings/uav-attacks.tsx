@@ -2,10 +2,11 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { uavAttacksTraining } from "@/content/trainings";
+import { toPublicTraining } from "@/lib/trainings/public";
 
 /** RU: Деталь тренінгу БПЛА. EN: UAV training detail (uk). */
 export default function PageContent() {
-  const training = uavAttacksTraining;
+  const training = toPublicTraining(uavAttacksTraining);
 
   return (
     <>

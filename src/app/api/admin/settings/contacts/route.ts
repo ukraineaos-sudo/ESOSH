@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse, requireAdmin } from "@/lib/admin/auth";
 import { getContactSettings, saveContactSettings, type ContactSettings } from "@/lib/site-settings";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Чтение настроек контактов. EN: Read contact settings. */
 export async function GET() {
@@ -11,6 +12,8 @@ export async function GET() {
 
 /** RU: Сохранение контактов (admin). EN: Save contacts (admin only). */
 export async function PUT(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
   if (!requireAdmin(user) && !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 403 });

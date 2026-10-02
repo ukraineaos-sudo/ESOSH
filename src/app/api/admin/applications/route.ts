@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
-import { canEditContent, getAdminSession } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 
 /** RU: Список заявок з фільтрами. EN: Filtered applications list. */
 export async function GET(request: Request) {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const db = getDb();

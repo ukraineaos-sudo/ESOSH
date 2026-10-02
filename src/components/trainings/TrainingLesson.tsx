@@ -7,19 +7,25 @@ import {
   TrainingStatusMark,
   YoutubeConsentEmbed,
 } from "@/components/trainings/YoutubeConsentEmbed";
-import type { LocaleCode, TrainingDetail, TrainingModule } from "@/content/trainings/types";
+import type {
+  LocaleCode,
+  PublicTrainingDetail,
+  PublicTrainingModule,
+  QuizOptionId,
+} from "@/content/trainings/types";
 import { pickLocalized } from "@/content/trainings/types";
 import { resolveLocaleDoc } from "@/lib/docs";
 
 type Props = {
   locale: LocaleCode;
-  training: TrainingDetail;
+  training: PublicTrainingDetail;
 };
 
 type QuizOutcome = {
   score: number;
   total: number;
   scorePercent: number;
+  answers: Record<string, QuizOptionId>;
 };
 
 function moduleVideoKey(slug: string, moduleId: string) {
@@ -43,7 +49,7 @@ function isNameReady(firstName: string, lastName: string) {
   return normalizeNamePart(firstName).length >= 2 && normalizeNamePart(lastName).length >= 2;
 }
 
-function emptyOutcomes(modules: TrainingModule[]): Record<string, QuizOutcome | null> {
+function emptyOutcomes(modules: PublicTrainingModule[]): Record<string, QuizOutcome | null> {
   const map: Record<string, QuizOutcome | null> = {};
   for (const mod of modules) map[mod.id] = null;
   return map;
@@ -63,6 +69,7 @@ export function TrainingLesson({ locale, training }: Props) {
   const [quizByModule, setQuizByModule] = useState<Record<string, QuizOutcome | null>>(() =>
     emptyOutcomes(modules),
   );
+  const [certificateToken, setCertificateToken] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
@@ -123,16 +130,16 @@ export function TrainingLesson({ locale, training }: Props) {
   const certificateResolution = training.certificateDocId
     ? resolveLocaleDoc(training.certificateDocId, locale)
     : null;
-  const certificateUrl =
-    certificateResolution?.status === "available"
-      ? certificateResolution.href
-      : pickLocalized(training.certificatePdf, locale);
+  const hasCertificateAsset =
+    certificateResolution?.status === "available" ||
+    Boolean(pickLocalized(training.certificatePdf, locale));
 
   const totals = useMemo(() => {
     let score = 0;
     let total = 0;
     let allSubmitted = true;
     for (const mod of modules) {
+      if (mod.quiz.length === 0) continue;
       const outcome = quizByModule[mod.id];
       if (!outcome) {
         allSubmitted = false;
@@ -145,12 +152,26 @@ export function TrainingLesson({ locale, training }: Props) {
     return { score, total, scorePercent, allSubmitted };
   }, [modules, quizByModule]);
 
-  const allVideosDone = modules.every((mod) => videoDoneByModule[mod.id]);
+  const siblingAnswers = useMemo(() => {
+    const map: Record<string, Record<string, string>> = {};
+    for (const [moduleId, outcome] of Object.entries(quizByModule)) {
+      if (outcome?.answers) map[moduleId] = outcome.answers;
+    }
+    return map;
+  }, [quizByModule]);
+
+  const allVideosDone = modules.every((mod) => {
+    if (!mod.youtubeId.trim()) return true;
+    return Boolean(videoDoneByModule[mod.id]);
+  });
   const quizPassed = totals.allSubmitted && totals.scorePercent >= threshold;
   const courseComplete = allVideosDone && quizPassed;
-  const canDownload = courseComplete && Boolean(certificateUrl);
+  const canDownload = courseComplete && hasCertificateAsset && Boolean(certificateToken);
   const nameReady = isNameReady(firstName, lastName);
   const canDownloadNamed = canDownload && nameReady;
+  const certificateHref = certificateToken
+    ? `/api/trainings/${encodeURIComponent(training.slug)}/certificate?token=${encodeURIComponent(certificateToken)}&locale=${encodeURIComponent(locale)}`
+    : null;
 
   const overallStatusLabel = !totals.allSubmitted
     ? t("quizNotPassed")
@@ -166,7 +187,9 @@ export function TrainingLesson({ locale, training }: Props) {
     if (!prev) return false;
     // Empty shell: show all module slots until video/quiz are filled in.
     if (!prev.youtubeId.trim() && prev.quiz.length === 0) return true;
-    return Boolean(videoDoneByModule[prev.id] && quizByModule[prev.id]);
+    const prevVideoOk = !prev.youtubeId.trim() || Boolean(videoDoneByModule[prev.id]);
+    const prevQuizOk = prev.quiz.length === 0 || Boolean(quizByModule[prev.id]);
+    return prevVideoOk && prevQuizOk;
   }
 
   function certHint(): string {
@@ -175,9 +198,10 @@ export function TrainingLesson({ locale, training }: Props) {
     if (totals.allSubmitted && totals.scorePercent < threshold) {
       return t("certificateThresholdHint", { threshold });
     }
-    if (!certificateUrl || certificateResolution?.status === "unavailable") {
+    if (!hasCertificateAsset || certificateResolution?.status === "unavailable") {
       return t("certPending");
     }
+    if (!certificateToken) return t("certNeedQuiz");
     return t("certificateThresholdHint", { threshold });
   }
 
@@ -223,6 +247,9 @@ export function TrainingLesson({ locale, training }: Props) {
         </div>
         <p className="training-lesson__cert-name-example" aria-hidden="true">
           {t("certificateNameExample")}
+        </p>
+        <p className="training-quiz__cert-hint regular-s" role="note">
+          {t("certificateParticipationNote")}
         </p>
       </div>
     );
@@ -296,9 +323,12 @@ export function TrainingLesson({ locale, training }: Props) {
             {unlocked && mod.quiz.length > 0 ? (
               <TrainingQuiz
                 locale={locale}
+                slug={training.slug}
+                moduleId={mod.id}
                 questions={mod.quiz}
                 ui={training.quizUi}
-                locked={!hasVideo || !videoDone}
+                locked={hasVideo && !videoDone}
+                siblingAnswers={siblingAnswers}
                 onResultChange={(result) => {
                   setQuizByModule((prev) => {
                     const previous = prev[mod.id];
@@ -312,8 +342,22 @@ export function TrainingLesson({ locale, training }: Props) {
                     ) {
                       return prev;
                     }
-                    return { ...prev, [mod.id]: result };
+                    if (!result) return { ...prev, [mod.id]: null };
+                    return {
+                      ...prev,
+                      [mod.id]: {
+                        score: result.score,
+                        total: result.total,
+                        scorePercent: result.scorePercent,
+                        answers: result.answers,
+                      },
+                    };
                   });
+                  if (result?.certificateToken) {
+                    setCertificateToken(result.certificateToken);
+                  } else if (!result) {
+                    setCertificateToken(null);
+                  }
                 }}
                 passThresholdPercent={threshold}
               />
@@ -330,8 +374,8 @@ export function TrainingLesson({ locale, training }: Props) {
         {courseComplete ? (
           <>
             {renderNameFields()}
-            {canDownloadNamed ? (
-              <a className="btn is--primary w-button" href={certificateUrl!} download>
+            {canDownloadNamed && certificateHref ? (
+              <a className="btn is--primary w-button" href={certificateHref}>
                 {t("downloadCertificate")}
               </a>
             ) : (
@@ -343,9 +387,13 @@ export function TrainingLesson({ locale, training }: Props) {
               <p className="training-quiz__cert-hint" role="status">
                 {t("certNeedName")}
               </p>
-            ) : !certificateUrl ? (
+            ) : !hasCertificateAsset ? (
               <p className="training-quiz__cert-hint" role="status">
                 {t("certPending")}
+              </p>
+            ) : !certificateToken ? (
+              <p className="training-quiz__cert-hint" role="status">
+                {t("certNeedQuiz")}
               </p>
             ) : null}
           </>

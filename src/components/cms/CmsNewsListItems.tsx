@@ -1,32 +1,41 @@
 import { listPublishedCmsNews } from "@/lib/cms/public";
+import { LOCALE_BCP47, localePathPrefix, type AppLocale } from "@/lib/locale";
 
 type Props = {
-  locale: "uk" | "en";
+  locale: AppLocale;
   /** Max cards (homepage usually 3). */
   limit?: number;
   /** When true and feed empty — show a short empty hint. */
   showEmpty?: boolean;
 };
 
-function formatNewsDate(value: Date | string | null | undefined, locale: string): string {
+const EMPTY_HINT: Record<AppLocale, string> = {
+  uk: "Поки немає опублікованих новин.",
+  en: "No published news yet.",
+  de: "Noch keine veröffentlichten Neuigkeiten.",
+  es: "Aún no hay noticias publicadas.",
+  fr: "Aucune actualité publiée pour le moment.",
+  az: "Hələ dərc olunmuş xəbər yoxdur.",
+  kk: "Әзірге жарияланған жаңалықтар жоқ.",
+};
+
+function formatNewsDate(value: Date | string | null | undefined, locale: AppLocale): string {
   if (!value) return "";
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString(locale === "en" ? "en-GB" : "uk-UA");
+  return d.toLocaleDateString(LOCALE_BCP47[locale]);
 }
 
 /** RU: Карточки опубликованных CMS-новостей. EN: Published CMS news cards. */
 export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Props) {
   const posts = await listPublishedCmsNews(locale, { limit });
-  const prefix = locale === "en" ? "/en" : "";
+  const prefix = localePathPrefix(locale);
 
   if (posts.length === 0) {
     if (!showEmpty) return null;
     return (
       <div role="listitem" className="collection-item w-dyn-item">
-        <p className="regular-m is--grey-20">
-          {locale === "en" ? "No published news yet." : "Поки немає опублікованих новин."}
-        </p>
+        <p className="regular-m is--grey-20">{EMPTY_HINT[locale]}</p>
       </div>
     );
   }

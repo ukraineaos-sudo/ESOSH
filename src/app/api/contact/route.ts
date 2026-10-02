@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { contactSchema } from "@/lib/contact";
 import { deliverContact } from "@/lib/contact/deliver-contact";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 /** RU: Проверяет и передаёт обращение, не имитируя доставку. EN: Validate and deliver without reporting false success. */
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403 });
+  const limited = await assertRateLimit(request, "contact");
+  if (limited) return limited;
   const raw = await request.text();
   if (raw.length > 8192) return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
   let json: unknown;

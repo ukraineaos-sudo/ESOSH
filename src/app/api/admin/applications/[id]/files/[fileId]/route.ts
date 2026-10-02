@@ -2,15 +2,16 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applicationFiles } from "@/db/schema";
-import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
+import { canManageRegistry, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { getEnrollmentBlob, safeServeContentType } from "@/lib/enrollment/files";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string; fileId: string }> };
 
 /** RU: Проксі приватного файлу заявки. EN: Proxy private application file. */
 export async function GET(request: Request, ctx: Ctx) {
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const db = getDb();
@@ -53,8 +54,10 @@ export async function GET(request: Request, ctx: Ctx) {
 
 /** RU: Статус перевірки документа. EN: Update document review status. */
 export async function PATCH(request: Request, ctx: Ctx) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
-  if (!user || !canEditContent(user)) {
+  if (!user || !canManageRegistry(user)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const passwordBlock = passwordChangeRequiredResponse(user);

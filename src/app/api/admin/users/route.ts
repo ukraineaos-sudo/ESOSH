@@ -5,6 +5,7 @@ import { adminUsers } from "@/db/schema";
 import { getAdminSession, passwordChangeRequiredResponse, requireAdmin } from "@/lib/admin/auth";
 import { hashPassword } from "@/lib/admin/password";
 import { isValidNewPassword, isValidUsername, normalizeUsername } from "@/lib/admin/password-policy";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список пользователей админки. EN: List admin users. */
 export async function GET() {
@@ -25,6 +26,8 @@ export async function GET() {
 
 /** RU: Создать editor/admin. EN: Create an admin user. */
 export async function POST(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !requireAdmin(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);
@@ -62,6 +65,8 @@ export async function POST(request: Request) {
 
 /** RU: Активировать/деактивировать. EN: Toggle user active flag. */
 export async function PATCH(request: Request) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !requireAdmin(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);

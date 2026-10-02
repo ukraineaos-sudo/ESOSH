@@ -3,7 +3,7 @@ import { NewsManager } from "@/components/admin/NewsManager";
 import { getDb } from "@/db";
 import { newsPosts } from "@/db/schema";
 import type { CmsBlock } from "@/lib/cms/blocks";
-import { desc } from "drizzle-orm";
+import { desc, ne } from "drizzle-orm";
 
 /** RU: Комната новостей. EN: News room. */
 export default async function AdminNewsPage() {
@@ -21,7 +21,12 @@ export default async function AdminNewsPage() {
   }[] = [];
   if (db) {
     try {
-      const rows = await db.select().from(newsPosts).orderBy(desc(newsPosts.updatedAt)).limit(500);
+      const rows = await db
+        .select()
+        .from(newsPosts)
+        .where(ne(newsPosts.status, "deleted"))
+        .orderBy(desc(newsPosts.updatedAt))
+        .limit(500);
       initialItems = rows.map((row) => ({
         id: row.id,
         locale: row.locale,

@@ -8,11 +8,14 @@ import {
   passwordChangeRequiredResponse,
 } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /** RU: Видалення картки керівництва («так»). EN: Delete leadership card. */
 export async function DELETE(request: Request, ctx: Ctx) {
+  const originBlock = assertSameOrigin(request);
+  if (originBlock) return originBlock;
   const user = await getAdminSession();
   if (!user || !canEditContent(user)) return NextResponse.json({ ok: false }, { status: 401 });
   const passwordBlock = passwordChangeRequiredResponse(user);

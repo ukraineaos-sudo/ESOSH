@@ -1,11 +1,53 @@
 import { countJoinedMembers } from "@/lib/members/public-stats";
+import { LOCALE_BCP47, localePathPrefix, type AppLocale } from "@/lib/locale";
 
 type Props = {
-  locale: "uk" | "en";
+  locale: AppLocale;
 };
 
-function formatCount(value: number, locale: "uk" | "en"): string {
-  return value.toLocaleString(locale === "en" ? "en-GB" : "uk-UA");
+const COPY: Record<
+  AppLocale,
+  { title: string; caption: string; cta: string }
+> = {
+  uk: {
+    title: "Вже з ESOSH",
+    caption: "тих, хто вже приєднався до спільноти",
+    cta: "Доєднатися",
+  },
+  en: {
+    title: "Already with ESOSH",
+    caption: "people who have joined the community",
+    cta: "Join us",
+  },
+  de: {
+    title: "Bereits bei ESOSH",
+    caption: "Menschen, die der Gemeinschaft beigetreten sind",
+    cta: "Mitmachen",
+  },
+  es: {
+    title: "Ya con ESOSH",
+    caption: "personas que se han unido a la comunidad",
+    cta: "Únase",
+  },
+  fr: {
+    title: "Déjà avec ESOSH",
+    caption: "personnes qui ont rejoint la communauté",
+    cta: "Rejoindre",
+  },
+  az: {
+    title: "Artıq ESOSH ilə",
+    caption: "icmaya qoşulmuş insanlar",
+    cta: "Qoşulun",
+  },
+  kk: {
+    title: "ESOSH-пен бірге",
+    caption: "қауымдастыққа қосылған адамдар",
+    cta: "Қосылу",
+  },
+};
+
+function formatCount(value: number, locale: AppLocale): string {
+  return value.toLocaleString(LOCALE_BCP47[locale]);
 }
 
 /** RU: Заготовка лічильника членів на головній. EN: Homepage members-count stub. */
@@ -13,14 +55,8 @@ export async function HomeMembersStat({ locale }: Props) {
   const total = await countJoinedMembers();
   if (total === null) return null;
 
-  const prefix = locale === "en" ? "/en" : "";
-  const title =
-    locale === "en" ? "Already with ESOSH" : "Вже з ESOSH";
-  const caption =
-    locale === "en"
-      ? "people who have joined the community"
-      : "тих, хто вже приєднався до спільноти";
-  const cta = locale === "en" ? "Join us" : "Доєднатися";
+  const prefix = localePathPrefix(locale);
+  const { title, caption, cta } = COPY[locale];
 
   return (
     <section

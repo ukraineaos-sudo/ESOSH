@@ -9,7 +9,7 @@
 - [x] Origin-check на `POST /api/admin/login`
 - [x] Production: отказ создавать bootstrap-админа со слабым паролем (`admin` / &lt; 8 символов)
 - [x] Production: запрет `ENROLLMENT_BLOB_ACCESS=public`
-- [x] Enrollment upload: magic-byte sniff (JPEG/PNG/PDF), лимит **20 файлов** и **40 МБ суммарно** на заявку (поверх лимитов 5 МБ фото / 10 МБ документ)
+- [x] Enrollment upload: magic-byte sniff (JPEG/PNG/PDF); лимиты под Vercel body ~4.5 MB (**фото ≤2 МБ**, **документ ≤3 МБ**, **сумма ≤4 МБ**, до **8 файлов**)
 - [x] Публичная анкета не перезаписывает существующую карточку `members` по email (только link + payload; merge — админом)
 - [x] Enrollment files: MIME только из magic bytes; mismatch client MIME → reject; admin proxy `nosniff` + никогда не отдаёт `text/html`
 
@@ -33,10 +33,10 @@ Honeypot оставить. Логировать только факт 429 без
 
 | Параметр | Значение | Статус |
 |----------|----------|--------|
-| Фото | ≤ 5 МБ, JPEG/PNG + magic | есть |
-| Документ | ≤ 10 МБ, PDF/JPEG/PNG + magic | есть |
-| Число файлов / заявка | ≤ 20 | **сделано** |
-| Суммарный размер | ≤ 40 МБ | **сделано** |
+| Фото | ≤ 2 МБ, JPEG/PNG + magic | есть (под Vercel 4.5 MB) |
+| Документ | ≤ 3 МБ, PDF/JPEG/PNG + magic | есть (под Vercel 4.5 MB) |
+| Число файлов / заявка | ≤ 8 | **сделано** |
+| Суммарный размер | ≤ 4 МБ | **сделано** (под Vercel Functions payload) |
 | Срок хранения файлов/заявок | политика ассоциации + job очистки | TODO |
 | Audit скачивания файлов в admin | лог who/when/fileId | TODO |
 

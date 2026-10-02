@@ -3,6 +3,7 @@ import { count, eq } from "drizzle-orm";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getDb } from "@/db";
 import { applications, members, newsPosts } from "@/db/schema";
+import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 
 type DashCard = {
   href: string;
@@ -17,6 +18,8 @@ type DashCard = {
 
 /** RU: Дашборд пульта. EN: Admin dashboard rooms. */
 export default async function AdminHomePage() {
+  const user = await getAdminSession();
+  const registryAccess = Boolean(user && canManageRegistry(user));
   const db = getDb();
   const dbReady = Boolean(db);
 
@@ -27,46 +30,52 @@ export default async function AdminHomePage() {
 
   if (db) {
     try {
-      const [newRow] = await db
-        .select({ value: count() })
-        .from(applications)
-        .where(eq(applications.status, "new"));
-      const [appsRow] = await db.select({ value: count() }).from(applications);
-      const [membersRow] = await db.select({ value: count() }).from(members);
+      if (registryAccess) {
+        const [newRow] = await db
+          .select({ value: count() })
+          .from(applications)
+          .where(eq(applications.status, "new"));
+        const [appsRow] = await db.select({ value: count() }).from(applications);
+        const [membersRow] = await db.select({ value: count() }).from(members);
+        newApplications = Number(newRow?.value ?? 0);
+        totalApplications = Number(appsRow?.value ?? 0);
+        totalMembers = Number(membersRow?.value ?? 0);
+      }
       const [newsRow] = await db
         .select({ value: count() })
         .from(newsPosts)
         .where(eq(newsPosts.status, "published"));
-      newApplications = Number(newRow?.value ?? 0);
-      totalApplications = Number(appsRow?.value ?? 0);
-      totalMembers = Number(membersRow?.value ?? 0);
       publishedNews = Number(newsRow?.value ?? 0);
     } catch {
       // keep zeros
     }
   }
 
-  const hasNewApps = newApplications > 0;
+  const hasNewApps = registryAccess && newApplications > 0;
 
   const cards: DashCard[] = [
-    {
-      href: "/admin/applications",
-      title: "Заявки",
-      description: "Перегляд анкет, перевірка документів і рішення щодо рівня.",
-      mark: "✉",
-      tone: "crm",
-      featured: hasNewApps,
-      badge: hasNewApps ? `${newApplications} нових` : undefined,
-      cta: hasNewApps ? "Відкрити нові →" : "Відкрити реєстр →",
-    },
-    {
-      href: "/admin/members",
-      title: "Члени",
-      description: "Картки учасників: контакти, статус і рівень після підтвердження.",
-      mark: "☺",
-      tone: "crm",
-      cta: "Перейти →",
-    },
+    ...(registryAccess
+      ? ([
+          {
+            href: "/admin/applications",
+            title: "Заявки",
+            description: "Перегляд анкет, перевірка документів і рішення щодо рівня.",
+            mark: "✉",
+            tone: "crm",
+            featured: hasNewApps,
+            badge: hasNewApps ? `${newApplications} нових` : undefined,
+            cta: hasNewApps ? "Відкрити нові →" : "Відкрити реєстр →",
+          },
+          {
+            href: "/admin/members",
+            title: "Члени",
+            description: "Картки учасників: контакти, статус і рівень після підтвердження.",
+            mark: "☺",
+            tone: "crm",
+            cta: "Перейти →",
+          },
+        ] satisfies DashCard[])
+      : []),
     {
       href: "/admin/content/news",
       title: "Новини",
@@ -115,31 +124,36 @@ export default async function AdminHomePage() {
         </p>
       ) : null}
       <p className="admin-muted admin-lead">
-        Оперативні показники та швидкий доступ. Нові заявки — першими; новини керуються з розділу
-        «Новини» і одразу відображаються на публічному сайті.
+        {registryAccess
+          ? "Оперативні показники та швидкий доступ. Нові заявки — першими; новини керуються з розділу «Новини» і одразу відображаються на публічному сайті."
+          : "Швидкий доступ до контенту. Реєстри заявок і членів доступні лише адміністраторам."}
       </p>
       {dbReady ? (
         <div className="admin-metric-grid" aria-label="Оперативні показники">
-          <Link
-            href="/admin/applications"
-            className={`admin-metric${hasNewApps ? " admin-metric--alert" : ""}`}
-          >
-            <span className="admin-metric__label">Нові заявки</span>
-            <strong className="admin-metric__value">{newApplications}</strong>
-            <span className="admin-metric__hint">
-              {hasNewApps ? "потребують уваги" : "немає нових"}
-            </span>
-          </Link>
-          <Link href="/admin/applications" className="admin-metric admin-metric--apps">
-            <span className="admin-metric__label">Усі заявки</span>
-            <strong className="admin-metric__value">{totalApplications}</strong>
-            <span className="admin-metric__hint">у реєстрі</span>
-          </Link>
-          <Link href="/admin/members" className="admin-metric admin-metric--members">
-            <span className="admin-metric__label">Члени</span>
-            <strong className="admin-metric__value">{totalMembers}</strong>
-            <span className="admin-metric__hint">карток у базі</span>
-          </Link>
+          {registryAccess ? (
+            <>
+              <Link
+                href="/admin/applications"
+                className={`admin-metric${hasNewApps ? " admin-metric--alert" : ""}`}
+              >
+                <span className="admin-metric__label">Нові заявки</span>
+                <strong className="admin-metric__value">{newApplications}</strong>
+                <span className="admin-metric__hint">
+                  {hasNewApps ? "потребують уваги" : "немає нових"}
+                </span>
+              </Link>
+              <Link href="/admin/applications" className="admin-metric admin-metric--apps">
+                <span className="admin-metric__label">Усі заявки</span>
+                <strong className="admin-metric__value">{totalApplications}</strong>
+                <span className="admin-metric__hint">у реєстрі</span>
+              </Link>
+              <Link href="/admin/members" className="admin-metric admin-metric--members">
+                <span className="admin-metric__label">Члени</span>
+                <strong className="admin-metric__value">{totalMembers}</strong>
+                <span className="admin-metric__hint">карток у базі</span>
+              </Link>
+            </>
+          ) : null}
           <Link href="/admin/content/news" className="admin-metric">
             <span className="admin-metric__label">Новини на сайті</span>
             <strong className="admin-metric__value">{publishedNews}</strong>
