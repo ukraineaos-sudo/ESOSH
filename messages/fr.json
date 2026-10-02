@@ -51,7 +51,7 @@
   "consent": {
     "bannerAria": "Consentement aux cookies et services tiers",
     "bannerTitle": "Cookies et traitement des données",
-    "bannerBody": "Nous utilisons des cookies nécessaires au fonctionnement du site. Les widgets de communication tiers (Binotel) ne se chargent qu’avec votre consentement. En savoir plus :",
+    "bannerBody": "Nous utilisons des cookies nécessaires au fonctionnement du site. En savoir plus :",
     "privacyLink": "Politique de confidentialité",
     "cookieLink": "Politique de cookies",
     "acceptAll": "Tout accepter",

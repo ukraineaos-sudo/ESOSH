@@ -51,7 +51,7 @@
   "consent": {
     "bannerAria": "Cookie and third-party service consent",
     "bannerTitle": "Cookies and data processing",
-    "bannerBody": "We use necessary cookies to run the site. Third-party communication widgets (Binotel) load only with your consent. Learn more:",
+    "bannerBody": "We use necessary cookies to run the site. Learn more:",
     "privacyLink": "Privacy Policy",
     "cookieLink": "Cookie Policy",
     "acceptAll": "Accept all",

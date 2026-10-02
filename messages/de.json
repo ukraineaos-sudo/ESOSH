@@ -51,7 +51,7 @@
   "consent": {
     "bannerAria": "Einwilligung zu Cookies und Drittanbieterdiensten",
     "bannerTitle": "Cookies und Datenverarbeitung",
-    "bannerBody": "Wir verwenden notwendige Cookies für den Betrieb der Website. Kommunikations-Widgets von Drittanbietern (Binotel) werden nur mit Ihrer Einwilligung geladen. Mehr dazu:",
+    "bannerBody": "Wir verwenden notwendige Cookies für den Betrieb der Website. Mehr dazu:",
     "privacyLink": "Datenschutzerklärung",
     "cookieLink": "Cookie-Richtlinie",
     "acceptAll": "Alle akzeptieren",

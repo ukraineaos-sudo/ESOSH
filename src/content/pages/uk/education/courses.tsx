@@ -1,7 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { MailtoActionLink } from "@/components/MailtoActionLink";
+import { Link } from "@/i18n/navigation";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -159,9 +159,9 @@ export default function PageContent() {
                   </p>
                   <p className={"regular-l"}>
                     {"Для проведення поглиблених практичних занять з оцінки ризиків на вашому підприємстві, "}
-                    <a href={"mailto:office@esosh.net"}>
+                    <Link href={"/contact-us"}>
                       {"замовте навчання."}
-                    </a>
+                    </Link>
                   </p>
                 </div>
                 <a href={"https://docs.google.com/forms/d/e/1FAIpQLSdO-GYRfFdIsQORpLZ2bEbxeehFfeWiWunUL4mAPbqlrM0-nQ/viewform"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
@@ -227,9 +227,9 @@ export default function PageContent() {
                   </div>
                   <p className={"regular-l"}>
                     {"Для проведення поглиблених практичних занять з оцінки ризиків на вашому підприємстві, "}
-                    <a href={"mailto:office@esosh.net"}>
+                    <Link href={"/contact-us"}>
                       {"замовте навчання."}
-                    </a>
+                    </Link>
                   </p>
                 </div>
                 <a href={"https://www.ilo.org/budapest/what-we-do/projects/declared-work-ukraine/WCMS_868465/lang--uk/index.htm"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
@@ -509,9 +509,9 @@ export default function PageContent() {
                   <img src={"/images/join-participation/Check-299ab963.svg"} loading={"lazy"} alt={""} className={"is--icon-size-12"} />
                   <img src={"/images/join-participation/Check-299ab963.svg"} loading={"lazy"} alt={""} className={"is--icon-size-12"} />
                 </div>
-                <a href={"mailto:office@esosh.net"} className={"btn is--primary w-button"}>
+                <Link href={"/contact-us"} className={"btn is--primary w-button"}>
                   {"Зареєструватись"}
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -558,12 +558,9 @@ export default function PageContent() {
                 {"По закінченню курсу «Левовий захист» ваші діти отримають іменний сертифікат від Європейського співтовариства з охорони праці (ESOSH). А також до курсу готується і власний мерч, щоб кожна дитина відчувала себе частиною команди «левів»."}
               </p>
             </div>
-            <MailtoActionLink
-              subject="Замовлення програми «Левовий захист»"
-              className={"btn is--primary w-button"}
-            >
+            <Link href={"/contact-us"} className={"btn is--primary w-button"}>
               {"Замовити програму"}
-            </MailtoActionLink>
+            </Link>
           </div>
           <div className={"hero-split"}>
             <img src={"/images/education-courses/photo-5332389781784623196-y-a4845907.jpg"} loading={"lazy"} alt={""} className={"image-inside"} width={1024} height={1280} decoding="async" />

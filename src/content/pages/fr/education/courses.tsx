@@ -1,7 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { MailtoActionLink } from "@/components/MailtoActionLink";
+import { Link } from "@/i18n/navigation";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -152,12 +152,12 @@ export default function PageContent() {
                   </p>
                   <p className={"regular-l"}>
                     {"Pour une formation pratique approfondie sur l’évaluation des risques dans votre entreprise,"}
-                    <a href={"mailto:office@esosh.net"}>
+                    <Link href={"/contact-us"}>
                       {"commander le cours."}
-                    </a>
+                    </Link>
                   </p>
                 </div>
-                <a href={"#"} className={"btn is--primary w-button"}>
+                <a href={"https://docs.google.com/forms/d/e/1FAIpQLSdO-GYRfFdIsQORpLZ2bEbxeehFfeWiWunUL4mAPbqlrM0-nQ/viewform"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
                   {"Registre"}
                 </a>
               </div>
@@ -220,9 +220,9 @@ export default function PageContent() {
                   </div>
                   <p className={"regular-l"}>
                     {"Pour une formation pratique approfondie sur l’évaluation des risques dans votre entreprise,"}
-                    <a href={"mailto:office@esosh.net"}>
+                    <Link href={"/contact-us"}>
                       {"commander une formation."}
-                    </a>
+                    </Link>
                   </p>
                 </div>
                 <a href={"https://www.ilo.org/budapest/what-we-do/projects/declared-work-ukraine/WCMS_868465/lang--uk/index.htm"} target={"_blank"} className={"btn is--primary w-button"} rel="noopener noreferrer">
@@ -505,9 +505,9 @@ export default function PageContent() {
                   <img src={"/images/join-participation/Check-299ab963.svg"} loading={"lazy"} alt={""} className={"is--icon-size-12"} />
                   <img src={"/images/join-participation/Check-299ab963.svg"} loading={"lazy"} alt={""} className={"is--icon-size-12"} />
                 </div>
-                <a href={"mailto:office@esosh.net"} className={"btn is--primary w-button"}>
+                <Link href={"/contact-us"} className={"btn is--primary w-button"}>
                   {"Registre"}
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -559,12 +559,9 @@ export default function PageContent() {
                 {"De plus, des produits spéciaux sont en préparation pour le cours afin que chaque enfant puisse se sentir comme un véritable membre de la « Lion Team »."}
               </p>
             </div>
-            <MailtoActionLink
-              subject="Commander le programme « Lion Defense »"
-              className={"btn is--primary w-button"}
-            >
+            <Link href={"/contact-us"} className={"btn is--primary w-button"}>
               {"Commander le programme"}
-            </MailtoActionLink>
+            </Link>
           </div>
           <div className={"hero-split"}>
             <img src={"/images/education-courses/photo-5332389781784623196-y-a4845907.jpg"} loading={"lazy"} alt={""} className={"image-inside"} width={1024} height={1280} decoding="async" />
