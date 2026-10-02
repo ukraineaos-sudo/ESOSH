@@ -2,6 +2,7 @@ import { listPublishedCmsNews } from "@/lib/cms/public";
 import { LOCALE_BCP47, localePathPrefix, type AppLocale } from "@/lib/locale";
 
 type Props = {
+  /** UI locale for chrome (dates, card href prefix). Content always Ukrainian. */
   locale: AppLocale;
   /** Max cards (homepage usually 3). */
   limit?: number;
@@ -26,7 +27,10 @@ function formatNewsDate(value: Date | string | null | undefined, locale: AppLoca
   return d.toLocaleDateString(LOCALE_BCP47[locale]);
 }
 
-/** RU: Карточки опубликованных CMS-новостей. EN: Published CMS news cards. */
+/**
+ * RU: Картки опублікованих CMS-новин (текст завжди uk; посилання в UI-локалі).
+ * EN: Published CMS news cards (Ukrainian content; links keep UI locale).
+ */
 export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Props) {
   const posts = await listPublishedCmsNews(locale, { limit });
   const prefix = localePathPrefix(locale);
@@ -45,7 +49,7 @@ export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Pro
       {posts.map((post) => (
         <div key={post.id} role="listitem" className="collection-item w-dyn-item">
           <a href={`${prefix}/news/${post.slug}`} className="collection-link-wrapper w-inline-block">
-            <div className="collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden">
+            <div className="collection-image-wrapper is--height-240--t-360--m-240 is--overflow-hidden">
               {post.coverUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

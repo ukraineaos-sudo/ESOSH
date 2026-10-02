@@ -3,6 +3,14 @@ import { getDb } from "@/db";
 import { newsPosts, pages } from "@/db/schema";
 import type { CmsBlock } from "@/lib/cms/blocks";
 import { getAdminSession } from "@/lib/admin/auth";
+import { localizedPath } from "@/lib/locale";
+import { routing } from "@/i18n/routing";
+
+/**
+ * RU: Публічний контент новин завжди українською (UI-локаль окремо).
+ * EN: Public news body/list always Ukrainian; UI locale stays separate.
+ */
+export const NEWS_CONTENT_LOCALE = "uk" as const;
 
 export type CmsPageDoc = {
   id: number;
@@ -129,9 +137,13 @@ export async function getCmsNewsPresence(
   }
 }
 
-/** RU: Список опубликованных CMS-новостей (новые сверху). EN: Published CMS news, newest first. */
+/**
+ * RU: Список опублікованих CMS-новин для публічної стрічки (завжди `uk`).
+ * EN: Public news feed always reads published Ukrainian CMS rows.
+ * `_uiLocale` is ignored for content (kept for call-site compatibility).
+ */
 export async function listPublishedCmsNews(
-  locale: string,
+  _uiLocale?: string,
   opts?: { limit?: number },
 ): Promise<CmsNewsDoc[]> {
   const db = getDb();
@@ -141,7 +153,12 @@ export async function listPublishedCmsNews(
     const rows = await db
       .select()
       .from(newsPosts)
-      .where(and(eq(newsPosts.locale, locale), eq(newsPosts.status, "published")))
+      .where(
+        and(
+          eq(newsPosts.locale, NEWS_CONTENT_LOCALE),
+          eq(newsPosts.status, "published"),
+        ),
+      )
       .orderBy(desc(newsPosts.publishedAt), desc(newsPosts.id))
       .limit(limit);
     return rows.map((row) => ({
@@ -160,19 +177,31 @@ export async function listPublishedCmsNews(
   }
 }
 
-/** RU: Пути CMS-новостей для sitemap. EN: CMS news paths for sitemap. */
+/**
+ * RU: Публічні URL опублікованих uk-новин у всіх UI-локалях (sitemap).
+ * EN: Sitemap paths for Ukrainian news under every UI locale prefix.
+ */
 export async function listPublishedCmsNewsPaths(): Promise<string[]> {
   const db = getDb();
   if (!db) return [];
   try {
     const rows = await db
-      .select({ locale: newsPosts.locale, slug: newsPosts.slug })
+      .select({ slug: newsPosts.slug })
       .from(newsPosts)
-      .where(eq(newsPosts.status, "published"))
+      .where(
+        and(
+          eq(newsPosts.locale, NEWS_CONTENT_LOCALE),
+          eq(newsPosts.status, "published"),
+        ),
+      )
       .limit(500);
-    return rows.map((row) =>
-      row.locale === "en" ? `/en/news/${row.slug}` : `/news/${row.slug}`,
-    );
+    const paths: string[] = [];
+    for (const row of rows) {
+      for (const locale of routing.locales) {
+        paths.push(localizedPath(locale, `/news/${row.slug}`));
+      }
+    }
+    return paths;
   } catch {
     return [];
   }

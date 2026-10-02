@@ -1,3 +1,5 @@
+import { localizedPath } from "@/lib/locale";
+
 const UK_MAP: Record<string, string> = {
   а: "a",
   б: "b",
@@ -53,8 +55,8 @@ export function slugifyTitle(title: string): string {
     .slice(0, 180);
 }
 
-/** RU: Публичный путь новости. EN: Public news path. */
+/** RU: Публичный путь новости (UI-локаль). EN: Public news path for UI locale. */
 export function newsPublicPath(locale: string, slug: string): string {
   const clean = slug.replace(/^\/+|\/+$/g, "");
-  return locale === "en" ? `/en/news/${clean}` : `/news/${clean}`;
+  return localizedPath(locale, `/news/${clean}`);
 }

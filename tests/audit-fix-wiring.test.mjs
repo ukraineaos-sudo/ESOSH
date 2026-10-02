@@ -55,12 +55,31 @@ test("CMS unpublished news presence blocks legacy fallback wiring", () => {
   assert.match(page, /getCmsNewsPresence/);
   assert.match(page, /presence === "unpublished"/);
   assert.match(page, /notFound\(\)/);
+  assert.match(page, /NEWS_CONTENT_LOCALE/);
 
   const cms = readFileSync(join(root, "src/lib/cms/public.ts"), "utf8");
   assert.match(cms, /export async function getCmsNewsPresence/);
+  assert.match(cms, /export const NEWS_CONTENT_LOCALE = "uk"/);
 
   const del = readFileSync(join(root, "src/app/api/admin/news/[id]/route.ts"), "utf8");
   assert.match(del, /status:\s*"deleted"/);
+});
+
+test("public news feed always reads Ukrainian CMS content", () => {
+  const cms = readFileSync(join(root, "src/lib/cms/public.ts"), "utf8");
+  assert.match(cms, /NEWS_CONTENT_LOCALE/);
+  assert.match(cms, /eq\(newsPosts\.locale, NEWS_CONTENT_LOCALE\)/);
+
+  const list = readFileSync(join(root, "src/components/cms/CmsNewsListItems.tsx"), "utf8");
+  assert.match(list, /listPublishedCmsNews/);
+  // Cards keep UI-locale href prefix; content comes from uk feed helper.
+  assert.match(list, /localePathPrefix\(locale\)/);
+  assert.match(list, /\$\{prefix\}\/news\/\$\{post\.slug\}/);
+
+  const articlePage = readFileSync(join(root, "src/app/[locale]/news/[slug]/page.tsx"), "utf8");
+  assert.match(articlePage, /getCmsNews\(NEWS_CONTENT_LOCALE/);
+  assert.match(articlePage, /getPage\(NEWS_CONTENT_LOCALE/);
+  assert.match(articlePage, /uiLocale=\{locale\}/);
 });
 
 test("AdminShell hides CRM nav without canManageRegistry", () => {

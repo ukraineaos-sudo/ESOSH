@@ -18,7 +18,7 @@
 5. Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` (+ `cf-turnstile-response`) → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
 6. Admin: `/admin` shell (sidebar + sticky chrome) → session cookie → `/api/admin/*` → Neon/Blob
    - Live UX: header chip «нові заявки» polls `GET /api/admin/applications?status=new` ~30s (stops on 401); applications list same interval + `esosh:admin-apps-refresh` event
-   - News CMS (Phase A–C): `/admin/content/news` = **єдиний каталог** новин; public `/news` + homepage = published `news_posts` (`listPublishedCmsNews`). Legacy TSX лишається dual-read fallback для `/news/{slug}` і джерелом `db:import-news`
+   - News CMS (Phase A–C): `/admin/content/news` = **єдиний каталог** новин; public `/news` + homepage = published **uk** `news_posts` (`listPublishedCmsNews` → `NEWS_CONTENT_LOCALE`); UI-локаль лишається для chrome/посилань `/{locale}/news/{slug}`. Legacy TSX fallback лише **uk** для статей; не вимагаємо перекладів новин
    - Import: `npm run db:import-news` (`scripts/import-legacy-news.mjs`, docs `docs/NEWS_IMPORT.md`) — після імпорту всі TSX-статті в адмін-списку (edit/hide/delete як нові)
    - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
@@ -102,7 +102,8 @@
   - **Не залишати admin/admin у production**
 - Admin bootstrap: якщо `admin_users` порожня — створює користувача з `ADMIN_BOOTSTRAP_USERNAME` / `ADMIN_BOOTSTRAP_PASSWORD` (default `admin` / `admin`, `must_change_password`); **не залишати admin/admin у production**
 - Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх
-- News public feed: `CmsNewsListItems` → `listPublishedCmsNews(locale)` (newest `publishedAt`); без DB / порожня таблиця → порожній список (статті dual-read legacy TSX лишаються)
+- News public feed: `CmsNewsListItems` → `listPublishedCmsNews()` завжди **uk** CMS (`NEWS_CONTENT_LOCALE`); картки ведуть на `/{uiLocale}/news/{slug}`; без DB / порожня таблиця → порожній список
+- News article (`/[locale]/news/[slug]`): тіло з uk CMS → uk legacy TSX; `ContentTranslationPending` для новин не показуємо, якщо uk існує; chrome Header/Footer з UI-локалі
 - Home members stub: `HomeMembersStat` → `countJoinedMembers()` (усі рядки `members`); без DB → блок не рендериться
 - News import: `npm run db:import-news` (+ `--dry-run` / `--upsert`); див. `docs/NEWS_IMPORT.md`; DELETE news = `{ confirm: "так" }`
 - Pages CMS: UI вимкнено — критерії re-enable у `docs/PAGES_CMS.md`
@@ -134,8 +135,9 @@
 - Binotel GetCall + chat **не** в DOM без згоди `communications`
 - YouTube iframe / player на тренінгах **не** в DOM без згоди `marketing`
 - Training certificate: participation PDF behind signed pass token after server-side quiz pass; UI marks participation (not qualification attestation)
-- Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable; **лента /news и блок новостей на главной** при отсутствии DB — пустые (статьи `/news/{slug}` dual-read legacy лише якщо CMS-ряду немає)
+- Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable; **лента /news и блок новостей на главной** при отсутствии DB — пустые (статьи `/news/{slug}` dual-read **uk** legacy лише якщо CMS-ряду uk немає)
 - CMS news draft/deleted для slug → 404 (не воскрешає legacy TSX)
+- Public news content locale = `uk` на всіх UI-локалях (kk/de/es/fr/az/en); переклади статей не потрібні
 - Honeypot и contact API не ослабляются админкой
 - Contact / enrollment без явної privacy-згоди не приймаються як валідні
 - Sitemap покрывает все записи `page-metadata.json` (+ опционально CMS news)
