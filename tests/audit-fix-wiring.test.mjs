@@ -89,6 +89,18 @@ test("AdminShell hides CRM nav without canManageRegistry", () => {
   assert.match(src, /AdminNewAppsBadge/);
 });
 
+test("public Header stays fixed with flow spacer", () => {
+  const header = readFileSync(join(root, "src/components/Header.tsx"), "utf8");
+  assert.match(header, /site-header-slot/);
+  assert.match(header, /className="w-layout-blockcontainer container is--nav w-container"/);
+
+  const css = readFileSync(join(root, "src/styles/refinements.css"), "utf8");
+  assert.match(css, /header\.is--nav\s*\{[^}]*position:\s*fixed/s);
+  assert.match(css, /--site-header-height:\s*88px/);
+  assert.match(css, /\.site-header-slot\s*\{[^}]*height:\s*var\(--site-header-height\)/s);
+  assert.match(css, /background-color:\s*var\(--white\)/);
+});
+
 // Optional: if tsx available, score against real module (skipped otherwise).
 test("training score helper exists for server answer keys", () => {
   const src = readFileSync(join(root, "src/lib/trainings/score.ts"), "utf8");

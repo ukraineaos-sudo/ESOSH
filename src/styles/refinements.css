@@ -93,7 +93,43 @@ body { -webkit-font-smoothing: antialiased; }
   object-fit: contain;
   display: block;
 }
-header.is--nav { position: relative; z-index: 30; flex-shrink: 0; }
+/* Fixed site chrome: Header sits inside many legacy <section> heroes, so sticky
+   would unpin after the first section. Spacer keeps document flow height. */
+:root {
+  --site-header-height: 88px; /* .nav padding 24+24 + logo 40 */
+}
+html {
+  scroll-padding-top: var(--site-header-height);
+}
+.site-header-slot {
+  height: var(--site-header-height);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+header.is--nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50; /* above page content; below consent (90+) and mobile dialog (1000) */
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--white);
+  flex-shrink: 0;
+}
+/* Full-bleed opaque bar while keeping .container max-width for nav content */
+header.is--nav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background-color: var(--white);
+  z-index: -1;
+  pointer-events: none;
+}
 .wrapper.is--hero-internal-layout { padding-bottom: 0; min-height: 560px; }
 .wrapper.is--hero-internal-text { margin-top: 0; padding-block: 88px; justify-content: center; }
 /* Text-only internal heroes: reference locks the section to 100vh for a split photo layout */
