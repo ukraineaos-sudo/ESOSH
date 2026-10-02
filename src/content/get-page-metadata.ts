@@ -60,8 +60,8 @@ export function getPageMetadata(locale: string, route: string): Metadata {
     };
   }
 
-  // Pending locales: metadata without pretending uk/en copy is this language's body.
-  if (isAppLocale(locale) && !hasLegacyPageContent(locale)) {
+  // Pending slot (e.g. trainings on de/es/…): do not pretend uk/en SEO copy is this language.
+  if (isAppLocale(locale)) {
     const ukPage = inventory[localizedPath("uk", route)];
     const enPage = inventory[localizedPath("en", route)];
     if (ukPage || enPage) {

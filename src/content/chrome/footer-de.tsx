@@ -1,0 +1,151 @@
+import type { ContactSettings } from "@/lib/site-settings";
+import { defaultContactSettings } from "@/lib/site-settings";
+import { FooterSocialIcons } from "@/components/FooterSocialIcons";
+import { OpenConsentSettingsButton } from "@/components/consent/OpenConsentSettingsButton";
+
+/** RU: Подвал (de). EN: de chrome footer. Aligned with messages/de.json nav/consent. */
+export default function FooterContent({
+  contacts = defaultContactSettings(),
+  localePrefix = "/de",
+}: {
+  contacts?: ContactSettings;
+  localePrefix?: string;
+}) {
+  const p = localePrefix || "/de";
+  const phone0 = contacts.phones[0] || { display: "", href: "#" };
+  const phone1 = contacts.phones[1] || { display: "", href: "#" };
+  return (
+      <section className={"section site-footer-content"}>
+        <div className={"w-layout-blockcontainer container w-container"}>
+          <div className={"footer-wrapper is--h-flex-top-space-between"}>
+            <div className={"footer-logo-copyright"}>
+              <a href={p} aria-current={"page"} className={"footer-logo-wrapper is--margin-bottom-24 w-inline-block w--current"}>
+                <img src={"/images/home/Logo-White-c13cc8ca.png"} loading={"lazy"} alt={"Esosh"} className={"footer-logo"} width={104} height={40} decoding="async" />
+              </a>
+              <div className={"medium-xs is--grey-20"}>
+                {"© 2022 ESOSH. Alle Rechte vorbehalten"}
+              </div>
+              <div className={"footer-legal-links wrapper is--v-flex-start-start is--rows-gap-12 is--margin-top-16"}>
+                <a href={`${p}/privacy-policy`} className={"footer-menu-link"}>
+                  {"Datenschutz"}
+                </a>
+                <a href={`${p}/cookie-policy`} className={"footer-menu-link"}>
+                  {"Cookies"}
+                </a>
+                <OpenConsentSettingsButton className={"footer-menu-link"}>
+                  {"Cookie-Einstellungen"}
+                </OpenConsentSettingsButton>
+              </div>
+              <a href={"/admin"} className={"footer-menu-link footer-admin-link"}>
+                {"Admin"}
+              </a>
+            </div>
+            <div className={"w-layout-grid is--footer-grid"}>
+              <div id={"w-node-_9bcc6dd1-016b-8498-c6ca-2e36aa9eba9d-aa9eba94"} className={"wrapper"}>
+                <div className={"regular-l is--white is--margin-bottom-24"}>
+                  {"Menü"}
+                </div>
+                <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
+                  <a href={p} aria-current={"page"} className={"footer-menu-link w--current"}>
+                    {"Startseite"}
+                  </a>
+                  <a href={`${p}/about-esosh`} className={"footer-menu-link"}>
+                    {"Über ESOSH"}
+                  </a>
+                  <a href={`${p}/businesses`} className={"footer-menu-link"}>
+                    {"Für Unternehmen"}
+                  </a>
+                  <a href={`${p}/news`} className={"footer-menu-link"}>
+                    {"Nachrichten"}
+                  </a>
+                  <a href={`${p}/contact-us`} className={"footer-menu-link"}>
+                    {"Kontakt"}
+                  </a>
+                </div>
+              </div>
+              <div id={"w-node-_7ff4a067-3856-9226-473c-7932dbd2e92f-aa9eba94"} className={"wrapper"}>
+                <div className={"regular-l is--white is--margin-bottom-24"}>
+                  {"Bildung"}
+                </div>
+                <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
+                  <a href={`${p}/education/projects`} className={"footer-menu-link"}>
+                    {"Projekte"}
+                  </a>
+                  <a href={`${p}/education/courses`} className={"footer-menu-link"}>
+                    {"Kurse"}
+                  </a>
+                  <a href={`${p}/education/trainings`} className={"footer-menu-link"}>
+                    {"Trainings"}
+                  </a>
+                </div>
+              </div>
+              <div id={"w-node-_9bcc6dd1-016b-8498-c6ca-2e36aa9ebaa9-aa9eba94"} className={"wrapper"}>
+                <div className={"regular-l is--white is--margin-bottom-24"}>
+                  {"Mitmachen"}
+                </div>
+                <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
+                  <a href={`${p}/join/apply`} className={"footer-menu-link"}>
+                    {"Formular ausfüllen"}
+                  </a>
+                  <a href={`${p}/join/enrollment`} className={"footer-menu-link"}>
+                    {"Teilnahme an ESOSH für Unternehmen"}
+                  </a>
+                  <a href={`${p}/join/participation`} className={"footer-menu-link"}>
+                    {"Beitritt zu ESOSH für Fachkräfte"}
+                  </a>
+                  <a href={`${p}/join/codex`} className={"footer-menu-link"}>
+                    {"Verhaltenskodex"}
+                  </a>
+                  <a href={`${p}/join/terms`} className={"footer-menu-link"}>
+                    <strong>
+                      {"Satzung der ESOSH"}
+                    </strong>
+                  </a>
+                  <a href={`${p}/join/safety-league-best-practices`} className={"footer-menu-link"}>
+                    <strong>
+                      {"Fachgruppen und bewährte Praktiken"}
+                    </strong>
+                  </a>
+                </div>
+              </div>
+              <div id={"w-node-_2376a8a3-09b1-9797-9800-107d66343029-aa9eba94"} className={"wrapper is--foter-contacts"}>
+                <div id={"w-node-_9bcc6dd1-016b-8498-c6ca-2e36aa9ebab7-aa9eba94"} className={"wrapper"}>
+                  <div className={"regular-l is--white is--margin-bottom-24"}>
+                    {"Kontakt"}
+                  </div>
+                  <div className={"wrapper is--v-flex-start-start is--rows-gap-12"}>
+                    <a href={phone0.href} className={"footer-menu-contacts w-inline-block"}>
+                      <img src={"/images/home/Phone-106dae9b.svg"} loading={"lazy"} alt={""} className={"is--icon-size-16"} />
+                      <div className={"medium-m is--grey-20"}>
+                        {phone0.display}
+                      </div>
+                    </a>
+                    <a href={phone1.href} className={"footer-menu-contacts w-inline-block"}>
+                      <img src={"/images/home/Phone-106dae9b.svg"} loading={"lazy"} alt={""} className={"is--icon-size-16"} />
+                      <div className={"medium-m is--grey-20"}>
+                        {phone1.display}
+                      </div>
+                    </a>
+                    <a href={`mailto:${contacts.email}`} className={"footer-menu-contacts w-inline-block"}>
+                      <img src={"/images/home/Mail-6ccfcadf.svg"} loading={"lazy"} alt={""} className={"is--icon-size-16"} />
+                      <div className={"medium-m is--grey-20"}>
+                        {contacts.email}
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div className={"wrapper"}>
+                  <div className={"regular-l is--white is--margin-bottom-24"}>
+                    {"Folgen Sie uns"}
+                  </div>
+                  <div>
+                    <FooterSocialIcons social={contacts.social} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  );
+}

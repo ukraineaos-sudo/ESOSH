@@ -4,14 +4,9 @@ import { CmsPageShell } from "@/components/cms/CmsPageShell";
 import { ContentTranslationPending } from "@/components/content/ContentTranslationPending";
 import { pageLoaders } from "./page-loaders";
 import { getCmsPage } from "@/lib/cms/public";
-import {
-  hasLegacyPageContent,
-  isAppLocale,
-  localizedPath,
-  type AppLocale,
-} from "@/lib/locale";
+import { isAppLocale, localizedPath, type AppLocale } from "@/lib/locale";
 
-/** RU: Dual-read: CMS → legacy TSX → честный pending для новых локалей. EN: CMS → legacy → pending for new locales. */
+/** RU: Dual-read: CMS → legacy TSX → честный pending (напр. trainings). EN: CMS → legacy → pending when no loader. */
 export async function getPage(
   locale: string,
   route: string,
@@ -32,8 +27,9 @@ export async function getPage(
     return (await pageLoaders[path as keyof typeof pageLoaders]()).default;
   }
 
-  // New locales: do not serve uk/en body under a different lang attribute.
-  if (isAppLocale(locale) && !hasLegacyPageContent(locale)) {
+  // Honest pending when uk/en sibling exists but this locale has no loader
+  // (e.g. trainings still uk/en-only after CONTENT_LOCALES expanded).
+  if (isAppLocale(locale)) {
     const ukPath = localizedPath("uk", route);
     const enPath = localizedPath("en", route);
     const hasSibling =

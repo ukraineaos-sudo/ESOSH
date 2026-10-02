@@ -1,0 +1,151 @@
+/* Public ESOSH content captured 2026-09-07. Edit text and media here. */
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+
+/** RU: Содержимое страницы. EN: Static page content. */
+export default function PageContent() {
+  return (
+    <>
+      <Header />
+      <section className={"section is--margin-top-144--t-128--m-104"}>
+        <div className={"w-layout-blockcontainer container w-container"}>
+          <div className={"wrapper is--v-flex-center-top"}>
+            <div className={"wrapper is--max-width-870 is--w-100p"}>
+              <a href={"/de/news"} className={"btn is--tertiary is--margin-bottom-40 w-inline-block"}>
+                <div className={"wrapper is--h-flex-center-left is--gap-4-columns"}>
+                  <img src={"/images/news-26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu/Chevron-Left-18f1b294.svg"} loading={"lazy"} alt={""} className={"is--icon-size-16"} />
+                  <div className={"bold-m"}>
+                    {"Zurück zu den Neuigkeiten"}
+                  </div>
+                </div>
+              </a>
+              <div className={"wrapper is--margin-bottom-64--m-48"}>
+                <h1 className={"h1 is--margin-bottom-16"}>
+                  {"Lion Defense – Selbstverteidigungskurs für Kinder"}
+                </h1>
+                <div className={"regular-s is--grey-20"}>
+                  {"8.4.2026"}
+                </div>
+              </div>
+              <img id={"www.esosh.net-news-esosh-pidtrimuie-globalniy-tizhden-obiznanosti-pro-azbest-yakiy-prohodit-1-7-kvitnya"} alt={""} loading={"lazy"} src={"/images/news/2026-04-07-161026106-a3c26d96.webp"} className={"image is--w-100p is--height-480 is--radius-6 is--fit-cover is--margin-bottom-64--m-48"} width={1536} height={1024} decoding="async" />
+              <div className={"rich-news-text w-richtext"}>
+                <h3>
+                  {"ESOSH präsentiert in der Ukraine einen einzigartigen Selbstschutzkurs für Kinder „Loewen Defence“ (Loewen Defence), der in Deutschland entwickelt wurde."}
+                </h3>
+                <h3>
+                  {"Das Programm richtet sich speziell an Kinder im Alter von 5 bis 7 und 8 bis 11 Jahren und zielt darauf ab:"}
+                </h3>
+                <h3>
+                  {"✔️ Entwicklung des Selbstvertrauens"}
+                </h3>
+                <h3>
+                  {"✔️ Ausbildung sicherer Verhaltensfähigkeiten"}
+                </h3>
+                <h3>
+                  {"✔️ grundlegende Selbstverteidigungstechniken"}
+                </h3>
+                <h3>
+                  {"✔️ Fähigkeit, in gefährlichen Situationen „Nein“ zu sagen"}
+                </h3>
+                <h3>
+                  {"Formate:"}
+                </h3>
+                <h3>
+                  {"🏫Schulen und Kindergärten"}
+                </h3>
+                <h3>
+                  {"🏢 Firmenschulungen für Kinder von Mitarbeitern"}
+                </h3>
+                <h3>
+                  {"👥offene Sets"}
+                </h3>
+                <h3>
+                  {"👕 Für den Kurs wird auch eigenes Merch vorbereitet, sodass sich jedes Kind als Teil des Teams der „Löwen“ fühlt."}
+                </h3>
+                <h3>
+                  {"Wir haben bereits mit der Ausbildung von Trainern begonnen, um Lion Defense in verschiedenen Städten der Ukraine so zugänglich wie möglich zu machen."}
+                </h3>
+                <p>
+                  {"‍"}
+                </p>
+                <h3>
+                  {"Zur Bestellung des Programms schreiben Sie an: office@esosh.net"}
+                </h3>
+                <p>
+                  {"‍"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
+        <div className={"w-layout-blockcontainer container w-container"}>
+          <div className={"wrapper is--h-flex-bottom-space-between is--margin-bottom-40"}>
+            <h2 className={"h2"}>
+              {"Sie könnten interessiert sein"}
+            </h2>
+            <a href={"/de/news"} className={"btn is--tertiary w-inline-block"}>
+              <div className={"wrapper is--h-flex-center-left is--gap-4-columns"}>
+                <div className={"bold-m"}>
+                  {"Alle anzeigen"}
+                </div>
+                <img src={"/images/home/Chevron-Right-1f56be04.svg"} loading={"lazy"} alt={""} className={"is--icon-size-16"} />
+              </div>
+            </a>
+          </div>
+          <div className={"collection-list-wrapper w-dyn-list"}>
+            <div role={"list"} className={"collection-list is--grid-3-columns--a-1-column w-dyn-items"}>
+              <div role={"listitem"} className={"collection-item w-dyn-item"}>
+                <a href={"#"} className={"collection-link-wrapper w-inline-block"}>
+                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
+                    <img loading={"lazy"} alt={"Die Zulassungskampagne ist der perfekte Zeitpunkt, um einen Beruf zu wählen, der immer gefragt sein wird."} src={"/images/news/2026-07-29-132928930-c7caa873.webp"} className={"collection-image"} width={1672} height={941} decoding="async" />
+                  </div>
+                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
+                    <h3 className={"h3 is--margin-bottom-12"}>
+                      {"Die Zulassungskampagne ist der perfekte Zeitpunkt, um einen Beruf zu wählen, der immer gefragt sein wird."}
+                    </h3>
+                    <div className={"regular-xs is--grey-20"}>
+                      {"29.7.2026"}
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div role={"listitem"} className={"collection-item w-dyn-item"}>
+                <a href={"#"} className={"collection-link-wrapper w-inline-block"}>
+                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
+                    <img loading={"lazy"} alt={"7. Mai 2026 – der wahre Tag der Wissenschaft im Bereich Arbeitssicherheit in der Ukraine! "} src={"/images/news/2026-04-29-132558502-7bc52d9f.png"} className={"collection-image"} width={1280} height={768} decoding="async" />
+                  </div>
+                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
+                    <h3 className={"h3 is--margin-bottom-12"}>
+                      {"7. Mai 2026 – der wahre Tag der Wissenschaft im Bereich Arbeitssicherheit in der Ukraine! "}
+                    </h3>
+                    <div className={"regular-xs is--grey-20"}>
+                      {"4.5.2026"}
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div role={"listitem"} className={"collection-item w-dyn-item"}>
+                <a href={"#"} className={"collection-link-wrapper w-inline-block"}>
+                  <div className={"collection-image-wrapper is--height-240--t-360--m-240 is--margin-bottom-20--m-16 is--overflow-hidden"}>
+                    <img loading={"lazy"} alt={"Christus ist auferstanden!"} src={"/images/news/2026-04-12-140354386-430af24a.webp"} className={"collection-image"} width={1536} height={1024} decoding="async" />
+                  </div>
+                  <div className={"collection-text-wrapper is--max-width-408--a-664 is--padding-right-24--m-0"}>
+                    <h3 className={"h3 is--margin-bottom-12"}>
+                      {"Christus ist auferstanden!"}
+                    </h3>
+                    <div className={"regular-xs is--grey-20"}>
+                      {"4.5.2026"}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <Footer />
+    </>
+  );
+}

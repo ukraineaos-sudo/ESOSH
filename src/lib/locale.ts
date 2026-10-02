@@ -2,8 +2,11 @@ import { routing, type AppLocale } from "@/i18n/routing";
 
 export type { AppLocale };
 
-/** Locales that have full legacy TSX page bodies today. */
-export const CONTENT_LOCALES = ["uk", "en"] as const;
+/**
+ * Locales with legacy TSX page bodies for non-training routes.
+ * Trainings (`education/trainings*`) remain uk/en-only; other locales get pending via getPage.
+ */
+export const CONTENT_LOCALES = ["uk", "en", "de", "es", "fr", "az", "kk"] as const;
 export type ContentLocale = (typeof CONTENT_LOCALES)[number];
 
 export const LOCALE_NATIVE_LABELS: Record<AppLocale, string> = {
