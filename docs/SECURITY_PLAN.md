@@ -10,6 +10,7 @@
 - [x] Production: отказ создавать bootstrap-админа со слабым паролем (`admin` / &lt; 8 символов)
 - [x] Production: запрет `ENROLLMENT_BLOB_ACCESS=public`
 - [x] Enrollment upload: magic-byte sniff (JPEG/PNG/PDF), лимит **20 файлов** и **40 МБ суммарно** на заявку (поверх лимитов 5 МБ фото / 10 МБ документ)
+- [x] Публичная анкета не перезаписывает существующую карточку `members` по email (только link + payload; merge — админом)
 
 ## Предложенные лимиты (к внедрению)
 

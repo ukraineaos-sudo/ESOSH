@@ -477,3 +477,4 @@ src/content/pages/fr/news/zahist-leva.tsx
 src/lib/contact/brevo-contact.ts
 tests/contact-brevo.test.mjs
 .cursor/mcp.json
+tests/enrollment-members.test.mjs

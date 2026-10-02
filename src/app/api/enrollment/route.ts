@@ -198,6 +198,10 @@ export async function POST(request: Request) {
       lastApplicationId: applicationPublicId,
     });
 
+    const linkedExistingMember = !member.created;
+    const requiresManualReview =
+      classification.requiresManualReview || linkedExistingMember;
+
     const [createdApp] = await db
       .insert(applications)
       .values({
@@ -206,16 +210,22 @@ export async function POST(request: Request) {
         locale: parsed.data.locale,
         status: "new",
         autoLevel: classification.level,
-        requiresManualReview: classification.requiresManualReview,
+        requiresManualReview,
         autoLevelRules: {
           matchedRules: classification.matchedRules,
           criteria: classification.criteria,
           nextLevelHintUk: classification.nextLevelHintUk,
           quizVersion: CODEX_QUIZ_VERSION,
+          ...(linkedExistingMember
+            ? { existingMemberLinked: true, memberProfileUnchanged: true }
+            : {}),
         },
         payload: {
           ...safePayload,
           classificationLabelUk: classification.labelUk,
+          ...(linkedExistingMember
+            ? { existingMemberLinked: true, memberProfileUnchanged: true }
+            : {}),
         },
         consentVersion: CONSENT_VERSION,
         testScore,
@@ -243,11 +253,15 @@ export async function POST(request: Request) {
       applicationId: app.id,
       actorType: "system",
       eventType: "submitted",
-      message: "Заявку подано кандидатом",
+      message: linkedExistingMember
+        ? "Заявку подано; картку існуючого учасника не змінено (потрібна перевірка адміна)"
+        : "Заявку подано кандидатом",
       meta: {
         autoLevel: classification.level,
         testScore,
         fileCount: storedFiles.length,
+        existingMemberLinked: linkedExistingMember,
+        memberProfileUpdated: false,
       },
     });
   } catch (error) {
@@ -308,7 +322,8 @@ export async function POST(request: Request) {
     memberPublicId: member.publicId,
     autoLevel: classification.level,
     autoLevelLabelUk: classification.labelUk,
-    requiresManualReview: classification.requiresManualReview,
+    requiresManualReview: classification.requiresManualReview || !member.created,
+    existingMemberLinked: !member.created,
     criteria: classification.criteria,
     nextLevelHintUk: classification.nextLevelHintUk,
     testScore,

@@ -48,8 +48,10 @@ export function buildMemberProfileFromEnrollment(
 }
 
 /**
- * RU: Upsert лише за primary email; secondary — тільки conflict-check (без overwrite чужої картки).
- * EN: Upsert by primary only; secondary used for conflict, never as overwrite key.
+ * RU: Публічна анкета: новий member або link до існуючого за primary email.
+ * Існуючу картку НЕ оновлює (PII лише в applications.payload → merge адміном).
+ * Secondary — тільки conflict-check, ніколи ключ overwrite.
+ * EN: Public enrollment creates or links by primary; never mutates existing member PII.
  */
 export async function upsertMemberFromEnrollment(
   db: Db,
@@ -66,40 +68,19 @@ export async function upsertMemberFromEnrollment(
     throw new Error("email_conflict");
   }
 
-  if (secondary) {
-    if (secondary === email) {
-      // same as primary — ignore duplicate secondary
-    } else {
-      const secAsPrimary = await findMemberByPrimaryEmail(db, secondary);
-      const secAsSecondary = await findMemberBySecondaryEmail(db, secondary);
-      if (secAsPrimary && secAsPrimary.id !== byPrimary?.id) {
-        throw new Error("email_conflict");
-      }
-      if (secAsSecondary && secAsSecondary.id !== byPrimary?.id) {
-        throw new Error("email_conflict");
-      }
+  if (secondary && secondary !== email) {
+    const secAsPrimary = await findMemberByPrimaryEmail(db, secondary);
+    const secAsSecondary = await findMemberBySecondaryEmail(db, secondary);
+    if (secAsPrimary && secAsPrimary.id !== byPrimary?.id) {
+      throw new Error("email_conflict");
+    }
+    if (secAsSecondary && secAsSecondary.id !== byPrimary?.id) {
+      throw new Error("email_conflict");
     }
   }
 
+  // Existing member: link application only — no unauthenticated profile overwrite.
   if (byPrimary) {
-    const nextSecondary =
-      secondary && secondary !== byPrimary.primaryEmail ? secondary : byPrimary.secondaryEmail;
-    await db
-      .update(members)
-      .set({
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        phone: payload.phone,
-        secondaryEmail: nextSecondary,
-        profile: {
-          ...(typeof byPrimary.profile === "object" && byPrimary.profile
-            ? (byPrimary.profile as object)
-            : {}),
-          ...nextProfile,
-        },
-        updatedAt: new Date(),
-      })
-      .where(eq(members.id, byPrimary.id));
     return { memberId: byPrimary.id, publicId: byPrimary.publicId, created: false };
   }
 
