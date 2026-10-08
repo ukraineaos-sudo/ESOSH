@@ -451,7 +451,7 @@
   },
   "/en/education/trainings": {
     "title": "ESOSH — Trainings",
-    "description": "Short video trainings on safety and emergency actions.",
+    "description": "ESOSH basic and professional safety trainings.",
     "locale": "en",
     "alternates": {
       "uk": "/education/trainings",
@@ -466,7 +466,7 @@
   },
   "/education/trainings": {
     "title": "ESOSH — Тренінги",
-    "description": "Короткі відеотренінги з безпеки та дій у надзвичайних ситуаціях.",
+    "description": "Базові та професійні тренінги ESOSH з безпеки праці.",
     "locale": "uk",
     "alternates": {
       "uk": "/education/trainings",
@@ -510,7 +510,7 @@
     "image": null
   },
   "/en/education/trainings/risk-assessment": {
-    "title": "ESOSH — Risk assessment. Awareness course",
+    "title": "ESOSH — Risk Assessment: Awareness Course",
     "description": "Three short modules on risk assessment with a knowledge check and certificate.",
     "locale": "en",
     "alternates": {
@@ -525,8 +525,8 @@
     "image": null
   },
   "/education/trainings/risk-assessment": {
-    "title": "ESOSH — Оцінка ризиків. Базовий курс",
-    "description": "Три короткі модулі з оцінки ризиків, тест і сертифікат.",
+    "title": "ESOSH — Оцінювання ризиків: вступний курс",
+    "description": "Три короткі модулі з оцінювання ризиків, тест і сертифікат.",
     "locale": "uk",
     "alternates": {
       "uk": "/education/trainings/risk-assessment",
@@ -536,6 +536,36 @@
       "fr": "/fr/education/trainings/risk-assessment",
       "az": "/az/education/trainings/risk-assessment",
       "kk": "/kk/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/en/education/trainings/emergency-actions": {
+    "title": "ESOSH — Citizen actions in emergency situations",
+    "description": "Training on citizen actions in emergencies. Video, quiz, and certificate coming soon.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
+    },
+    "image": null
+  },
+  "/education/trainings/emergency-actions": {
+    "title": "ESOSH — Порядок дій громадян у разі виникнення надзвичайних ситуацій",
+    "description": "Тренінг про порядок дій громадян у надзвичайних ситуаціях. Відео, тест і сертифікат з’являться незабаром.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
     },
     "image": null
   },
@@ -1755,7 +1785,7 @@
   },
   "/de/education/trainings": {
     "title": "ESOSH – Schulungen",
-    "description": "Kurze Videoschulungen zu Sicherheit und Notfallmaßnahmen.",
+    "description": "Grundlagen- und Professionalschulungen von ESOSH zur Arbeitssicherheit.",
     "locale": "de",
     "alternates": {
       "uk": "/education/trainings",
@@ -1770,7 +1800,7 @@
   },
   "/es/education/trainings": {
     "title": "ESOSH — Entrenamientos",
-    "description": "Capacitaciones breves en video sobre acciones de seguridad y emergencia.",
+    "description": "Entrenamientos básicos y profesionales de ESOSH sobre seguridad laboral.",
     "locale": "es",
     "alternates": {
       "uk": "/education/trainings",
@@ -1785,7 +1815,7 @@
   },
   "/fr/education/trainings": {
     "title": "ESOSH — Formations",
-    "description": "Courtes formations vidéo sur les actions de sécurité et d’urgence.",
+    "description": "Formations de base et professionnelles ESOSH en sécurité au travail.",
     "locale": "fr",
     "alternates": {
       "uk": "/education/trainings",
@@ -1800,7 +1830,7 @@
   },
   "/az/education/trainings": {
     "title": "ESOSH — Təlimlər",
-    "description": "Təhlükəsizlik və fövqəladə hallarda hərəkətlər üzrə qısa video təlimlər.",
+    "description": "ESOSH əsas və peşəkar əmək təhlükəsizliyi təlimləri.",
     "locale": "az",
     "alternates": {
       "uk": "/education/trainings",
@@ -1815,7 +1845,7 @@
   },
   "/kk/education/trainings": {
     "title": "ESOSH — Тренингтер",
-    "description": "Қауіпсіздік және төтенше жағдайдағы әрекеттер бойынша қысқа бейне тренингтер.",
+    "description": "ESOSH негізгі және кәсіби еңбек қауіпсіздігі тренингтері.",
     "locale": "kk",
     "alternates": {
       "uk": "/education/trainings",
@@ -4524,7 +4554,7 @@
     "image": null
   },
   "/de/education/trainings/risk-assessment": {
-    "title": "ESOSH — Risikobewertung. Basiskurs",
+    "title": "ESOSH — Risikobewertung: Einführungskurs",
     "description": "Drei kurze Module zur Risikobewertung mit Wissenscheck und Zertifikat.",
     "locale": "de",
     "alternates": {
@@ -4539,7 +4569,7 @@
     "image": null
   },
   "/es/education/trainings/risk-assessment": {
-    "title": "ESOSH — Evaluación de riesgos. Curso básico",
+    "title": "ESOSH — Evaluación de riesgos: curso de sensibilización",
     "description": "Tres módulos breves sobre evaluación de riesgos con comprobación de conocimientos y certificado.",
     "locale": "es",
     "alternates": {
@@ -4554,7 +4584,7 @@
     "image": null
   },
   "/fr/education/trainings/risk-assessment": {
-    "title": "ESOSH — Évaluation des risques. Cours de base",
+    "title": "ESOSH — Évaluation des risques : cours de sensibilisation",
     "description": "Trois modules courts sur l’évaluation des risques avec contrôle des connaissances et certificat.",
     "locale": "fr",
     "alternates": {
@@ -4569,7 +4599,7 @@
     "image": null
   },
   "/az/education/trainings/risk-assessment": {
-    "title": "ESOSH — Risklərin qiymətləndirilməsi. Əsas kurs",
+    "title": "ESOSH — Risklərin qiymətləndirilməsi: giriş kursu",
     "description": "Risk qiymətləndirilməsi üzrə üç qısa modul, bilik yoxlaması və sertifikat.",
     "locale": "az",
     "alternates": {
@@ -4584,7 +4614,7 @@
     "image": null
   },
   "/kk/education/trainings/risk-assessment": {
-    "title": "ESOSH — Тәуекелді бағалау. Негізгі курс",
+    "title": "ESOSH — Тәуекелді бағалау: кіріспе курс",
     "description": "Тәуекелді бағалау бойынша үш қысқа модуль, білім тексерісі және сертификат.",
     "locale": "kk",
     "alternates": {
@@ -4595,6 +4625,81 @@
       "fr": "/fr/education/trainings/risk-assessment",
       "az": "/az/education/trainings/risk-assessment",
       "kk": "/kk/education/trainings/risk-assessment"
+    },
+    "image": null
+  },
+  "/de/education/trainings/emergency-actions": {
+    "title": "ESOSH — Handlungsablauf für Bürgerinnen und Bürger in Notfällen",
+    "description": "Schulung zum Handlungsablauf in Notfällen. Video, Test und Zertifikat folgen in Kürze.",
+    "locale": "de",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
+    },
+    "image": null
+  },
+  "/es/education/trainings/emergency-actions": {
+    "title": "ESOSH — Procedimiento de actuación ciudadana en emergencias",
+    "description": "Formación sobre actuación ciudadana en emergencias. Vídeo, test y certificado próximamente.",
+    "locale": "es",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
+    },
+    "image": null
+  },
+  "/fr/education/trainings/emergency-actions": {
+    "title": "ESOSH — Conduite à tenir des citoyens en cas de situations d’urgence",
+    "description": "Formation sur la conduite à tenir en situation d’urgence. Vidéo, test et certificat à venir.",
+    "locale": "fr",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
+    },
+    "image": null
+  },
+  "/az/education/trainings/emergency-actions": {
+    "title": "ESOSH — Fövqəladə hallarda vətəndaşların hərəkət qaydası",
+    "description": "Fövqəladə hallarda vətəndaş hərəkətləri üzrə təlim. Video, test və sertifikat tezliklə əlavə olunacaq.",
+    "locale": "az",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
+    },
+    "image": null
+  },
+  "/kk/education/trainings/emergency-actions": {
+    "title": "ESOSH — Төтенше жағдайлар кезінде азаматтардың әрекет тәртібі",
+    "description": "Төтенше жағдайлардағы азаматтар әрекеті бойынша тренинг. Бейне, тест және сертификат жақында қосылады.",
+    "locale": "kk",
+    "alternates": {
+      "uk": "/education/trainings/emergency-actions",
+      "en": "/en/education/trainings/emergency-actions",
+      "de": "/de/education/trainings/emergency-actions",
+      "es": "/es/education/trainings/emergency-actions",
+      "fr": "/fr/education/trainings/emergency-actions",
+      "az": "/az/education/trainings/emergency-actions",
+      "kk": "/kk/education/trainings/emergency-actions"
     },
     "image": null
   }

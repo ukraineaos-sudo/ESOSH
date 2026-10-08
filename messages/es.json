@@ -327,7 +327,12 @@
     "youtubeLoading": "Cargando reproductor…",
     "quizScoreError": "No se pudieron comprobar las respuestas. Inténtelo de nuevo.",
     "quizScoring": "Comprobando…",
-    "certificateParticipationNote": "Este es un certificado de participación, no una acreditación de cualificación."
+    "certificateParticipationNote": "Este es un certificado de participación, no una acreditación de cualificación.",
+    "certificateConfirmTitle": "El certificado se emitirá a nombre de:",
+    "certificateConfirmBack": "Atrás / Corregir",
+    "certificateConfirmSubmit": "Confirmar y generar",
+    "certificateGenerating": "Preparando el certificado…",
+    "certificateGenerateError": "No se pudo generar el certificado. Inténtelo de nuevo."
   },
   "content": {
     "pendingTitle": "Traducción de la página en curso",

@@ -93,15 +93,36 @@ export type TrainingDetail = {
   certificatePdf?: LocalizedString;
   /** Minimum overall score percent to unlock certificate (default 80). */
   passThresholdPercent?: number;
+  /**
+   * When false, hide the forward-seek tip under the player.
+   * Anti-seek / watermark behavior stays enabled either way (default true).
+   */
+  showSeekHint?: boolean;
+  /**
+   * Short course code for named PDF numbers (e.g. RA → ESOSH-RA-2026-000001).
+   * When set, certificate is generated (named PDF) instead of static locale docs.
+   */
+  courseCode?: string;
+  /** Certificate duration lines (not derived from video length). */
+  duration?: { uk: string; en: string };
+  /**
+   * ALL-CAPS titles on the PDF; if omitted, `title.uk`/`title.en` are uppercased.
+   */
+  certificateTitles?: { uk: string; en: string };
 };
 
 export type PublicTrainingDetail = Omit<TrainingDetail, "modules"> & {
   modules: PublicTrainingModule[];
 };
 
+/** RU: Рівень у каталозі лістингу. EN: Listing catalog tier. */
+export type TrainingTier = "basic" | "professional";
+
 export type TrainingListItem = {
   slug: string;
   href: string;
   title: LocalizedString;
   summary: LocalizedString;
+  /** Drives listing sections (basic vs professional). */
+  tier: TrainingTier;
 };

@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { riskAssessmentTraining, uavAttacksTraining } from "@/content/trainings";
+import {
+  emergencyActionsTraining,
+  riskAssessmentTraining,
+  uavAttacksTraining,
+} from "@/content/trainings";
 import type { QuizOptionId, TrainingDetail } from "@/content/trainings/types";
 import { answerKeyForModule } from "@/lib/trainings/public";
 
@@ -8,6 +12,7 @@ const PASS_TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
 const TRAININGS_BY_SLUG: Record<string, TrainingDetail> = {
   [riskAssessmentTraining.slug]: riskAssessmentTraining,
   [uavAttacksTraining.slug]: uavAttacksTraining,
+  [emergencyActionsTraining.slug]: emergencyActionsTraining,
 };
 
 /** RU: Тренінг за slug (server-only). EN: Resolve training by slug (server-only). */

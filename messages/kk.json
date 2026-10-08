@@ -327,7 +327,12 @@
     "youtubeLoading": "Ойнатқыш жүктелуде…",
     "quizScoreError": "Жауаптарды тексеру мүмкін болмады. Қайта көріңіз.",
     "quizScoring": "Тексерілуде…",
-    "certificateParticipationNote": "Бұл қатысу сертификаты, біліктілік аттестаты емес."
+    "certificateParticipationNote": "Бұл қатысу сертификаты, біліктілік аттестаты емес.",
+    "certificateConfirmTitle": "Сертификат мына атқа беріледі:",
+    "certificateConfirmBack": "Артқа / Түзету",
+    "certificateConfirmSubmit": "Растау және құру",
+    "certificateGenerating": "Сертификат дайындалуда…",
+    "certificateGenerateError": "Сертификатты құру мүмкін болмады. Қайта көріңіз."
   },
   "content": {
     "pendingTitle": "Бет аудармасы дайындалуда",

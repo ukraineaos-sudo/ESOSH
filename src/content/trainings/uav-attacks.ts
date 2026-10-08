@@ -88,6 +88,16 @@ export const uavAttacksTraining: TrainingDetail = {
     az: "PİA (drones) hücumları zamanı mülki şəxslərin təhlükəsiz hərəkətləri üzrə video təlim, baxışdan sonra bilik yoxlaması ilə.",
     kk: "Ұшқышсыз ұшақтар шабуылы кезінде бейбіт тұрғындардың қауіпсіз әрекеттері бойынша бейне тренинг, қарағаннан кейін білім тексерісімен.",
   },
+  courseCode: "UAV",
+  duration: {
+    uk: "10 хвилин",
+    en: "10 minutes",
+  },
+  certificateTitles: {
+    uk: "ДІЇ ПІД ЧАС АТАК БПЛА",
+    en: "ACTIONS DURING UAV ATTACKS",
+  },
+  /** Static PDF kept as legacy fallback reference; named generator is primary when courseCode is set. */
   certificateDocId: "trainings/uav-attacks-certificate",
   passThresholdPercent: 80,
   quizUi,

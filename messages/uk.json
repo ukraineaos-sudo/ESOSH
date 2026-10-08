@@ -327,7 +327,12 @@
     "youtubeLoading": "Завантаження плеєра…",
     "quizScoreError": "Не вдалося перевірити відповіді. Спробуйте ще раз.",
     "quizScoring": "Перевіряємо…",
-    "certificateParticipationNote": "Це сертифікат участі у тренінгу, не документ атестації кваліфікації."
+    "certificateParticipationNote": "Це сертифікат участі у тренінгу, не документ атестації кваліфікації.",
+    "certificateConfirmTitle": "Сертифікат буде видано на ім’я:",
+    "certificateConfirmBack": "Назад / Виправити",
+    "certificateConfirmSubmit": "Підтвердити та сформувати",
+    "certificateGenerating": "Готуємо сертифікат…",
+    "certificateGenerateError": "Не вдалося сформувати сертифікат. Спробуйте ще раз."
   },
   "content": {
     "pendingTitle": "Переклад сторінки готується",

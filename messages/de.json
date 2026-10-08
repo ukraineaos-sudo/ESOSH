@@ -327,7 +327,12 @@
     "youtubeLoading": "Player wird geladen…",
     "quizScoreError": "Antworten konnten nicht geprüft werden. Bitte erneut versuchen.",
     "quizScoring": "Wird geprüft…",
-    "certificateParticipationNote": "Dies ist eine Teilnahmebescheinigung, keine Qualifikationsbescheinigung."
+    "certificateParticipationNote": "Dies ist eine Teilnahmebescheinigung, keine Qualifikationsbescheinigung.",
+    "certificateConfirmTitle": "Das Zertifikat wird ausgestellt auf:",
+    "certificateConfirmBack": "Zurück / Bearbeiten",
+    "certificateConfirmSubmit": "Bestätigen und erstellen",
+    "certificateGenerating": "Zertifikat wird vorbereitet…",
+    "certificateGenerateError": "Zertifikat konnte nicht erstellt werden. Bitte erneut versuchen."
   },
   "content": {
     "pendingTitle": "Seitenübersetzung in Arbeit",

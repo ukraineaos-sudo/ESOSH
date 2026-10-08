@@ -23,7 +23,7 @@
    - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`; YouTube embeds на тренінгах **только после** `marketing === true` (`YoutubeConsentEmbed`)
-8. Trainings: `TrainingLesson` → sequential `modules[]` (YouTube + quiz each; anti forward-seek) → server score `POST /api/trainings/[slug]/score` ≥ `passThresholdPercent` + name fields → certificate via signed token `GET /api/trainings/[slug]/certificate`; video IDs may be empty until upload (`videoPending`)
+8. Trainings: `TrainingLesson` → sequential `modules[]` (YouTube + quiz each; anti forward-seek) → server score `POST /api/trainings/[slug]/score` ≥ `passThresholdPercent` + name confirm → certificate: **named PDF** when `courseCode` set (`POST` issue + `GET ?downloadToken=`, Neon `training_certificates`) else static locale PDF via pass token `GET ?token=`; video IDs may be empty until upload (`videoPending`)
 9. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — типовые тексты UA/международные (по решению заказчика без отдельного юр. review)
 
 ## Точки входа
@@ -38,7 +38,8 @@
 | Trainings catalog / quiz content | `src/content/trainings/**` |
 | Training quiz UI / YouTube gate | `src/components/trainings/**` (`TrainingLesson`, `YoutubeConsentEmbed`, `TrainingQuiz`) |
 | Training score / certificate API | `src/app/api/trainings/[slug]/{score,certificate}/route.ts` + `src/lib/trainings/**` |
-| Training certificate generator | `scripts/generate-training-certificate.py` → `public/docs/trainings/*` |
+| Training named PDF (runtime) | `src/lib/trainings/certificate-pdf.ts` + assets `public/assets/certificate/**` (pdf-lib + Noto Sans) |
+| Training static cert PDFs (legacy) | `scripts/generate-training-certificate.py` → `public/docs/trainings/*` |
 | Admin UI | `src/app/admin/**` |
 | Admin API | `src/app/api/admin/**` |
 | DB schema | `src/db/schema.ts` |
@@ -60,7 +61,7 @@
 | Nav / form / consent / trainings / content / docs UI strings | `messages/{uk,en,de,es,fr,az,kk}.json` |
 | Footer markup | `src/content/chrome/**` (uk chrome; EN chrome + `localePrefix` for all prefixed locales) |
 | Visual parity CSS | `src/styles/reference.css` (+ navigation/contact/enrollment/consent/trainings/refinements) |
-| Trainings listing + quiz copy | `src/content/trainings/**` (+ pages `education/trainings*`; `pickLocalized` — no silent fallback) |
+| Trainings listing + quiz copy | `src/content/trainings/**` (`tier`: basic\|professional; `trainingsListingCopy`; pages → `TrainingsCatalog`; `pickLocalized` — no silent fallback) |
 | Admin UI CSS | `src/app/admin/admin.css` |
 | Contact validation | `src/lib/contact.ts` (`appLocaleSchema`) |
 | Contact delivery | `src/lib/contact/deliver-contact.ts` (Brevo `brevo-contact.ts`, webhook fallback) |
@@ -82,7 +83,7 @@
 - Locales: `uk` (default, no prefix), `en` `/en/...`, `de` `/de/...`, `es` `/es/...`, `fr` `/fr/...`, `az` `/az/...`, `kk` `/kk/...`; `localeDetection: false`
 - Full marketing TSX bodies: all `CONTENT_LOCALES` (`uk|en|de|es|fr|az|kk`) for core routes including education/trainings*; honest `ContentTranslationPending` only when a loader is still missing
 - Routes: зеркало slug esosh.net; список — `page-loaders` / `page-metadata`; CMS может перекрыть маршрут после publish
-  - Education trainings: `/education/trainings`, `/education/trainings/risk-assessment`, `/education/trainings/uav-attacks` (+ `/{locale}/...`); quiz/UI strings in `src/content/trainings/**`; certificate PDFs still uk+en only (`DOC_INVENTORY`)
+  - Education trainings: `/education/trainings`, `/education/trainings/risk-assessment`, `/education/trainings/uav-attacks`, `/education/trainings/emergency-actions` (+ `/{locale}/...`); quiz/UI strings in `src/content/trainings/**`; certificate PDFs still uk+en only for shipped courses (`DOC_INVENTORY`; `emergency-actions` cert pending)
 - Contact API body: `{ name, email, message, locale?, company?, privacyConsent: true }` (`locale` ∈ uk|en|de|es|fr|az|kk)
   - без `privacyConsent: true` → 400; honeypot `company` → `{ ok: true }` без доставки (згода не змінює honeypot-семантику)
   - delivery: Brevo (`BREVO_*` + `CONTACT_ADMIN_EMAIL` або `ENROLLMENT_ADMIN_EMAIL`) → інакше `CONTACT_WEBHOOK_*`
@@ -111,13 +112,14 @@
 - Admin application PATCH: `confirmed`/`confirmed_no_level` → member active; `rejected`/`needs_info` → demote member лише якщо немає іншої confirmed-заявки (`shouldDemoteMemberAfterApplicationDecision`)
 - Admin CRM (applications/members/files/CSV): лише `canManageRegistry` (role `admin`); editor бачить контент, CRM nav/badge приховані
 - Admin mutating POST/PATCH/PUT/DELETE: `assertSameOrigin` (`src/lib/http/same-origin.ts`); CSV export/members: `csvCell` formula-safe
-- Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграція `drizzle/0002_rate_limit_buckets.sql` — `db:generate` / `db:migrate`; `db:push` лише для швидкого локального sync)
+- Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview/training_certificate → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграції `drizzle/0002_rate_limit_buckets.sql`, `drizzle/0003_training_certificates.sql` — `db:migrate` або `db:push`)
+- Named training certificates: Neon `training_certificates` + `training_certificate_counters`; number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName)` (anonymous, no memberId); download via long-lived `downloadToken`
 - Enrollment POST: compensating rollback (blobs + application cascade; orphan member лише якщо `created` у цьому запиті)
 - News CMS: draft/deleted slug → `notFound()` без legacy TSX fallback (`getCmsNewsPresence`); DELETE = soft `status=deleted`
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
 - Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_ADMIN_EMAIL` (опц., fallback `ENROLLMENT_ADMIN_EMAIL`), `CONTACT_WEBHOOK_*` (опц. fallback), `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, опц. `TRAINING_PASS_SECRET` (см. `.env.example`)
 - Binotel: публичные widget URLs на `widgets.binotel.com`; **загрузка только после consent `communications`**
-- YouTube (trainings): YouTube IFrame API + `youtube-nocookie` через `YoutubeConsentEmbed`; **только после consent `marketing`**; forward-seek limited; quiz locked until video end; score via `POST /api/trainings/[slug]/score` (answer keys server-only); certificate via `GET /api/trainings/[slug]/certificate?token=` (HMAC pass token)
+- YouTube (trainings): YouTube IFrame API + `youtube-nocookie` через `YoutubeConsentEmbed`; **только после consent `marketing`**; forward-seek limited; quiz locked until video end; score via `POST /api/trainings/[slug]/score` (answer keys server-only); named cert: `POST /api/trainings/[slug]/certificate` (pass token + name, same-origin) → `GET ?downloadToken=`; static cert courses: `GET ?token=` (HMAC pass token)
 - Locale layout must pass client namespaces used by `"use client"` trees: `nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs` (missing namespace → raw `namespace.key` in UI)
 - Env для consent **не** потрібен (first-party cookie)
 - Enrollment admin deep-link у Brevo: `resolveAdminOrigin()` — localhost → request origin; поки `esosh.net` на старому хості → `https://esosh.vercel.app/admin/...`
@@ -127,14 +129,14 @@
 - `npm test` (после build; поднимает `next start` + mock webhook; unit `tests/consent-parse.test.mjs`, `tests/security-hygiene.test.mjs`, `tests/audit-fix-wiring.test.mjs`)
 - `npm run db:generate` — SQL-міграції з `src/db/schema.ts` у `drizzle/`
 - `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`)
-- `npm run db:push` — швидкий sync схеми на Neon без journal (dev); для `rate_limit_buckets` у git — міграція `0002_*`
+- `npm run db:push` — швидкий sync схеми на Neon без journal (dev); для rate limit / certificates у git — міграції `0002_*`, `0003_*`
 
 ## Инварианты
 - Нет ложного успеха формы без webhook
 - Нет Webflow runtime-скриптов в HTML
 - Binotel GetCall + chat **не** в DOM без згоди `communications`
 - YouTube iframe / player на тренінгах **не** в DOM без згоди `marketing`
-- Training certificate: participation PDF behind signed pass token after server-side quiz pass; UI marks participation (not qualification attestation)
+- Training certificate: participation PDF after server-side quiz pass; named courses require Neon + pass token to issue, then `downloadToken` for PDF; UI marks participation (not qualification attestation); without `DATABASE_URL` named issue returns 503 (fail closed)
 - Без `DATABASE_URL` публичный сайт работает на legacy TSX / `SITE` fallback; админка показывает unavailable; **лента /news и блок новостей на главной** при отсутствии DB — пустые (статьи `/news/{slug}` dual-read **uk** legacy лише якщо CMS-ряду uk немає)
 - CMS news draft/deleted для slug → 404 (не воскрешає legacy TSX)
 - Public news content locale = `uk` на всіх UI-локалях (kk/de/es/fr/az/en); переклади статей не потрібні

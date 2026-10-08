@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  // pdf-lib + fontkit use Node font engine; keep them external for serverless routes
+  serverExternalPackages: ["pdf-lib", "@pdf-lib/fontkit"],
   // Prevent Next from auto-writing AI rule files into the repo
   agentRules: false,
 };

@@ -13,6 +13,8 @@ type Props = {
   /** Fired once when the learner reaches the natural end of the video. */
   onCompleted: () => void;
   completed: boolean;
+  /** When false, hide the seek-limit tip; anti-seek still applies (default true). */
+  showSeekHint?: boolean;
 };
 
 const SEEK_TOLERANCE_SEC = 1.4;
@@ -120,6 +122,7 @@ export function YoutubeConsentEmbed({
   title,
   onCompleted,
   completed,
+  showSeekHint = true,
 }: Props) {
   const { ready, consent, openSettings } = useConsent();
   const allowed = ready && hasConsent(consent, "marketing");
@@ -289,7 +292,9 @@ export function YoutubeConsentEmbed({
           </div>
         ) : null}
       </div>
-      <p className="training-video__seek-hint regular-s">{t("youtubeSeekHint")}</p>
+      {showSeekHint ? (
+        <p className="training-video__seek-hint regular-s">{t("youtubeSeekHint")}</p>
+      ) : null}
       <TrainingStatusMark done={completed} label={t("youtubeWatched")} />
     </div>
   );

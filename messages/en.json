@@ -327,7 +327,12 @@
     "youtubeLoading": "Loading player…",
     "quizScoreError": "Could not score your answers. Please try again.",
     "quizScoring": "Checking…",
-    "certificateParticipationNote": "This is a participation certificate, not a professional qualification attestation."
+    "certificateParticipationNote": "This is a participation certificate, not a professional qualification attestation.",
+    "certificateConfirmTitle": "The certificate will be issued to:",
+    "certificateConfirmBack": "Back / Edit",
+    "certificateConfirmSubmit": "Confirm and generate",
+    "certificateGenerating": "Preparing your certificate…",
+    "certificateGenerateError": "Could not generate the certificate. Please try again."
   },
   "content": {
     "pendingTitle": "Page translation in progress",

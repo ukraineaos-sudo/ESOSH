@@ -30,6 +30,13 @@ test("toPublicTraining strips correct answers from quiz payload", async () => {
     "src/content/pages/fr/education/trainings/uav-attacks.tsx",
     "src/content/pages/az/education/trainings/uav-attacks.tsx",
     "src/content/pages/kk/education/trainings/uav-attacks.tsx",
+    "src/content/pages/uk/education/trainings/emergency-actions.tsx",
+    "src/content/pages/en/education/trainings/emergency-actions.tsx",
+    "src/content/pages/de/education/trainings/emergency-actions.tsx",
+    "src/content/pages/es/education/trainings/emergency-actions.tsx",
+    "src/content/pages/fr/education/trainings/emergency-actions.tsx",
+    "src/content/pages/az/education/trainings/emergency-actions.tsx",
+    "src/content/pages/kk/education/trainings/emergency-actions.tsx",
   ]) {
     const src = readFileSync(join(root, rel), "utf8");
     assert.match(src, /toPublicTraining\(/, rel);

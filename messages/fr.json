@@ -327,7 +327,12 @@
     "youtubeLoading": "Chargement du lecteur…",
     "quizScoreError": "Impossible de vérifier les réponses. Réessayez.",
     "quizScoring": "Vérification…",
-    "certificateParticipationNote": "Il s’agit d’un certificat de participation, non d’une attestation de qualification."
+    "certificateParticipationNote": "Il s’agit d’un certificat de participation, non d’une attestation de qualification.",
+    "certificateConfirmTitle": "Le certificat sera délivré au nom de :",
+    "certificateConfirmBack": "Retour / Modifier",
+    "certificateConfirmSubmit": "Confirmer et générer",
+    "certificateGenerating": "Préparation du certificat…",
+    "certificateGenerateError": "Impossible de générer le certificat. Veuillez réessayer."
   },
   "content": {
     "pendingTitle": "Traduction de la page en cours",

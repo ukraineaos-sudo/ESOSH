@@ -1,10 +1,11 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { RiskAssessmentIntro } from "@/components/trainings/RiskAssessmentIntro";
 import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { riskAssessmentTraining } from "@/content/trainings";
 import { toPublicTraining } from "@/lib/trainings/public";
 
-/** RU: Деталь тренінгу «Оцінка ризиків». EN: Risk-assessment training detail (uk). */
+/** RU: Деталь тренінгу «Оцінювання ризиків: вступний курс». EN: Risk-assessment training detail (uk). */
 export default function PageContent() {
   const training = toPublicTraining(riskAssessmentTraining);
 
@@ -35,6 +36,7 @@ export default function PageContent() {
       </section>
       <section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
+          <RiskAssessmentIntro locale="uk" />
           <div className={"training-detail-lead"}>
             <p className={"regular-l"}>{training.summary.uk}</p>
           </div>

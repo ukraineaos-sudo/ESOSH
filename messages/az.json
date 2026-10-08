@@ -327,7 +327,12 @@
     "youtubeLoading": "Pleyer yüklənir…",
     "quizScoreError": "Cavabları yoxlamaq mümkün olmadı. Yenidən cəhd edin.",
     "quizScoring": "Yoxlanılır…",
-    "certificateParticipationNote": "Bu iştirak sertifikatıdır, peşə ixtisas attestatı deyil."
+    "certificateParticipationNote": "Bu iştirak sertifikatıdır, peşə ixtisas attestatı deyil.",
+    "certificateConfirmTitle": "Sertifikat bu ada veriləcək:",
+    "certificateConfirmBack": "Geri / Düzəliş",
+    "certificateConfirmSubmit": "Təsdiq et və yarat",
+    "certificateGenerating": "Sertifikat hazırlanır…",
+    "certificateGenerateError": "Sertifikat yaradılmadı. Yenidən cəhd edin."
   },
   "content": {
     "pendingTitle": "Səhifə tərcüməsi hazırlanır",

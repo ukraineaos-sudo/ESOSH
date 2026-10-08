@@ -3,6 +3,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -162,3 +163,41 @@ export const rateLimitBuckets = pgTable("rate_limit_buckets", {
   windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
   count: integer("count").notNull().default(0),
 });
+
+/**
+ * RU: Анонімні іменовані сертифікати тренінгів (без memberId).
+ * EN: Anonymous named training certificates (no memberId).
+ */
+export const trainingCertificates = pgTable("training_certificates", {
+  id: serial("id").primaryKey(),
+  courseSlug: varchar("course_slug", { length: 128 }).notNull(),
+  courseCode: varchar("course_code", { length: 16 }).notNull(),
+  participantName: varchar("participant_name", { length: 200 }).notNull(),
+  /** sha256(courseSlug + NUL + normalizedName) for idempotent re-issue. */
+  identityHash: varchar("identity_hash", { length: 64 }).notNull(),
+  courseTitleUk: text("course_title_uk").notNull(),
+  courseTitleEn: text("course_title_en").notNull(),
+  durationUk: text("duration_uk").notNull(),
+  durationEn: text("duration_en").notNull(),
+  completionDate: varchar("completion_date", { length: 32 }).notNull(),
+  certificateNumber: varchar("certificate_number", { length: 64 }).notNull(),
+  modulesSnapshot: jsonb("modules_snapshot").notNull().default([]),
+  /** Long-lived secret for GET download (separate from short-lived pass token). */
+  downloadToken: varchar("download_token", { length: 64 }).notNull(),
+  issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("training_certificates_number_uidx").on(table.certificateNumber),
+  uniqueIndex("training_certificates_download_uidx").on(table.downloadToken),
+  uniqueIndex("training_certificates_identity_uidx").on(table.identityHash),
+]);
+
+/** RU: Лічильник ESOSH-{CODE}-{YEAR}-{######}. EN: Per course-code/year sequence. */
+export const trainingCertificateCounters = pgTable(
+  "training_certificate_counters",
+  {
+    courseCode: varchar("course_code", { length: 16 }).notNull(),
+    year: integer("year").notNull(),
+    lastSeq: integer("last_seq").notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.courseCode, table.year], name: "training_certificate_counters_pk" })],
+);

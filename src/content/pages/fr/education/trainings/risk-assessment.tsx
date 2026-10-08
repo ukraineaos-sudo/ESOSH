@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "@/i18n/navigation";
+import { RiskAssessmentIntro } from "@/components/trainings/RiskAssessmentIntro";
 import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { pickLocalized, riskAssessmentTraining } from "@/content/trainings";
 import { toPublicTraining } from "@/lib/trainings/public";
@@ -41,6 +42,7 @@ export default function PageContent() {
       </section>
       <section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
+          <RiskAssessmentIntro locale={LOCALE} />
           <div className={"training-detail-lead"}>
             <p className={"regular-l"}>{summary}</p>
           </div>
