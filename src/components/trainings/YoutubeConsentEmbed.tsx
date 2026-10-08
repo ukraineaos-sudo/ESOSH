@@ -19,6 +19,8 @@ type Props = {
 
 const SEEK_TOLERANCE_SEC = 1.4;
 const POLL_MS = 400;
+/** TEMP: set `true` only for local seek-bypass testing; keep `false` in production. */
+const DISABLE_ANTI_SEEK = false;
 
 type YtPlayer = {
   destroy: () => void;
@@ -155,7 +157,8 @@ export function YoutubeConsentEmbed({
   useEffect(() => {
     if (!allowed) return;
 
-    if (readStoredDone(videoId)) {
+    const alreadyDone = completedRef.current || readStoredDone(videoId);
+    if (alreadyDone) {
       maxWatchedRef.current = Math.max(maxWatchedRef.current, readStoredMax(videoId));
       markComplete();
     } else {
@@ -186,6 +189,9 @@ export function YoutubeConsentEmbed({
           onReady: () => {
             if (cancelled) return;
             setPlayerReady(true);
+            // After first completion, start at 0 so the learner can rewatch.
+            // Before completion, resume from the stored watermark.
+            if (alreadyDone) return;
             const start = maxWatchedRef.current;
             if (start > 1) {
               try {
@@ -222,7 +228,9 @@ export function YoutubeConsentEmbed({
         if (tNow <= 0) return;
 
         const max = maxWatchedRef.current;
-        if (tNow > max + SEEK_TOLERANCE_SEC) {
+        // Free seek while testing, or after the required watch is already done (rewatch).
+        const allowFreeSeek = DISABLE_ANTI_SEEK || completedRef.current;
+        if (!allowFreeSeek && tNow > max + SEEK_TOLERANCE_SEC) {
           try {
             player.seekTo(max, true);
           } catch {
@@ -231,8 +239,11 @@ export function YoutubeConsentEmbed({
           return;
         }
 
-        // Advance watermark only while watching forward in small steps
-        if (tNow >= max - 0.25 && tNow <= max + SEEK_TOLERANCE_SEC + 0.5) {
+        if (allowFreeSeek) {
+          maxWatchedRef.current = Math.max(max, tNow);
+          writeStored(videoId, maxWatchedRef.current, completedRef.current);
+        } else if (tNow >= max - 0.25 && tNow <= max + SEEK_TOLERANCE_SEC + 0.5) {
+          // Advance watermark only while watching forward in small steps
           maxWatchedRef.current = Math.max(max, tNow);
           writeStored(videoId, maxWatchedRef.current, completedRef.current);
         }
@@ -292,7 +303,7 @@ export function YoutubeConsentEmbed({
           </div>
         ) : null}
       </div>
-      {showSeekHint ? (
+      {showSeekHint && !DISABLE_ANTI_SEEK && !completed ? (
         <p className="training-video__seek-hint regular-s">{t("youtubeSeekHint")}</p>
       ) : null}
       <TrainingStatusMark done={completed} label={t("youtubeWatched")} />
