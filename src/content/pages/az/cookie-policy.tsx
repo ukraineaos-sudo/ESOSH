@@ -33,7 +33,7 @@ export default function PageContent() {
           <div className={"wrapper is--v-flex-center-top"}>
             <div className={"wrapper is--max-width-870 is--w-100p"}>
               <p className={"regular-s is--grey-60 is--margin-bottom-24"}>
-                {`Version ${CONSENT_POLICY_VERSION}`}
+                {`Versiya ${CONSENT_POLICY_VERSION}`}
               </p>
 
               <div className={"wrapper is--margin-bottom-48"}>

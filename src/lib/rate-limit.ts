@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { rateLimitBuckets } from "@/db/schema";
+import { bumpWindowCounter } from "@/lib/rate-limit-counter";
+import { consumeModuleAttempt } from "@/lib/trainings/module-attempt-budget";
 
 export type RateLimitBucket =
   | "admin_login"
@@ -20,6 +21,41 @@ const LIMITS: Record<RateLimitBucket, { limit: number; windowMs: number }> = {
   training_score: { limit: 60, windowMs: 60 * 60 * 1000 },
 };
 
+/**
+ * RU: Серверний бюджет спроб на (IP, курс, модуль) у Neon; cookie не впливає. Production без DB — 503.
+ * EN: Server-side attempt budget per (IP, course, module) in Neon; cookie-independent. No DB in production → 503.
+ */
+export async function assertModuleScoreBudget(
+  request: Request,
+  slug: string,
+  moduleId: string,
+): Promise<NextResponse | null> {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl || !getDb()) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
+    }
+    return null;
+  }
+
+  let decision;
+  try {
+    decision = await consumeModuleAttempt(
+      neon(databaseUrl),
+      clientIpFromRequest(request),
+      slug,
+      moduleId,
+    );
+  } catch {
+    return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
+  }
+  if (decision.allowed) return null;
+  return NextResponse.json(
+    { ok: false, error: "too_many_attempts" },
+    { status: 429, headers: { "Retry-After": String(decision.retryAfterSec) } },
+  );
+}
+
 /** RU: IP клієнта з proxy-заголовків. EN: Client IP from trusted proxy headers. */
 export function clientIpFromRequest(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -33,42 +69,33 @@ export function clientIpFromRequest(request: Request): string {
 }
 
 /**
- * RU: Перевірка rate limit у Neon. Без DB — пропускаємо (публічний сайт без Neon).
- * EN: Neon-backed rate limit; skip when DB unavailable.
+ * RU: Атомарний rate limit у Neon. Production без DB — 503 (fail-closed).
+ * EN: Atomic Neon rate limit; production without DB → 503 (fail-closed).
  */
 export async function assertRateLimit(
   request: Request,
   bucket: RateLimitBucket,
 ): Promise<NextResponse | null> {
-  const db = getDb();
-  if (!db) return null;
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl || !getDb()) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
+    }
+    return null;
+  }
 
   const { limit, windowMs } = LIMITS[bucket];
   const ip = clientIpFromRequest(request);
   const key = `${bucket}:${ip}`.slice(0, 191);
   const now = Date.now();
 
-  const rows = await db
-    .select()
-    .from(rateLimitBuckets)
-    .where(eq(rateLimitBuckets.key, key))
-    .limit(1);
-  const row = rows[0];
-  const windowStartMs = row ? new Date(row.windowStart).getTime() : 0;
-  const inWindow = row && now - windowStartMs < windowMs;
-
-  if (!row || !inWindow) {
-    await db
-      .insert(rateLimitBuckets)
-      .values({ key, windowStart: new Date(now), count: 1 })
-      .onConflictDoUpdate({
-        target: rateLimitBuckets.key,
-        set: { windowStart: new Date(now), count: 1 },
-      });
-    return null;
+  const counter = await bumpWindowCounter(neon(databaseUrl), key, windowMs, now);
+  if (!counter) {
+    return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   }
 
-  if (row.count >= limit) {
+  if (counter.count > limit) {
+    const windowStartMs = counter.windowStartMs;
     const retryAfter = Math.max(1, Math.ceil((windowStartMs + windowMs - now) / 1000));
     return NextResponse.json(
       { ok: false, error: "rate_limited" },
@@ -76,9 +103,5 @@ export async function assertRateLimit(
     );
   }
 
-  await db
-    .update(rateLimitBuckets)
-    .set({ count: row.count + 1 })
-    .where(eq(rateLimitBuckets.key, key));
   return null;
 }

@@ -1,10 +1,10 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import {
   emergencyActionsTraining,
   riskAssessmentTraining,
   uavAttacksTraining,
 } from "@/content/trainings";
-import type { QuizOptionId, TrainingDetail } from "@/content/trainings/types";
+import type { TrainingDetail } from "@/content/trainings/types";
 import { answerKeyForModule } from "@/lib/trainings/public";
 
 const PASS_TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
@@ -24,11 +24,12 @@ export type ModuleScoreResult = {
   score: number;
   total: number;
   scorePercent: number;
-  byId: Record<number, boolean>;
-  correctById: Record<number, QuizOptionId>;
 };
 
-/** RU: Оцінка модуля на сервері. EN: Score one module server-side. */
+/**
+ * RU: Оцінка модуля на сервері. Повертає лише агрегат (без відповідності питання→правильність).
+ * EN: Score one module server-side. Aggregate only — no per-question correctness map.
+ */
 export function scoreTrainingModule(
   slug: string,
   moduleId: string,
@@ -40,18 +41,13 @@ export function scoreTrainingModule(
   if (!key) return null;
 
   let score = 0;
-  const byId: Record<number, boolean> = {};
-  const correctById: Record<number, QuizOptionId> = {};
   for (const [id, correct] of key) {
-    correctById[id] = correct;
     const raw = answers[String(id)] ?? answers[id as unknown as string];
-    const ok = raw === correct;
-    byId[id] = ok;
-    if (ok) score += 1;
+    if (raw === correct) score += 1;
   }
   const total = key.size;
   const scorePercent = total > 0 ? (score / total) * 100 : 0;
-  return { score, total, scorePercent, byId, correctById };
+  return { score, total, scorePercent };
 }
 
 /** RU: Сумарний бал курсу. EN: Overall course score from module answers. */
@@ -75,17 +71,23 @@ export function scoreTrainingCourse(
   return { score, total, scorePercent, passed: total > 0 && scorePercent >= threshold };
 }
 
-function passSecret(): string {
-  return (
-    process.env.TRAINING_PASS_SECRET ||
-    process.env.ADMIN_SESSION_SECRET ||
-    process.env.TURNSTILE_SECRET_KEY ||
-    "esosh-training-dev-secret"
-  );
+/**
+ * RU: Секрет pass/progress. У production лише TRAINING_PASS_SECRET.
+ * EN: Pass/progress secret. Production requires TRAINING_PASS_SECRET only.
+ */
+export function resolveTrainingPassSecret(): string | null {
+  const dedicated = process.env.TRAINING_PASS_SECRET?.trim();
+  if (dedicated) return dedicated;
+  if (process.env.NODE_ENV === "production") return null;
+  return "esosh-training-dev-secret";
 }
 
-function signPayload(payload: string): string {
-  return createHmac("sha256", passSecret()).update(payload).digest("base64url");
+function passSecret(): string | null {
+  return resolveTrainingPassSecret();
+}
+
+function signPayload(payload: string, secret: string): string {
+  return createHmac("sha256", secret).update(payload).digest("base64url");
 }
 
 export type TrainingPassClaims = {
@@ -93,15 +95,19 @@ export type TrainingPassClaims = {
   score: number;
   total: number;
   scorePercent: number;
+  jti: string;
 };
 
-/** RU: Підписаний токен (slug + бал квиза). EN: Signed pass token with quiz score. */
-export function issueTrainingPassToken(slug: string, score: number, total: number): string {
+/** RU: Підписаний одноразовий токен (slug + бал + jti). EN: Signed one-time pass token. */
+export function issueTrainingPassToken(slug: string, score: number, total: number): string | null {
+  const secret = passSecret();
+  if (!secret) return null;
   const exp = Date.now() + PASS_TOKEN_TTL_MS;
   const safeScore = Math.max(0, Math.trunc(score));
   const safeTotal = Math.max(0, Math.trunc(total));
-  const payload = `${slug}.${exp}.${safeScore}.${safeTotal}`;
-  return `${payload}.${signPayload(payload)}`;
+  const jti = randomBytes(16).toString("base64url");
+  const payload = `${slug}.${exp}.${safeScore}.${safeTotal}.${jti}`;
+  return `${payload}.${signPayload(payload, secret)}`;
 }
 
 /**
@@ -109,10 +115,13 @@ export function issueTrainingPassToken(slug: string, score: number, total: numbe
  * EN: Verify pass token; returns claims or null.
  */
 export function verifyTrainingPassToken(slug: string, token: string): TrainingPassClaims | null {
+  const secret = passSecret();
+  if (!secret) return null;
   const parts = token.split(".");
-  if (parts.length !== 5) return null;
-  const [tokenSlug, expRaw, scoreRaw, totalRaw, sig] = parts;
+  if (parts.length !== 6) return null;
+  const [tokenSlug, expRaw, scoreRaw, totalRaw, jti, sig] = parts;
   if (tokenSlug !== slug) return null;
+  if (!jti || jti.length < 8 || jti.length > 64) return null;
   const exp = Number(expRaw);
   const score = Number(scoreRaw);
   const total = Number(totalRaw);
@@ -120,8 +129,8 @@ export function verifyTrainingPassToken(slug: string, token: string): TrainingPa
   if (!Number.isFinite(score) || !Number.isFinite(total) || score < 0 || total < 1 || score > total) {
     return null;
   }
-  const payload = `${tokenSlug}.${expRaw}.${scoreRaw}.${totalRaw}`;
-  const expected = signPayload(payload);
+  const payload = `${tokenSlug}.${expRaw}.${scoreRaw}.${totalRaw}.${jti}`;
+  const expected = signPayload(payload, secret);
   try {
     const a = Buffer.from(sig);
     const b = Buffer.from(expected);
@@ -131,5 +140,13 @@ export function verifyTrainingPassToken(slug: string, token: string): TrainingPa
     return null;
   }
   const scorePercent = Math.round((score / total) * 100);
-  return { slug: tokenSlug, score, total, scorePercent };
+  return { slug: tokenSlug, score, total, scorePercent, jti };
+}
+
+/** RU: Чи бал токена проходить поріг курсу. EN: Whether token score meets course threshold. */
+export function passMeetsThreshold(slug: string, scorePercent: number): boolean {
+  const training = getTrainingBySlug(slug);
+  if (!training) return false;
+  const threshold = training.passThresholdPercent ?? 80;
+  return scorePercent >= threshold;
 }

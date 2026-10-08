@@ -6,11 +6,13 @@ import { ADMIN_DELETE_CONFIRM } from "@/lib/admin/confirm-delete";
 import type {
   AdminCertificateCourseStat,
   AdminCertificateListItem,
+  AdminListMeta,
 } from "@/lib/admin/training-certificates";
 
 type Props = {
   initialItems: AdminCertificateListItem[];
   initialCourses: AdminCertificateCourseStat[];
+  initialMeta?: AdminListMeta;
 };
 
 type PendingDelete =
@@ -19,9 +21,16 @@ type PendingDelete =
   | { mode: "all"; label: string };
 
 /** RU: Реєстр сертифікатів тренінгів. EN: Training certificates registry UI. */
-export function CertificatesAdminClient({ initialItems, initialCourses }: Props) {
+export function CertificatesAdminClient({
+  initialItems,
+  initialCourses,
+  initialMeta,
+}: Props) {
   const [items, setItems] = useState(initialItems);
   const [courses, setCourses] = useState(initialCourses);
+  const [listMeta, setListMeta] = useState<AdminListMeta>(
+    initialMeta ?? { limit: 500, total: initialItems.length, truncated: false },
+  );
   const [courseFilter, setCourseFilter] = useState("");
   const [query, setQuery] = useState("");
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
@@ -55,10 +64,20 @@ export function CertificatesAdminClient({ initialItems, initialCourses }: Props)
         ok?: boolean;
         items?: AdminCertificateListItem[];
         courses?: AdminCertificateCourseStat[];
+        limit?: number;
+        total?: number;
+        truncated?: boolean;
       };
       if (res.ok && data.ok && data.items && data.courses) {
         setItems(data.items);
         setCourses(data.courses);
+        if (typeof data.total === "number" && typeof data.limit === "number") {
+          setListMeta({
+            limit: data.limit,
+            total: data.total,
+            truncated: Boolean(data.truncated),
+          });
+        }
       }
     } finally {
       setBusyReload(false);
@@ -126,6 +145,12 @@ export function CertificatesAdminClient({ initialItems, initialCourses }: Props)
 
   return (
     <div className="admin-stack">
+      {listMeta.truncated ? (
+        <p className="admin-warn-banner" role="status">
+          Показано {items.length} з {listMeta.total} (ліміт списку {listMeta.limit}). Уточніть фільтр
+          або експортуйте Excel (до 5000 рядків).
+        </p>
+      ) : null}
       <div className="admin-metric-grid admin-metric-grid--2">
         <div className="admin-metric">
           <span className="admin-metric__label">Усього видано</span>

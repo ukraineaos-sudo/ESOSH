@@ -6,13 +6,18 @@ export function normalizeParticipantName(value: string): string {
 }
 
 /**
- * RU: Стабільний хеш courseSlug + нормалізоване ім’я (ідемпотентний issue).
- * EN: Stable identity hash for idempotent certificate issue.
+ * RU: Хеш courseSlug + ім’я + jti pass-токена (унікальність спроби).
+ * EN: Hash of courseSlug + name + pass jti (per-attempt uniqueness).
  */
-export function certificateIdentityHash(courseSlug: string, participantName: string): string {
+export function certificateIdentityHash(
+  courseSlug: string,
+  participantName: string,
+  jti: string,
+): string {
   const normalized = normalizeParticipantName(participantName).toLocaleLowerCase("uk-UA");
+  const safeJti = jti.trim();
   return createHash("sha256")
-    .update(`${courseSlug}\0${normalized}`, "utf8")
+    .update(`${courseSlug}\0${normalized}\0${safeJti}`, "utf8")
     .digest("hex");
 }
 

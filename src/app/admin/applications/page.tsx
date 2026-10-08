@@ -25,6 +25,7 @@ export default async function AdminApplicationsPage() {
     organization: string | null;
     industry: string | null;
   }[] = [];
+  let listMeta = { limit: 300, total: 0, truncated: false };
   let loadError: "unavailable" | null = null;
 
   const db = getDb();
@@ -50,12 +51,15 @@ export default async function AdminApplicationsPage() {
         .from(applications)
         .leftJoin(members, eq(applications.memberId, members.id))
         .orderBy(desc(applications.createdAt))
-        .limit(200);
+        .limit(300);
+      const totalRows = await db.select({ value: sql<number>`count(*)::int` }).from(applications);
+      const total = Number(totalRows[0]?.value ?? 0);
       items = rows.map((r) => ({
         ...r,
         createdAt: r.createdAt?.toISOString?.() || "",
         requiresManualReview: Boolean(r.requiresManualReview),
       }));
+      listMeta = { limit: 300, total, truncated: total > 300 };
     } catch (error) {
       console.error("[admin/applications] list failed", error instanceof Error ? error.message : "error");
       items = [];
@@ -74,7 +78,7 @@ export default async function AdminApplicationsPage() {
             Не вдалося завантажити реєстр (БД недоступна). Спробуйте пізніше.
           </p>
         ) : null}
-        <ApplicationsAdminClient initialItems={items} />
+        <ApplicationsAdminClient initialItems={items} initialMeta={listMeta} />
       </div>
     </AdminShell>
   );

@@ -38,9 +38,20 @@ function statusTone(status: string): "new" | "progress" | "done" | "other" {
   return "other";
 }
 
+type ListMeta = { limit: number; total: number; truncated: boolean };
+
 /** RU: Клієнтський реєстр заявок. EN: Applications registry client. */
-export function ApplicationsAdminClient({ initialItems }: { initialItems: ListItem[] }) {
+export function ApplicationsAdminClient({
+  initialItems,
+  initialMeta,
+}: {
+  initialItems: ListItem[];
+  initialMeta?: ListMeta;
+}) {
   const [items, setItems] = useState(initialItems);
+  const [listMeta, setListMeta] = useState<ListMeta>(
+    initialMeta ?? { limit: 300, total: initialItems.length, truncated: false },
+  );
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [autoLevel, setAutoLevel] = useState("");
@@ -93,6 +104,13 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
         const data = await response.json();
         if (response.ok && data.items) {
           setItems(data.items);
+          if (typeof data.total === "number" && typeof data.limit === "number") {
+            setListMeta({
+              limit: data.limit,
+              total: data.total,
+              truncated: Boolean(data.truncated),
+            });
+          }
           void syncHeaderBadge();
         }
       } finally {
@@ -143,6 +161,12 @@ export function ApplicationsAdminClient({ initialItems }: { initialItems: ListIt
 
   return (
     <div className="admin-stack">
+      {listMeta.truncated ? (
+        <p className="admin-warn-banner" role="status">
+          Показано {items.length} з {listMeta.total} (ліміт списку {listMeta.limit}). Уточніть фільтр
+          або скористайтесь експортом.
+        </p>
+      ) : null}
       <div className="admin-toolbar">
         <input
           className="admin-input"

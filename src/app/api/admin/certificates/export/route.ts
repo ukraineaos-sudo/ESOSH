@@ -15,10 +15,11 @@ export async function GET(request: Request) {
   const courseCode = url.searchParams.get("courseCode") || undefined;
   const q = url.searchParams.get("q") || undefined;
 
-  const items = await listAdminCertificates({ courseCode, q, limit: 5000 });
-  if (!items) {
+  const listed = await listAdminCertificates({ courseCode, q, limit: 5000 });
+  if (!listed) {
     return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   }
+  const items = listed.items;
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "ESOSH";

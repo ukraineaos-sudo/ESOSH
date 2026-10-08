@@ -113,12 +113,12 @@
 - Admin application PATCH: `confirmed`/`confirmed_no_level` → member active; `rejected`/`needs_info` → demote member лише якщо немає іншої confirmed-заявки (`shouldDemoteMemberAfterApplicationDecision`)
 - Admin CRM (applications/members/files/CSV): лише `canManageRegistry` (role `admin`); editor бачить контент, CRM nav/badge приховані
 - Admin mutating POST/PATCH/PUT/DELETE: `assertSameOrigin` (`src/lib/http/same-origin.ts`); CSV export/members: `csvCell` formula-safe
-- Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview/training_certificate/training_score → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграції `drizzle/0002_*`…`0004_training_certificate_scores.sql` — `db:migrate` або `db:push`)
-- Named training certificates: Neon `training_certificates` + `training_certificate_counters`; number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName)` (anonymous, no memberId); quiz score stored at issue (`score`/`score_total`/`score_percent` from signed pass token); download via long-lived `downloadToken`; admin registry `/admin/certificates`
+- Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview/training_certificate/training_score → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграції `drizzle/0002_*`…`0006_enrollment_schema_parity.sql` — `db:migrate` або `db:push`)
+- Named training certificates: Neon `training_certificates` + `training_certificate_counters` + one-time `training_pass_redemptions` (jti); number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName + NUL + jti)`; progress via HttpOnly cookie `esosh_tp` (not client `allModuleAnswers`); quiz attempts capped server-side (5 per IP+course+module / 12h) in `rate_limit_buckets` (`training_module_score:{sha256}`, `src/lib/trainings/module-attempt-budget.ts`) — cookie wipe does not reset; quiz score at issue from signed pass token; download via long-lived `downloadToken`; admin registry `/admin/certificates`
 - Enrollment POST: compensating rollback (blobs + application cascade; orphan member лише якщо `created` у цьому запиті)
 - News CMS: draft/deleted slug → `notFound()` без legacy TSX fallback (`getCmsNewsPresence`); DELETE = soft `status=deleted`
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)
-- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_ADMIN_EMAIL` (опц., fallback `ENROLLMENT_ADMIN_EMAIL`), `CONTACT_WEBHOOK_*` (опц. fallback), `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, опц. `TRAINING_PASS_SECRET` (см. `.env.example`)
+- Env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_ADMIN_EMAIL` (опц., fallback `ENROLLMENT_ADMIN_EMAIL`), `CONTACT_WEBHOOK_*` (опц. fallback), `ENROLLMENT_WEBHOOK_*` (опц.), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ENROLLMENT_BLOB_ACCESS` (опц., default private), `ADMIN_SESSION_SECRET` (docs; сесія = random token + SHA256 у БД), `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, **`TRAINING_PASS_SECRET` (обов’язковий у production)** для pass-токенів і progress cookie
 - Binotel: публичные widget URLs на `widgets.binotel.com`; **загрузка только после consent `communications`**
 - YouTube (trainings): YouTube IFrame API + `youtube-nocookie` через `YoutubeConsentEmbed`; **только после consent `marketing`**; forward-seek limited; quiz locked until video end; score via `POST /api/trainings/[slug]/score` (answer keys server-only); named cert: `POST /api/trainings/[slug]/certificate` (pass token + name, same-origin) → `GET ?downloadToken=`; static cert courses: `GET ?token=` (HMAC pass token)
 - Locale layout must pass client namespaces used by `"use client"` trees: `nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs` (missing namespace → raw `namespace.key` in UI)
@@ -128,9 +128,9 @@
 - `npm run lint`
 - `npm run build`
 - `npm test` (после build; поднимает `next start` + mock webhook; unit `tests/consent-parse.test.mjs`, `tests/security-hygiene.test.mjs`, `tests/audit-fix-wiring.test.mjs`)
-- `npm run db:generate` — SQL-міграції з `src/db/schema.ts` у `drizzle/`
-- `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`)
-- `npm run db:push` — швидкий sync схеми на Neon без journal (dev); для rate limit / certificates у git — міграції `0002_*`, `0003_*`
+- `npm run db:generate` — SQL-міграції з `src/db/schema.ts` у `drizzle/` (snapshot-и після `0002` не повні — нові DDL краще писати hand-written як `0003+`, ідемпотентно)
+- `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`); ланцюг `0000`…`0006` покриває CMS + enrollment + rate limit + certificates (+ pass redemptions)
+- `npm run db:push` — швидкий sync схеми на Neon без journal (dev); прод/preview краще тримати на `db:migrate`
 
 ## Инварианты
 - Нет ложного успеха формы без webhook

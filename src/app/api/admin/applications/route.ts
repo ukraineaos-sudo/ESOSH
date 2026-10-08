@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
 import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
+
+const LIST_LIMIT = 300;
 
 /** RU: Список заявок з фільтрами. EN: Filtered applications list. */
 export async function GET(request: Request) {
@@ -34,29 +36,44 @@ export async function GET(request: Request) {
       ),
     );
   }
+  const where = conditions.length ? and(...conditions) : undefined;
 
-  const rows = await db
-    .select({
-      id: applications.id,
-      publicId: applications.publicId,
-      status: applications.status,
-      autoLevel: applications.autoLevel,
-      approvedLevel: applications.approvedLevel,
-      requiresManualReview: applications.requiresManualReview,
-      createdAt: applications.createdAt,
-      updatedAt: applications.updatedAt,
-      memberPublicId: members.publicId,
-      firstName: members.firstName,
-      lastName: members.lastName,
-      email: members.primaryEmail,
-      organization: sql<string>`${applications.payload}->>'organization'`,
-      industry: sql<string>`${applications.payload}->>'industry'`,
-    })
-    .from(applications)
-    .leftJoin(members, eq(applications.memberId, members.id))
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(applications.createdAt))
-    .limit(300);
+  const [rows, totalRows] = await Promise.all([
+    db
+      .select({
+        id: applications.id,
+        publicId: applications.publicId,
+        status: applications.status,
+        autoLevel: applications.autoLevel,
+        approvedLevel: applications.approvedLevel,
+        requiresManualReview: applications.requiresManualReview,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt,
+        memberPublicId: members.publicId,
+        firstName: members.firstName,
+        lastName: members.lastName,
+        email: members.primaryEmail,
+        organization: sql<string>`${applications.payload}->>'organization'`,
+        industry: sql<string>`${applications.payload}->>'industry'`,
+      })
+      .from(applications)
+      .leftJoin(members, eq(applications.memberId, members.id))
+      .where(where)
+      .orderBy(desc(applications.createdAt))
+      .limit(LIST_LIMIT),
+    db
+      .select({ value: count() })
+      .from(applications)
+      .leftJoin(members, eq(applications.memberId, members.id))
+      .where(where),
+  ]);
 
-  return NextResponse.json({ ok: true, items: rows });
+  const total = Number(totalRows[0]?.value ?? 0);
+  return NextResponse.json({
+    ok: true,
+    items: rows,
+    limit: LIST_LIMIT,
+    total,
+    truncated: total > LIST_LIMIT,
+  });
 }

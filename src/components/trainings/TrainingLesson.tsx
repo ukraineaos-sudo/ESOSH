@@ -236,14 +236,6 @@ export function TrainingLesson({ locale, training }: Props) {
     return { score, total, scorePercent, allSubmitted };
   }, [modules, quizByModule]);
 
-  const siblingAnswers = useMemo(() => {
-    const map: Record<string, Record<string, string>> = {};
-    for (const [moduleId, outcome] of Object.entries(quizByModule)) {
-      if (outcome?.answers) map[moduleId] = outcome.answers;
-    }
-    return map;
-  }, [quizByModule]);
-
   const allVideosDone = modules.every((mod) => {
     if (!mod.youtubeId.trim()) return true;
     return Boolean(videoDoneByModule[mod.id]);
@@ -310,6 +302,7 @@ export function TrainingLesson({ locale, training }: Props) {
       const response = await fetch(`/api/trainings/${encodeURIComponent(training.slug)}/certificate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({
           token: certificateToken,
           firstName: normalizeNamePart(firstName),
@@ -319,6 +312,7 @@ export function TrainingLesson({ locale, training }: Props) {
       });
       const data = (await response.json()) as {
         ok?: boolean;
+        error?: string;
         certificateId?: number;
         certificateNumber?: string;
         downloadToken?: string;
@@ -331,7 +325,7 @@ export function TrainingLesson({ locale, training }: Props) {
         typeof data.certificateNumber !== "string" ||
         typeof data.downloadToken !== "string"
       ) {
-        throw new Error("issue_failed");
+        throw new Error(data.error === "name_mismatch" ? "name_mismatch" : "issue_failed");
       }
       const next: IssuedCertSession = {
         id: data.certificateId,
@@ -538,7 +532,6 @@ export function TrainingLesson({ locale, training }: Props) {
                 questions={mod.quiz}
                 ui={training.quizUi}
                 locked={hasVideo && !videoDone}
-                siblingAnswers={siblingAnswers}
                 onResultChange={(result) => {
                   setQuizByModule((prev) => {
                     const previous = prev[mod.id];

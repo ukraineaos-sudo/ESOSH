@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { ADMIN_MEDIA_MAX_BYTES } from "@/lib/admin/media-limits";
 
 type MediaItem = {
   id: number;
@@ -47,14 +48,23 @@ export function MediaLibrary({ initialItems }: { initialItems: MediaItem[] }) {
 
   async function onUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
     setError("");
     setMessage("");
     const form = new FormData(event.currentTarget);
+    const file = form.get("file");
+    if (file instanceof File && file.size > ADMIN_MEDIA_MAX_BYTES) {
+      setError("Файл завеликий (макс. 4 МБ).");
+      return;
+    }
+    setPending(true);
     const response = await fetch("/api/admin/media", { method: "POST", body: form });
     setPending(false);
     if (!response.ok) {
-      setError("Не вдалося завантажити файл. Спробуйте інший формат (зображення або PDF).");
+      setError(
+        response.status === 413
+          ? "Файл завеликий (макс. 4 МБ)."
+          : "Не вдалося завантажити файл. Спробуйте інший формат (зображення або PDF).",
+      );
       return;
     }
     event.currentTarget.reset();
@@ -67,8 +77,8 @@ export function MediaLibrary({ initialItems }: { initialItems: MediaItem[] }) {
       <form className="admin-panel admin-form" onSubmit={onUpload}>
         <h2>Завантажити файл</h2>
         <p className="admin-muted" style={{ marginTop: 0 }}>
-          Зображення та PDF для обкладинок і матеріалів новин. Після завантаження файл зʼявиться в
-          списку нижче і в вікні вибору обкладинки.
+          Зображення та PDF для обкладинок і матеріалів новин (макс. 4 МБ). Після завантаження файл
+          зʼявиться в списку нижче і в вікні вибору обкладинки.
         </p>
         <label>
           Файл (зображення або PDF)

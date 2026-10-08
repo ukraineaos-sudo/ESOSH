@@ -205,3 +205,15 @@ export const trainingCertificateCounters = pgTable(
   },
   (table) => [primaryKey({ columns: [table.courseCode, table.year], name: "training_certificate_counters_pk" })],
 );
+
+/**
+ * RU: Одноразове погашення pass-токена (jti) при видачі іменованого сертифіката.
+ * EN: One-time pass-token redemption (jti) when issuing a named certificate.
+ */
+export const trainingPassRedemptions = pgTable("training_pass_redemptions", {
+  jti: varchar("jti", { length: 64 }).primaryKey(),
+  courseSlug: varchar("course_slug", { length: 128 }).notNull(),
+  participantName: varchar("participant_name", { length: 200 }).notNull(),
+  certificateId: integer("certificate_id"),
+  redeemedAt: timestamp("redeemed_at", { withTimezone: true }).notNull().defaultNow(),
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useState } from "react";
+import { ADMIN_MEDIA_MAX_BYTES } from "@/lib/admin/media-limits";
 
 type MediaItem = {
   id: number;
@@ -67,6 +68,10 @@ export function AdminMediaPicker({ open, onClose, onPick }: Props) {
 
   async function onUpload(file: File | null) {
     if (!file) return;
+    if (file.size > ADMIN_MEDIA_MAX_BYTES) {
+      setError("Файл завеликий (макс. 4 МБ).");
+      return;
+    }
     setPending(true);
     setError("");
     const form = new FormData();
@@ -76,7 +81,7 @@ export function AdminMediaPicker({ open, onClose, onPick }: Props) {
       const response = await fetch("/api/admin/media", { method: "POST", body: form });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setError(response.status === 413 ? "Файл завеликий (макс. 10 МБ)." : "Не вдалося завантажити.");
+        setError(response.status === 413 ? "Файл завеликий (макс. 4 МБ)." : "Не вдалося завантажити.");
         return;
       }
       if (data.item?.url) {

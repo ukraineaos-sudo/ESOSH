@@ -1,7 +1,13 @@
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { trainingCertificates } from "@/db/schema";
 import { knownNamedCourseCodes } from "@/lib/trainings/certificate-catalog";
+
+export type AdminListMeta = {
+  limit: number;
+  total: number;
+  truncated: boolean;
+};
 
 export type AdminCertificateListItem = {
   id: number;
@@ -32,7 +38,7 @@ export async function listAdminCertificates(params: {
   courseCode?: string;
   q?: string;
   limit?: number;
-}): Promise<AdminCertificateListItem[] | null> {
+}): Promise<{ items: AdminCertificateListItem[]; meta: AdminListMeta } | null> {
   const db = getDb();
   if (!db) return null;
 
@@ -51,31 +57,39 @@ export async function listAdminCertificates(params: {
       )!,
     );
   }
+  const where = filters.length ? and(...filters) : undefined;
 
-  const rows = await db
-    .select({
-      id: trainingCertificates.id,
-      courseSlug: trainingCertificates.courseSlug,
-      courseCode: trainingCertificates.courseCode,
-      participantName: trainingCertificates.participantName,
-      courseTitleUk: trainingCertificates.courseTitleUk,
-      courseTitleEn: trainingCertificates.courseTitleEn,
-      completionDate: trainingCertificates.completionDate,
-      certificateNumber: trainingCertificates.certificateNumber,
-      score: trainingCertificates.score,
-      scoreTotal: trainingCertificates.scoreTotal,
-      scorePercent: trainingCertificates.scorePercent,
-      issuedAt: trainingCertificates.issuedAt,
-    })
-    .from(trainingCertificates)
-    .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(trainingCertificates.issuedAt))
-    .limit(limit);
+  const [rows, totalRows] = await Promise.all([
+    db
+      .select({
+        id: trainingCertificates.id,
+        courseSlug: trainingCertificates.courseSlug,
+        courseCode: trainingCertificates.courseCode,
+        participantName: trainingCertificates.participantName,
+        courseTitleUk: trainingCertificates.courseTitleUk,
+        courseTitleEn: trainingCertificates.courseTitleEn,
+        completionDate: trainingCertificates.completionDate,
+        certificateNumber: trainingCertificates.certificateNumber,
+        score: trainingCertificates.score,
+        scoreTotal: trainingCertificates.scoreTotal,
+        scorePercent: trainingCertificates.scorePercent,
+        issuedAt: trainingCertificates.issuedAt,
+      })
+      .from(trainingCertificates)
+      .where(where)
+      .orderBy(desc(trainingCertificates.issuedAt))
+      .limit(limit),
+    db.select({ value: count() }).from(trainingCertificates).where(where),
+  ]);
 
-  return rows.map((row) => ({
-    ...row,
-    issuedAt: row.issuedAt?.toISOString?.() || "",
-  }));
+  const total = Number(totalRows[0]?.value ?? 0);
+  return {
+    items: rows.map((row) => ({
+      ...row,
+      issuedAt: row.issuedAt?.toISOString?.() || "",
+    })),
+    meta: { limit, total, truncated: total > limit },
+  };
 }
 
 /** RU: Агрегати по кодах курсів (+ заготовка відомих). EN: Per-course counts + known stubs. */

@@ -24,16 +24,23 @@ export async function GET(request: Request) {
   const courseCode = url.searchParams.get("courseCode") || undefined;
   const q = url.searchParams.get("q") || undefined;
 
-  const [items, courses] = await Promise.all([
+  const [listed, courses] = await Promise.all([
     listAdminCertificates({ courseCode, q }),
     listAdminCertificateCourseStats(),
   ]);
 
-  if (!items || !courses) {
+  if (!listed || !courses) {
     return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
   }
 
-  return NextResponse.json({ ok: true, items, courses });
+  return NextResponse.json({
+    ok: true,
+    items: listed.items,
+    courses,
+    limit: listed.meta.limit,
+    total: listed.meta.total,
+    truncated: listed.meta.truncated,
+  });
 }
 
 const deleteBodySchema = z.object({

@@ -36,8 +36,6 @@ type Props = {
   /** When true, answers cannot be changed (video not finished). */
   locked?: boolean;
   passThresholdPercent?: number;
-  /** Other modules' answers for overall unlock token. */
-  siblingAnswers?: Record<string, Record<string, string>>;
   onResultChange?: (result: TrainingQuizResult) => void;
 };
 
@@ -56,7 +54,6 @@ export function TrainingQuiz({
   ui,
   locked = false,
   passThresholdPercent = DEFAULT_PASS_THRESHOLD,
-  siblingAnswers,
   onResultChange,
 }: Props) {
   const t = useTranslations("trainings");
@@ -69,7 +66,6 @@ export function TrainingQuiz({
     score: number;
     total: number;
     scorePercent: number;
-    byId: Record<number, boolean>;
   } | null>(null);
   const optionPrefix = { ...DEFAULT_OPTION_PREFIX, ...ui.optionPrefix };
   const onResultChangeRef = useRef(onResultChange);
@@ -106,17 +102,13 @@ export function TrainingQuiz({
     }
 
     try {
-      const allModuleAnswers = {
-        ...(siblingAnswers || {}),
-        [moduleId]: payloadAnswers,
-      };
       const response = await fetch(`/api/trainings/${encodeURIComponent(slug)}/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({
           moduleId,
           answers: payloadAnswers,
-          allModuleAnswers,
         }),
       });
       if (!response.ok) {
@@ -128,7 +120,6 @@ export function TrainingQuiz({
         score?: number;
         total?: number;
         scorePercent?: number;
-        byId?: Record<number, boolean>;
         certificateToken?: string | null;
       };
       if (!data.ok || typeof data.score !== "number" || typeof data.total !== "number") {
@@ -139,7 +130,6 @@ export function TrainingQuiz({
         score: data.score,
         total: data.total,
         scorePercent: typeof data.scorePercent === "number" ? data.scorePercent : 0,
-        byId: data.byId || {},
       });
       setSubmitted(true);
       emitResult({
@@ -196,17 +186,10 @@ export function TrainingQuiz({
       <ol className="training-quiz__list">
         {questions.map((q) => {
           const selected = answers[q.id];
-          const isCorrect = results?.byId[q.id];
-          const statusClass =
-            submitted && isCorrect === true
-              ? " is-correct"
-              : submitted && isCorrect === false
-                ? " is-wrong"
-                : "";
           const questionText = pickQuizText(q.question, locale);
           const optionIds = optionIdsForQuestion(q);
           return (
-            <li key={q.id} className={`training-quiz__item${statusClass}`}>
+            <li key={q.id} className="training-quiz__item">
               <p className="training-quiz__question regular-m">{questionText}</p>
               <div className="training-quiz__options" role="radiogroup" aria-label={questionText}>
                 {optionIds.map((optionId) => {
@@ -214,16 +197,10 @@ export function TrainingQuiz({
                   if (!optionMap) return null;
                   const optionText = pickQuizText(optionMap, locale);
                   const id = `q${q.id}-${optionId}`;
-                  const pickedWrong =
-                    submitted && selected === optionId && isCorrect === false;
-                  const pickedRight =
-                    submitted && selected === optionId && isCorrect === true;
                   return (
                     <label
                       key={optionId}
-                      className={`training-quiz__option${pickedRight ? " is-key" : ""}${
-                        pickedWrong ? " is-picked-wrong" : ""
-                      }`}
+                      className="training-quiz__option"
                       htmlFor={id}
                     >
                       <input
@@ -243,13 +220,6 @@ export function TrainingQuiz({
                   );
                 })}
               </div>
-              {submitted && isCorrect != null ? (
-                <p className="training-quiz__feedback regular-s" role="status">
-                  {isCorrect
-                    ? pickLocalized(ui.correctLabel, locale)
-                    : pickLocalized(ui.wrongLabel, locale)}
-                </p>
-              ) : null}
             </li>
           );
         })}

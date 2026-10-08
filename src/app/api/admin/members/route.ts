@@ -41,7 +41,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: "bad_level" }, { status: 400 });
   }
 
-  const rows = await db.select().from(members).orderBy(desc(members.createdAt)).limit(500);
+  const LIST_LIMIT = 500;
+  const [rows, totalRows] = await Promise.all([
+    db.select().from(members).orderBy(desc(members.createdAt)).limit(LIST_LIMIT),
+    db.select({ value: count() }).from(members),
+  ]);
+  const totalMembers = Number(totalRows[0]?.value ?? 0);
   const ids = rows.map((row) => row.id);
   const linkedMap = new Map<number, number>();
   const latestPayloadByMember = new Map<number, unknown>();
@@ -105,7 +110,15 @@ export async function GET(request: Request) {
   const items = filterMemberRegistryItems(hydrated, filters);
   const stats = computeMemberRegistryStats(items);
 
-  return NextResponse.json({ ok: true, items, stats, facets });
+  return NextResponse.json({
+    ok: true,
+    items,
+    stats,
+    facets,
+    limit: LIST_LIMIT,
+    total: totalMembers,
+    truncated: totalMembers > LIST_LIMIT,
+  });
 }
 
 function normalizeOshFilter(value: string | null): "" | "yes" | "no" {

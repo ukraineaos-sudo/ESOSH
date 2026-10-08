@@ -32,7 +32,7 @@ export default function PageContent() {
           <div className={"wrapper is--v-flex-center-top"}>
             <div className={"wrapper is--max-width-870 is--w-100p"}>
               <p className={"regular-s is--grey-60 is--margin-bottom-24"}>
-                {`Version ${PRIVACY_NOTICE_VERSION}`}
+                {`Versión ${PRIVACY_NOTICE_VERSION}`}
               </p>
 
               <div className={"wrapper is--margin-bottom-48"}>
@@ -69,7 +69,7 @@ export default function PageContent() {
               </div>
 
               <div className={"wrapper is--margin-bottom-48"}>
-                <h2 className={"h2 is--margin-bottom-12"}>{"4. Destinatarias y transferencias internacionales."}</h2>
+                <h2 className={"h2 is--margin-bottom-12"}>{"4. Destinatarias y transferencias internacionales"}</h2>
                 <p className={"regular-l"}>
                   {"Los proveedores de infraestructura pueden incluir Vercel, Neon y Vercel Blob. Las notificaciones por correo electrónico pueden utilizar un proveedor como Brevo. Los envíos de formularios de contacto se pueden reenviar a través de un webhook configurado. Los widgets Binotel se cargan solo después del consentimiento a la categoría Comunicaciones. El reproductor YouTube en las páginas de capacitación se carga solo después del consentimiento de Marketing. Los acuerdos de procesador (DPA) se celebran por separado. Las transferencias fuera de Ucrania/el EEE dependen de las garantías que ofrecen esos proveedores."}
                 </p>

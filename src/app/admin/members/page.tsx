@@ -19,13 +19,24 @@ export default async function AdminMembersPage() {
   if (!user || !canManageRegistry(user)) redirect("/admin/login");
 
   let items: MemberRegistryItem[] = [];
+  let listMeta = { limit: 500, total: 0, truncated: false };
   let loadError: "unavailable" | null = null;
   const db = getDb();
   if (!db) {
     loadError = "unavailable";
   } else {
     try {
-      const rows = await db.select().from(members).orderBy(desc(members.createdAt)).limit(500);
+      const LIST_LIMIT = 500;
+      const [rows, totalRows] = await Promise.all([
+        db.select().from(members).orderBy(desc(members.createdAt)).limit(LIST_LIMIT),
+        db.select({ value: count() }).from(members),
+      ]);
+      const totalMembers = Number(totalRows[0]?.value ?? 0);
+      listMeta = {
+        limit: LIST_LIMIT,
+        total: totalMembers,
+        truncated: totalMembers > LIST_LIMIT,
+      };
       const ids = rows.map((row) => row.id);
       const linkedMap = new Map<number, number>();
       const latestPayloadByMember = new Map<number, unknown>();
@@ -103,6 +114,7 @@ export default async function AdminMembersPage() {
           initialItems={items}
           initialStats={stats}
           initialIndustries={industries}
+          initialMeta={listMeta}
         />
       </div>
     </AdminShell>

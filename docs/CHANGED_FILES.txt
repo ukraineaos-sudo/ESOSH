@@ -558,3 +558,10 @@ src/app/api/trainings/[slug]/score/route.ts
 src/components/trainings/TrainingQuiz.tsx
 src/lib/rate-limit.ts
 CODE_MAP.md
+drizzle/0005_training_pass_redemptions.sql
+src/lib/trainings/progress-cookie.ts
+drizzle/0006_enrollment_schema_parity.sql
+src/lib/rate-limit-counter.ts
+src/lib/trainings/module-attempt-budget.ts
+tests/module-attempt-budget.test.mjs
+src/lib/admin/media-limits.ts

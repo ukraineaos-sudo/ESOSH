@@ -116,3 +116,14 @@ test("training score helper exists for server answer keys", () => {
   assert.match(src, /verifyTrainingPassToken/);
   void require;
 });
+
+test("training score API exposes no per-question correctness and caps attempts", () => {
+  const score = readFileSync(join(root, "src/lib/trainings/score.ts"), "utf8");
+  const route = readFileSync(join(root, "src/app/api/trainings/[slug]/score/route.ts"), "utf8");
+  const quiz = readFileSync(join(root, "src/components/trainings/TrainingQuiz.tsx"), "utf8");
+  assert.doesNotMatch(score, /byId|correctById/);
+  assert.doesNotMatch(route, /byId|correctById/);
+  assert.doesNotMatch(quiz, /byId/);
+  assert.match(route, /MAX_MODULE_SCORE_ATTEMPTS/);
+  assert.match(route, /too_many_attempts/);
+});

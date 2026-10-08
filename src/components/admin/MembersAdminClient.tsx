@@ -22,10 +22,13 @@ const emptyStats: MemberRegistryStats = {
   byLevel: Object.fromEntries([...LEVEL_CODES, "none"].map((l) => [l, 0])),
 };
 
+type ListMeta = { limit: number; total: number; truncated: boolean };
+
 type Props = {
   initialItems: MemberListItem[];
   initialStats?: MemberRegistryStats;
   initialIndustries?: string[];
+  initialMeta?: ListMeta;
 };
 
 type FilterState = {
@@ -42,8 +45,12 @@ export function MembersAdminClient({
   initialItems,
   initialStats,
   initialIndustries = [],
+  initialMeta,
 }: Props) {
   const [items, setItems] = useState(initialItems);
+  const [listMeta, setListMeta] = useState<ListMeta>(
+    initialMeta ?? { limit: 500, total: initialItems.length, truncated: false },
+  );
   const [stats, setStats] = useState<MemberRegistryStats>(initialStats || emptyStats);
   const [industries, setIndustries] = useState(initialIndustries);
   const [filters, setFilters] = useState<FilterState>({
@@ -82,6 +89,13 @@ export function MembersAdminClient({
         setItems(data.items);
         if (data.stats) setStats(data.stats);
         if (data.facets?.industries) setIndustries(data.facets.industries);
+        if (typeof data.total === "number" && typeof data.limit === "number") {
+          setListMeta({
+            limit: data.limit,
+            total: data.total,
+            truncated: Boolean(data.truncated),
+          });
+        }
       }
     } finally {
       setLoading(false);
@@ -175,6 +189,12 @@ export function MembersAdminClient({
 
   return (
     <div className="admin-stack">
+      {listMeta.truncated ? (
+        <p className="admin-warn-banner" role="status">
+          Показано до {listMeta.limit} з {listMeta.total} карток у БД. Пошук і статистика нижче —
+          лише по завантаженій вибірці; уточніть фільтри або експортуйте CSV з поточної таблиці.
+        </p>
+      ) : null}
       <p className="admin-muted">
         Статистика й список оновлюються за фільтрами. Поля — з картки члена та останньої заявки (галузь, посада, стаж
         БЗР тощо).

@@ -43,10 +43,17 @@ describe("certificate admin registry wiring", () => {
     const schema = readFileSync(join(root, "src/db/schema.ts"), "utf8");
     assert.match(schema, /scoreTotal/);
     assert.match(schema, /scorePercent/);
+    assert.match(schema, /trainingPassRedemptions/);
 
     const scoreLib = readFileSync(join(root, "src/lib/trainings/score.ts"), "utf8");
     assert.match(scoreLib, /scorePercent/);
-    assert.match(scoreLib, /parts\.length !== 5/);
+    assert.match(scoreLib, /parts\.length !== 6/);
+    assert.match(scoreLib, /TRAINING_PASS_SECRET/);
+    assert.match(scoreLib, /jti/);
+
+    const progress = readFileSync(join(root, "src/lib/trainings/progress-cookie.ts"), "utf8");
+    assert.match(progress, /aggregateProgressScore/);
+    assert.match(progress, /writeTrainingProgressModule/);
   });
 });
 
@@ -58,7 +65,8 @@ describe("certificate API wiring", () => {
     );
     assert.match(route, /export async function POST/);
     assert.match(route, /downloadToken/);
-    assert.match(route, /issueOrGetNamedCertificate/);
+    assert.match(route, /redeemPassAndIssueCertificate/);
+    assert.match(route, /passMeetsThreshold/);
     assert.match(route, /assertSameOrigin/);
     assert.match(route, /assertRateLimit/);
 

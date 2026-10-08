@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getTrainingBySlug, verifyTrainingPassToken } from "@/lib/trainings/score";
+import {
+  getTrainingBySlug,
+  passMeetsThreshold,
+  verifyTrainingPassToken,
+} from "@/lib/trainings/score";
 import {
   findCertificateByDownloadToken,
   isNamedCertificateTraining,
-  issueOrGetNamedCertificate,
+  redeemPassAndIssueCertificate,
   renderCertificatePdf,
 } from "@/lib/trainings/certificates";
 import { normalizeParticipantName } from "@/lib/trainings/certificate-identity";
@@ -68,7 +72,7 @@ export async function POST(request: Request, ctx: Ctx) {
   }
 
   const pass = verifyTrainingPassToken(slug, parsed.data.token);
-  if (!pass) {
+  if (!pass || !passMeetsThreshold(slug, pass.scorePercent)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
@@ -83,16 +87,19 @@ export async function POST(request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "invalid_name" }, { status: 400 });
   }
 
-  const issued = await issueOrGetNamedCertificate({
+  const issued = await redeemPassAndIssueCertificate({
     training,
     participantName,
+    jti: pass.jti,
     score: pass.score,
     scoreTotal: pass.total,
     scorePercent: pass.scorePercent,
   });
   if ("error" in issued) {
-    const status = issued.error === "misconfigured" ? 503 : 503;
-    return NextResponse.json({ ok: false, error: issued.error }, { status });
+    if (issued.error === "name_mismatch") {
+      return NextResponse.json({ ok: false, error: "name_mismatch" }, { status: 401 });
+    }
+    return NextResponse.json({ ok: false, error: issued.error }, { status: 503 });
   }
 
   return NextResponse.json({

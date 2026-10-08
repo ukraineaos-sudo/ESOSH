@@ -5,6 +5,9 @@ import { canManageRegistry, getAdminSession } from "@/lib/admin/auth";
 import {
   listAdminCertificateCourseStats,
   listAdminCertificates,
+  type AdminCertificateCourseStat,
+  type AdminCertificateListItem,
+  type AdminListMeta,
 } from "@/lib/admin/training-certificates";
 
 /** RU: Реєстр сертифікатів тренінгів. EN: Training certificates registry. */
@@ -12,8 +15,9 @@ export default async function AdminCertificatesPage() {
   const user = await getAdminSession();
   if (!user || !canManageRegistry(user)) redirect("/admin/login");
 
-  let items: Awaited<ReturnType<typeof listAdminCertificates>> = [];
-  let courses: Awaited<ReturnType<typeof listAdminCertificateCourseStats>> = [];
+  let items: AdminCertificateListItem[] = [];
+  let courses: AdminCertificateCourseStat[] = [];
+  let listMeta: AdminListMeta = { limit: 500, total: 0, truncated: false };
   let loadError: "unavailable" | null = null;
 
   const [listed, stats] = await Promise.all([
@@ -23,10 +27,9 @@ export default async function AdminCertificatesPage() {
 
   if (!listed || !stats) {
     loadError = "unavailable";
-    items = [];
-    courses = [];
   } else {
-    items = listed;
+    items = listed.items;
+    listMeta = listed.meta;
     courses = stats;
   }
 
@@ -42,7 +45,11 @@ export default async function AdminCertificatesPage() {
             Не вдалося завантажити реєстр (БД недоступна або міграція ще не застосована).
           </p>
         ) : (
-          <CertificatesAdminClient initialItems={items} initialCourses={courses} />
+          <CertificatesAdminClient
+            initialItems={items}
+            initialCourses={courses}
+            initialMeta={listMeta}
+          />
         )}
       </div>
     </AdminShell>

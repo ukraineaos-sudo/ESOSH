@@ -69,19 +69,36 @@ export function sanitizeCmsHtml(html: string): string {
   if (!input) return "";
 
   // Drop whole dangerous blocks first.
-  let src = input
+  const src = input
     .replace(/<script\b[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[\s\S]*?<\/style>/gi, "")
     .replace(/<!--[\s\S]*?-->/g, "");
 
-  return src.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g, (full, rawTag: string, rawAttrs: string) => {
-    const tag = rawTag.toLowerCase();
-    const closing = full.startsWith("</");
-    if (!ALLOWED_TAGS.has(tag)) return "";
-    if (closing) return VOID_TAGS.has(tag) ? "" : `</${tag}>`;
-    const selfClosing = VOID_TAGS.has(tag) || /\/\s*$/.test(rawAttrs);
-    const attrs = sanitizeAttrs(tag, rawAttrs);
-    if (VOID_TAGS.has(tag) || selfClosing) return `<${tag}${attrs} />`;
-    return `<${tag}${attrs}>`;
-  });
+  // Rebuild allowed complete tags via placeholders, then escape orphan `<...` fragments
+  // (e.g. `<img src=x onerror=alert(1` without closing `>`) so they cannot become live HTML.
+  const kept: string[] = [];
+  const tokenized = src.replace(
+    /<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)>/g,
+    (full, rawTag: string, rawAttrs: string) => {
+      const tag = rawTag.toLowerCase();
+      const closing = full.startsWith("</");
+      let safe = "";
+      if (ALLOWED_TAGS.has(tag)) {
+        if (closing) {
+          safe = VOID_TAGS.has(tag) ? "" : `</${tag}>`;
+        } else {
+          const selfClosing = VOID_TAGS.has(tag) || /\/\s*$/.test(rawAttrs);
+          const attrs = sanitizeAttrs(tag, rawAttrs);
+          safe =
+            VOID_TAGS.has(tag) || selfClosing ? `<${tag}${attrs} />` : `<${tag}${attrs}>`;
+        }
+      }
+      const idx = kept.length;
+      kept.push(safe);
+      return `\u0000${idx}\u0000`;
+    },
+  );
+
+  const escaped = tokenized.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return escaped.replace(/\u0000(\d+)\u0000/g, (_, idx: string) => kept[Number(idx)] ?? "");
 }

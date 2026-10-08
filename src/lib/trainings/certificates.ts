@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 import { getDb } from "@/db";
-import { trainingCertificates } from "@/db/schema";
+import { trainingCertificates, trainingPassRedemptions } from "@/db/schema";
 import type { TrainingDetail } from "@/content/trainings/types";
 import {
   certificateIdentityHash,
@@ -170,12 +170,13 @@ function neonRowToIssued(row: NeonRow): IssuedCertificateRow {
 }
 
 /**
- * RU: Випустити або повернути існуючий сертифікат (ідемпотентно за identityHash).
- * EN: Issue or return existing certificate (idempotent by identityHash).
+ * RU: Випустити або повернути існуючий сертифікат (ідемпотентно за identityHash = slug+name+jti).
+ * EN: Issue or return existing certificate (idempotent by identityHash = slug+name+jti).
  */
 export async function issueOrGetNamedCertificate(params: {
   training: TrainingDetail;
   participantName: string;
+  jti: string;
   score: number;
   scoreTotal: number;
   scorePercent: number;
@@ -189,13 +190,15 @@ export async function issueOrGetNamedCertificate(params: {
 
   const participantName = normalizeParticipantName(params.participantName);
   if (participantName.length < 3) return { error: "misconfigured" };
+  const jti = params.jti.trim();
+  if (jti.length < 8 || jti.length > 64) return { error: "misconfigured" };
 
   const score = Math.max(0, Math.trunc(params.score));
   const scoreTotal = Math.max(0, Math.trunc(params.scoreTotal));
   const scorePercent = Math.min(100, Math.max(0, Math.trunc(params.scorePercent)));
   if (scoreTotal < 1 || score > scoreTotal) return { error: "misconfigured" };
 
-  const identityHash = certificateIdentityHash(training.slug, participantName);
+  const identityHash = certificateIdentityHash(training.slug, participantName, jti);
   const existing = await findByIdentityHash(identityHash);
   if (existing) return { row: existing, created: false };
 
@@ -291,6 +294,104 @@ export async function issueOrGetNamedCertificate(params: {
     });
     return { error: "unavailable" };
   }
+}
+
+/**
+ * RU: Погасити jti (одноразово) і видати сертифікат; чуже ім’я на той самий jti → name_mismatch.
+ * EN: Redeem jti once and issue certificate; different name for same jti → name_mismatch.
+ */
+export async function redeemPassAndIssueCertificate(params: {
+  training: TrainingDetail;
+  participantName: string;
+  jti: string;
+  score: number;
+  scoreTotal: number;
+  scorePercent: number;
+}): Promise<
+  | { row: IssuedCertificateRow; created: boolean }
+  | { error: "unavailable" | "misconfigured" | "name_mismatch" }
+> {
+  const db = getDb();
+  if (!db) return { error: "unavailable" };
+
+  const participantName = normalizeParticipantName(params.participantName);
+  if (participantName.length < 3) return { error: "misconfigured" };
+  const jti = params.jti.trim();
+  if (jti.length < 8 || jti.length > 64) return { error: "misconfigured" };
+
+  const existingRows = await db
+    .select()
+    .from(trainingPassRedemptions)
+    .where(eq(trainingPassRedemptions.jti, jti))
+    .limit(1);
+  const existing = existingRows[0];
+
+  if (existing) {
+    if (normalizeParticipantName(existing.participantName) !== participantName) {
+      return { error: "name_mismatch" };
+    }
+    if (existing.certificateId != null) {
+      const rows = await db
+        .select()
+        .from(trainingCertificates)
+        .where(eq(trainingCertificates.id, existing.certificateId))
+        .limit(1);
+      const row = rows[0];
+      if (row) return { row: rowFromDb(row), created: false };
+    }
+    // Same name, redemption without cert yet — finish issue below.
+  } else {
+    try {
+      await db.insert(trainingPassRedemptions).values({
+        jti,
+        courseSlug: params.training.slug,
+        participantName,
+        certificateId: null,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("duplicate key") || message.includes("training_pass_redemptions")) {
+        const again = await db
+          .select()
+          .from(trainingPassRedemptions)
+          .where(eq(trainingPassRedemptions.jti, jti))
+          .limit(1);
+        const raced = again[0];
+        if (raced && normalizeParticipantName(raced.participantName) !== participantName) {
+          return { error: "name_mismatch" };
+        }
+        if (raced?.certificateId != null) {
+          const rows = await db
+            .select()
+            .from(trainingCertificates)
+            .where(eq(trainingCertificates.id, raced.certificateId))
+            .limit(1);
+          const row = rows[0];
+          if (row) return { row: rowFromDb(row), created: false };
+        }
+      } else {
+        console.error("[trainings/certificate] redemption insert failed");
+        return { error: "unavailable" };
+      }
+    }
+  }
+
+  const issued = await issueOrGetNamedCertificate({
+    training: params.training,
+    participantName,
+    jti,
+    score: params.score,
+    scoreTotal: params.scoreTotal,
+    scorePercent: params.scorePercent,
+  });
+  if ("error" in issued) return issued;
+
+  await db
+    .update(trainingPassRedemptions)
+    .set({ certificateId: issued.row.id, participantName })
+    .where(eq(trainingPassRedemptions.jti, jti));
+
+  return issued;
 }
 
 /** RU: Згенерувати PDF з рядка БД. EN: Build PDF bytes from stored certificate row. */

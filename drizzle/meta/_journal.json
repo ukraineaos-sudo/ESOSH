@@ -36,6 +36,20 @@
       "when": 1790943209876,
       "tag": "0004_training_certificate_scores",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790943209877,
+      "tag": "0005_training_pass_redemptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790943209878,
+      "tag": "0006_enrollment_schema_parity",
+      "breakpoints": true
     }
   ]
 }

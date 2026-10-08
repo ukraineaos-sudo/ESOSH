@@ -4,6 +4,7 @@ import { desc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { mediaAssets } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
+import { ADMIN_MEDIA_MAX_BYTES } from "@/lib/admin/media-limits";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список медиа. EN: List media assets. */
@@ -32,7 +33,9 @@ export async function POST(request: Request) {
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
-  if (file.size > 10 * 1024 * 1024) return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
+  if (file.size > ADMIN_MEDIA_MAX_BYTES) {
+    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
+  }
   const alt = String(form.get("alt") || "");
   const blob = await put(`esosh/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`, file, {
     access: "public",
