@@ -741,6 +741,49 @@
   border: 1px solid var(--admin-border-soft);
   border-radius: var(--admin-radius);
   align-items: center;
+  justify-content: space-between;
+}
+
+.admin-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+
+.admin-filters--certs {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.admin-filter-reset {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin-bottom: 12px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.admin-metric-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
 }
 
 .admin-input {
@@ -1281,8 +1324,15 @@
   .admin-main {
     padding: 18px 16px 40px;
   }
-  .admin-metric-grid {
+  .admin-metric-grid,
+  .admin-metric-grid--2 {
     grid-template-columns: 1fr;
+  }
+  .admin-filters--certs {
+    grid-template-columns: 1fr;
+  }
+  .admin-filter-reset {
+    width: 100%;
   }
   .admin-split {
     grid-template-columns: 1fr;

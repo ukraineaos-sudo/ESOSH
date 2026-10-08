@@ -29,6 +29,13 @@
       "when": 1790943209875,
       "tag": "0003_training_certificates",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790943209876,
+      "tag": "0004_training_certificate_scores",
+      "breakpoints": true
     }
   ]
 }

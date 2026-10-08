@@ -88,29 +88,48 @@ function signPayload(payload: string): string {
   return createHmac("sha256", passSecret()).update(payload).digest("base64url");
 }
 
-/** RU: Підписаний токен доступу до сертифіката. EN: Signed certificate access token. */
-export function issueTrainingPassToken(slug: string): string {
+export type TrainingPassClaims = {
+  slug: string;
+  score: number;
+  total: number;
+  scorePercent: number;
+};
+
+/** RU: Підписаний токен (slug + бал квиза). EN: Signed pass token with quiz score. */
+export function issueTrainingPassToken(slug: string, score: number, total: number): string {
   const exp = Date.now() + PASS_TOKEN_TTL_MS;
-  const payload = `${slug}.${exp}`;
+  const safeScore = Math.max(0, Math.trunc(score));
+  const safeTotal = Math.max(0, Math.trunc(total));
+  const payload = `${slug}.${exp}.${safeScore}.${safeTotal}`;
   return `${payload}.${signPayload(payload)}`;
 }
 
-/** RU: Перевірка токена сертифіката. EN: Verify certificate access token. */
-export function verifyTrainingPassToken(slug: string, token: string): boolean {
+/**
+ * RU: Перевірка токена; повертає claims або null.
+ * EN: Verify pass token; returns claims or null.
+ */
+export function verifyTrainingPassToken(slug: string, token: string): TrainingPassClaims | null {
   const parts = token.split(".");
-  if (parts.length !== 3) return false;
-  const [tokenSlug, expRaw, sig] = parts;
-  if (tokenSlug !== slug) return false;
+  if (parts.length !== 5) return null;
+  const [tokenSlug, expRaw, scoreRaw, totalRaw, sig] = parts;
+  if (tokenSlug !== slug) return null;
   const exp = Number(expRaw);
-  if (!Number.isFinite(exp) || Date.now() > exp) return false;
-  const payload = `${tokenSlug}.${expRaw}`;
+  const score = Number(scoreRaw);
+  const total = Number(totalRaw);
+  if (!Number.isFinite(exp) || Date.now() > exp) return null;
+  if (!Number.isFinite(score) || !Number.isFinite(total) || score < 0 || total < 1 || score > total) {
+    return null;
+  }
+  const payload = `${tokenSlug}.${expRaw}.${scoreRaw}.${totalRaw}`;
   const expected = signPayload(payload);
   try {
     const a = Buffer.from(sig);
     const b = Buffer.from(expected);
-    if (a.length !== b.length) return false;
-    return timingSafeEqual(a, b);
+    if (a.length !== b.length) return null;
+    if (!timingSafeEqual(a, b)) return null;
   } catch {
-    return false;
+    return null;
   }
+  const scorePercent = Math.round((score / total) * 100);
+  return { slug: tokenSlug, score, total, scorePercent };
 }

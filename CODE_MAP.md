@@ -72,6 +72,7 @@
 | Enrollment schema / classify / files / notify / Brevo | `src/lib/enrollment/**` |
 | Applications / members | Neon `applications`, `members`, `application_files`, `application_events` |
 | Member registry filters/stats | `src/lib/admin/member-registry.ts` + `/admin/members` + `GET /api/admin/members` |
+| Training certificates registry | `src/lib/admin/training-certificates.ts` + `/admin/certificates` + `GET|DELETE /api/admin/certificates` + `GET /api/admin/certificates/export` |
 | Binotel widget URLs | `src/lib/binotel.ts` |
 | Phones / social fallback | `src/lib/site.ts` |
 | Locale path helpers | `src/lib/locale.ts` (`localizedPath`, `switchLocalePath`, `hasLegacyPageContent`) |
@@ -102,7 +103,7 @@
   - Блокування write-API через `mustChangePassword` **вимкнено за замовчуванням**; увімкнути: `ADMIN_ENFORCE_PASSWORD_CHANGE=1` → тоді POST/PATCH/PUT/DELETE → `403 password_change_required`; GET списки дозволені
   - **Не залишати admin/admin у production**
 - Admin bootstrap: якщо `admin_users` порожня — створює користувача з `ADMIN_BOOTSTRAP_USERNAME` / `ADMIN_BOOTSTRAP_PASSWORD` (default `admin` / `admin`, `must_change_password`); **не залишати admin/admin у production**
-- Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]` — тіло `{ confirm: "так" }`; заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх
+- Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]`, `DELETE /api/admin/certificates` — тіло `{ confirm: "так" }` (+ для сертифікатів `mode: one|course|all`); заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх; відкликання сертифіката не чіпає `training_certificate_counters`
 - News public feed: `CmsNewsListItems` → `listPublishedCmsNews()` завжди **uk** CMS (`NEWS_CONTENT_LOCALE`); картки ведуть на `/{uiLocale}/news/{slug}`; без DB / порожня таблиця → порожній список
 - News article (`/[locale]/news/[slug]`): тіло з uk CMS → uk legacy TSX; `ContentTranslationPending` для новин не показуємо, якщо uk існує; chrome Header/Footer з UI-локалі
 - Home members stub: `HomeMembersStat` → `countJoinedMembers()` (усі рядки `members`); без DB → блок не рендериться
@@ -112,8 +113,8 @@
 - Admin application PATCH: `confirmed`/`confirmed_no_level` → member active; `rejected`/`needs_info` → demote member лише якщо немає іншої confirmed-заявки (`shouldDemoteMemberAfterApplicationDecision`)
 - Admin CRM (applications/members/files/CSV): лише `canManageRegistry` (role `admin`); editor бачить контент, CRM nav/badge приховані
 - Admin mutating POST/PATCH/PUT/DELETE: `assertSameOrigin` (`src/lib/http/same-origin.ts`); CSV export/members: `csvCell` formula-safe
-- Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview/training_certificate → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграції `drizzle/0002_rate_limit_buckets.sql`, `drizzle/0003_training_certificates.sql` — `db:migrate` або `db:push`)
-- Named training certificates: Neon `training_certificates` + `training_certificate_counters`; number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName)` (anonymous, no memberId); download via long-lived `downloadToken`
+- Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview/training_certificate/training_score → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграції `drizzle/0002_*`…`0004_training_certificate_scores.sql` — `db:migrate` або `db:push`)
+- Named training certificates: Neon `training_certificates` + `training_certificate_counters`; number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName)` (anonymous, no memberId); quiz score stored at issue (`score`/`score_total`/`score_percent` from signed pass token); download via long-lived `downloadToken`; admin registry `/admin/certificates`
 - Enrollment POST: compensating rollback (blobs + application cascade; orphan member лише якщо `created` у цьому запиті)
 - News CMS: draft/deleted slug → `notFound()` без legacy TSX fallback (`getCmsNewsPresence`); DELETE = soft `status=deleted`
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)

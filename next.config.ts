@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   // pdf-lib + fontkit use Node font engine; keep them external for serverless routes
-  serverExternalPackages: ["pdf-lib", "@pdf-lib/fontkit"],
+  // exceljs pulls Node fs/stream helpers — keep external for admin export route
+  serverExternalPackages: ["pdf-lib", "@pdf-lib/fontkit", "exceljs"],
   // Prevent Next from auto-writing AI rule files into the repo
   agentRules: false,
 };

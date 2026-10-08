@@ -8,7 +8,8 @@ export type RateLimitBucket =
   | "contact"
   | "enrollment"
   | "enrollment_preview"
-  | "training_certificate";
+  | "training_certificate"
+  | "training_score";
 
 const LIMITS: Record<RateLimitBucket, { limit: number; windowMs: number }> = {
   admin_login: { limit: 5, windowMs: 15 * 60 * 1000 },
@@ -16,6 +17,7 @@ const LIMITS: Record<RateLimitBucket, { limit: number; windowMs: number }> = {
   enrollment: { limit: 5, windowMs: 60 * 60 * 1000 },
   enrollment_preview: { limit: 30, windowMs: 60 * 60 * 1000 },
   training_certificate: { limit: 20, windowMs: 60 * 60 * 1000 },
+  training_score: { limit: 60, windowMs: 60 * 60 * 1000 },
 };
 
 /** RU: IP клієнта з proxy-заголовків. EN: Client IP from trusted proxy headers. */

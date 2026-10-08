@@ -67,7 +67,8 @@ export async function POST(request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "invalid_body" }, { status: 400 });
   }
 
-  if (!verifyTrainingPassToken(slug, parsed.data.token)) {
+  const pass = verifyTrainingPassToken(slug, parsed.data.token);
+  if (!pass) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
@@ -82,7 +83,13 @@ export async function POST(request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "invalid_name" }, { status: 400 });
   }
 
-  const issued = await issueOrGetNamedCertificate({ training, participantName });
+  const issued = await issueOrGetNamedCertificate({
+    training,
+    participantName,
+    score: pass.score,
+    scoreTotal: pass.total,
+    scorePercent: pass.scorePercent,
+  });
   if ("error" in issued) {
     const status = issued.error === "misconfigured" ? 503 : 503;
     return NextResponse.json({ ok: false, error: issued.error }, { status });
@@ -96,6 +103,9 @@ export async function POST(request: Request, ctx: Ctx) {
     downloadToken: issued.row.downloadToken,
     participantName: issued.row.participantName,
     completionDate: issued.row.completionDate,
+    score: issued.row.score,
+    scoreTotal: issued.row.scoreTotal,
+    scorePercent: issued.row.scorePercent,
   });
 }
 

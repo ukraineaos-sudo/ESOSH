@@ -70,7 +70,6 @@ export function TrainingQuiz({
     total: number;
     scorePercent: number;
     byId: Record<number, boolean>;
-    correctById: Record<number, QuizOptionId>;
   } | null>(null);
   const optionPrefix = { ...DEFAULT_OPTION_PREFIX, ...ui.optionPrefix };
   const onResultChangeRef = useRef(onResultChange);
@@ -130,7 +129,6 @@ export function TrainingQuiz({
         total?: number;
         scorePercent?: number;
         byId?: Record<number, boolean>;
-        correctById?: Record<number, QuizOptionId>;
         certificateToken?: string | null;
       };
       if (!data.ok || typeof data.score !== "number" || typeof data.total !== "number") {
@@ -142,7 +140,6 @@ export function TrainingQuiz({
         total: data.total,
         scorePercent: typeof data.scorePercent === "number" ? data.scorePercent : 0,
         byId: data.byId || {},
-        correctById: data.correctById || {},
       });
       setSubmitted(true);
       emitResult({
@@ -200,7 +197,6 @@ export function TrainingQuiz({
         {questions.map((q) => {
           const selected = answers[q.id];
           const isCorrect = results?.byId[q.id];
-          const correctOption = results?.correctById[q.id];
           const statusClass =
             submitted && isCorrect === true
               ? " is-correct"
@@ -219,12 +215,13 @@ export function TrainingQuiz({
                   const optionText = pickQuizText(optionMap, locale);
                   const id = `q${q.id}-${optionId}`;
                   const pickedWrong =
-                    submitted && selected === optionId && optionId !== correctOption;
-                  const isKey = submitted && optionId === correctOption;
+                    submitted && selected === optionId && isCorrect === false;
+                  const pickedRight =
+                    submitted && selected === optionId && isCorrect === true;
                   return (
                     <label
                       key={optionId}
-                      className={`training-quiz__option${isKey ? " is-key" : ""}${
+                      className={`training-quiz__option${pickedRight ? " is-key" : ""}${
                         pickedWrong ? " is-picked-wrong" : ""
                       }`}
                       htmlFor={id}

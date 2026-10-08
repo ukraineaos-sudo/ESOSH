@@ -21,6 +21,7 @@ const rooms = [
   { href: "/admin/media", label: "Медіа", group: "content", icon: "▣" },
   { href: "/admin/applications", label: "Заявки", group: "crm", icon: "✉", badgeKey: "newApps" as const },
   { href: "/admin/members", label: "Члени", group: "crm", icon: "☺" },
+  { href: "/admin/certificates", label: "Сертифікати", group: "crm", icon: "🎓" },
   { href: "/admin/settings/contacts", label: "Контакти", group: "settings", icon: "☎" },
   { href: "/admin/security", label: "Безпека", group: "settings", icon: "🔒" },
   { href: "/admin/users", label: "Користувачі", group: "settings", icon: "⚙" },

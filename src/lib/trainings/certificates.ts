@@ -30,6 +30,9 @@ export type IssuedCertificateRow = {
   completionDate: string;
   certificateNumber: string;
   modulesSnapshot: CertificateModuleLine[];
+  score: number;
+  scoreTotal: number;
+  scorePercent: number;
   downloadToken: string;
   issuedAt: Date;
 };
@@ -74,6 +77,9 @@ function rowFromDb(row: typeof trainingCertificates.$inferSelect): IssuedCertifi
     completionDate: row.completionDate,
     certificateNumber: row.certificateNumber,
     modulesSnapshot: modules,
+    score: row.score,
+    scoreTotal: row.scoreTotal,
+    scorePercent: row.scorePercent,
     downloadToken: row.downloadToken,
     issuedAt: row.issuedAt,
   };
@@ -131,6 +137,9 @@ type NeonRow = {
   completion_date: string;
   certificate_number: string;
   modules_snapshot: CertificateModuleLine[] | string;
+  score: number;
+  score_total: number;
+  score_percent: number;
   download_token: string;
   issued_at: string | Date;
 };
@@ -152,6 +161,9 @@ function neonRowToIssued(row: NeonRow): IssuedCertificateRow {
     completionDate: row.completion_date,
     certificateNumber: row.certificate_number,
     modulesSnapshot: Array.isArray(modules) ? modules : [],
+    score: Number(row.score ?? 0),
+    scoreTotal: Number(row.score_total ?? 0),
+    scorePercent: Number(row.score_percent ?? 0),
     downloadToken: row.download_token,
     issuedAt: new Date(row.issued_at),
   };
@@ -164,6 +176,9 @@ function neonRowToIssued(row: NeonRow): IssuedCertificateRow {
 export async function issueOrGetNamedCertificate(params: {
   training: TrainingDetail;
   participantName: string;
+  score: number;
+  scoreTotal: number;
+  scorePercent: number;
 }): Promise<{ row: IssuedCertificateRow; created: boolean } | { error: "unavailable" | "misconfigured" }> {
   const { training } = params;
   if (!isNamedCertificateTraining(training) || !training.courseCode || !training.duration) {
@@ -174,6 +189,11 @@ export async function issueOrGetNamedCertificate(params: {
 
   const participantName = normalizeParticipantName(params.participantName);
   if (participantName.length < 3) return { error: "misconfigured" };
+
+  const score = Math.max(0, Math.trunc(params.score));
+  const scoreTotal = Math.max(0, Math.trunc(params.scoreTotal));
+  const scorePercent = Math.min(100, Math.max(0, Math.trunc(params.scorePercent)));
+  if (scoreTotal < 1 || score > scoreTotal) return { error: "misconfigured" };
 
   const identityHash = certificateIdentityHash(training.slug, participantName);
   const existing = await findByIdentityHash(identityHash);
@@ -210,6 +230,9 @@ export async function issueOrGetNamedCertificate(params: {
         completion_date,
         certificate_number,
         modules_snapshot,
+        score,
+        score_total,
+        score_percent,
         download_token
       )
       SELECT
@@ -224,6 +247,9 @@ export async function issueOrGetNamedCertificate(params: {
         ${completionDate},
         ('ESOSH-' || ${courseCode} || '-' || ${year}::text || '-' || lpad(next.last_seq::text, 6, '0')),
         (${modulesJson})::jsonb,
+        ${score},
+        ${scoreTotal},
+        ${scorePercent},
         ${downloadToken}
       FROM next
       RETURNING
@@ -238,6 +264,9 @@ export async function issueOrGetNamedCertificate(params: {
         completion_date,
         certificate_number,
         modules_snapshot,
+        score,
+        score_total,
+        score_percent,
         download_token,
         issued_at
     `) as NeonRow[];

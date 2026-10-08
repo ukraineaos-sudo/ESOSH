@@ -30,6 +30,26 @@ describe("training certificate number format", () => {
   });
 });
 
+describe("certificate admin registry wiring", () => {
+  it("exposes admin certificates GET/DELETE and score columns", () => {
+    const adminRoute = readFileSync(
+      join(root, "src/app/api/admin/certificates/route.ts"),
+      "utf8",
+    );
+    assert.match(adminRoute, /export async function GET/);
+    assert.match(adminRoute, /export async function DELETE/);
+    assert.match(adminRoute, /mode: z\.enum\(\["one", "course", "all"\]\)/);
+
+    const schema = readFileSync(join(root, "src/db/schema.ts"), "utf8");
+    assert.match(schema, /scoreTotal/);
+    assert.match(schema, /scorePercent/);
+
+    const scoreLib = readFileSync(join(root, "src/lib/trainings/score.ts"), "utf8");
+    assert.match(scoreLib, /scorePercent/);
+    assert.match(scoreLib, /parts\.length !== 5/);
+  });
+});
+
 describe("certificate API wiring", () => {
   it("exposes POST issue and GET downloadToken paths", () => {
     const route = readFileSync(

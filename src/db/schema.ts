@@ -182,6 +182,10 @@ export const trainingCertificates = pgTable("training_certificates", {
   completionDate: varchar("completion_date", { length: 32 }).notNull(),
   certificateNumber: varchar("certificate_number", { length: 64 }).notNull(),
   modulesSnapshot: jsonb("modules_snapshot").notNull().default([]),
+  /** Quiz score captured at issue (from signed pass token). */
+  score: integer("score").notNull().default(0),
+  scoreTotal: integer("score_total").notNull().default(0),
+  scorePercent: integer("score_percent").notNull().default(0),
   /** Long-lived secret for GET download (separate from short-lived pass token). */
   downloadToken: varchar("download_token", { length: 64 }).notNull(),
   issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),

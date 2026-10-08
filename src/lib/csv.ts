@@ -5,7 +5,8 @@ export function csvCell(value: unknown): string {
   if (/^[=+\-@\t\r]/.test(s)) {
     s = `'${s}`;
   }
-  if (/[",\n\r]/.test(s)) {
+  // Quote when delimiter chars appear (`,` for EN Excel, `;` for uk/ru Excel).
+  if (/["\n\r,;]/.test(s)) {
     return `"${s.replace(/"/g, '""')}"`;
   }
   return s;
