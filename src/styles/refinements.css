@@ -302,6 +302,69 @@ header.is--nav::before {
   .wrapper.is--course { width: 100%; min-width: 0; }
 }
 
+/* CMS course catalog: show full image (logos), compact chip/title/desc */
+.cms-course-card__media {
+  background-color: var(--grey-3, #f3f5f8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cms-course-card__image {
+  object-fit: contain !important;
+  object-position: center;
+  max-height: 100%;
+}
+.cms-course-card__chip {
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 8px;
+}
+.cms-course-card__chip-label {
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.cms-course-card__title.h3,
+.cms-course-card .cms-course-card__title {
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+.cms-course-card__desc {
+  max-height: 7.5em;
+  overflow: hidden;
+}
+.cms-course-card__desc .cms-course-card__text {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--black, #1a2131);
+}
+.cms-course-detail__chip {
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 8px;
+}
+.cms-course-detail__media {
+  width: 100%;
+  max-width: 720px;
+  max-height: 360px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--grey-3, #f3f5f8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cms-course-detail__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+  object-fit: contain;
+  object-position: center;
+}
+
 /* Homepage members count stub (client request; all registry rows). */
 .home-members-stat__inner {
   display: flex;

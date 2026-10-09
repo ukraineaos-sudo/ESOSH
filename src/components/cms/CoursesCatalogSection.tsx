@@ -49,12 +49,12 @@ function Description({ text }: { text: string }) {
   if (!text.trim()) return null;
   const paragraphs = text.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
   return (
-    <div>
+    <div className="cms-course-card__desc">
       {paragraphs.map((paragraph, index) => (
         <p
           key={index}
-          className="paragraph-2"
-          style={{ whiteSpace: "pre-line", marginTop: index > 0 ? 12 : undefined }}
+          className="cms-course-card__text"
+          style={{ whiteSpace: "pre-line", marginTop: index > 0 ? 8 : undefined }}
         >
           <RichTextWithLinks text={paragraph} />
         </p>
@@ -77,15 +77,15 @@ function CourseCard({
   const href = course.slug ? `/education/courses/${course.slug}` : "/education/courses";
 
   return (
-    <div className="wrapper is--course">
+    <div className="wrapper is--course cms-course-card">
       {course.imageUrl ? (
-        <div className="course-image-wrapper">
+        <div className="course-image-wrapper cms-course-card__media">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={course.imageUrl}
             loading="lazy"
             alt=""
-            className="course-image"
+            className="course-image cms-course-card__image"
             width={640}
             height={420}
             decoding="async"
@@ -94,11 +94,11 @@ function CourseCard({
       ) : null}
       <div className="course-content">
         {level ? (
-          <div className={chipClass(level)}>
-            <div className="medium-xs">{level}</div>
+          <div className={`${chipClass(level)} cms-course-card__chip`}>
+            <div className="cms-course-card__chip-label">{level}</div>
           </div>
         ) : null}
-        <h3 className="h3 is--max-width-440">
+        <h3 className="h3 is--max-width-440 cms-course-card__title">
           <strong>{title}</strong>
         </h3>
         <Description text={description} />

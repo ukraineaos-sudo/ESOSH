@@ -92,27 +92,25 @@ export function CourseDetailView({
       <section className="section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104">
         <div className="w-layout-blockcontainer container w-container">
           {level ? (
-            <div className={chipClass(level)} style={{ marginBottom: 16 }}>
-              <div className="medium-xs">{level}</div>
+            <div
+              className={`${chipClass(level)} cms-course-detail__chip`}
+              style={{ marginBottom: 16 }}
+            >
+              <div className="cms-course-card__chip-label">{level}</div>
             </div>
           ) : null}
           {course.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={course.imageUrl}
-              alt=""
-              className="course-image"
-              style={{
-                width: "100%",
-                maxWidth: 720,
-                height: "auto",
-                borderRadius: 8,
-                objectFit: "cover",
-              }}
-              width={960}
-              height={540}
-              decoding="async"
-            />
+            <div className="cms-course-detail__media">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={course.imageUrl}
+                alt=""
+                className="cms-course-detail__image"
+                width={960}
+                height={540}
+                decoding="async"
+              />
+            </div>
           ) : null}
           <TextBlock text={primary} className="regular-l" />
           <TextBlock text={extra} className="regular-l" />
