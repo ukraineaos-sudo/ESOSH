@@ -1471,3 +1471,76 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Field label + hover/focus “i” tip (courses and similar forms) */
+.admin-field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-field-hint {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.admin-field-hint__btn {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--admin-muted) 80%, transparent);
+  background: color-mix(in srgb, var(--admin-panel-2) 70%, transparent);
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+}
+
+.admin-field-hint__btn:hover,
+.admin-field-hint__btn:focus-visible {
+  color: var(--admin-text);
+  border-color: var(--admin-accent-2);
+  outline: none;
+}
+
+.admin-field-hint__tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: min(300px, 70vw);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #0b1220;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  font-size: 12px;
+  font-weight: 400;
+  font-style: normal;
+  font-family: var(--admin-font);
+  line-height: 1.45;
+  white-space: normal;
+  box-shadow: var(--admin-shadow-sm);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 0.12s ease;
+}
+
+.admin-field-hint:hover .admin-field-hint__tip,
+.admin-field-hint:focus-within .admin-field-hint__tip {
+  opacity: 1;
+  visibility: visible;
+}

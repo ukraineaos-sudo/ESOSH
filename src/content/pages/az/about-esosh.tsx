@@ -113,7 +113,7 @@ export default function PageContent() {
                     </div>
                   </div>
                   <p className={"regular-l"}>
-                    {"12 ölkədən 2000-dən çox iştirakçı, bizə qoşulun, pulsuzdur. CV-nizi gözləyirik, "}
+                    {"14 ölkədən 3000-dən çox assosiasiya üzvü, bizə qoşulun, pulsuzdur. CV-nizi gözləyirik, "}
                     <a href={"mailto:office@esosh.net"} className={"link"}>
                       {"office@esosh.net "}
                     </a>

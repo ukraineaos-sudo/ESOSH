@@ -50,6 +50,20 @@
       "when": 1790943209878,
       "tag": "0006_enrollment_schema_parity",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790943209879,
+      "tag": "0007_education_courses",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790943209880,
+      "tag": "0008_education_courses_detail",
+      "breakpoints": true
     }
   ]
 }

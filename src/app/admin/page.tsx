@@ -94,6 +94,14 @@ export default async function AdminHomePage() {
       cta: "Редагувати склад →",
     },
     {
+      href: "/admin/content/courses",
+      title: "Курси",
+      description: "Каталог «Наші курси»: назва, опис, фото та посилання без деплою.",
+      mark: "▤",
+      tone: "content",
+      cta: "Керувати курсами →",
+    },
+    {
       href: "/admin/media",
       title: "Медіа",
       description: "Зображення та PDF для обкладинок і матеріалів новин.",

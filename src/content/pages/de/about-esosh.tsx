@@ -113,7 +113,7 @@ export default function PageContent() {
                     </div>
                   </div>
                   <p className={"regular-l"}>
-                    {"Mehr als 2000 Teilnehmende aus 12 Ländern — machen Sie mit, es ist kostenlos. Senden Sie Ihren Lebenslauf an "}
+                    {"Mehr als 3000 assoziierte Mitglieder aus 14 Ländern — machen Sie mit, es ist kostenlos. Senden Sie Ihren Lebenslauf an "}
                     <a href={"mailto:office@esosh.net"} className={"link"}>
                       {"office@esosh.net "}
                     </a>

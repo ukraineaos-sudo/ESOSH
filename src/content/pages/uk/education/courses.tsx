@@ -1,6 +1,7 @@
 /* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CoursesCatalogSection } from "@/components/cms/CoursesCatalogSection";
 import { Link } from "@/i18n/navigation";
 
 /** RU: Содержимое страницы. EN: Static page content. */
@@ -734,7 +735,8 @@ export default function PageContent() {
           </div>
         </div>
       </section>
-      <section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
+      <CoursesCatalogSection locale="uk">
+<section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
           <h2 className={"h2 is--margin-bottom-40"}>
             {"Наші курси"}
@@ -1017,6 +1019,7 @@ export default function PageContent() {
           </div>
         </div>
       </section>
+      </CoursesCatalogSection>
       <Footer />
     </>
   );

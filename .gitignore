@@ -54,5 +54,8 @@ next-env.d.ts
 .firecrawl/
 .playwright-mcp/
 
+# local backlog notes (do not commit)
+docs/TODO.txt
+
 .vercel
 .env*

@@ -21,6 +21,7 @@
    - News CMS (Phase A–C): `/admin/content/news` = **єдиний каталог** новин; public `/news` + homepage = published **uk** `news_posts` (`listPublishedCmsNews` → `NEWS_CONTENT_LOCALE`); UI-локаль лишається для chrome/посилань `/{locale}/news/{slug}`. Legacy TSX fallback лише **uk** для статей; не вимагаємо перекладів новин
    - Import: `npm run db:import-news` (`scripts/import-legacy-news.mjs`, docs `docs/NEWS_IMPORT.md`) — після імпорту всі TSX-статті в адмін-списку (edit/hide/delete як нові)
    - Leadership CMS: `/admin/content/leadership` → `leadership_people`; public About grid = `LeadershipSection` (DB published або legacy fallback). Seed: `npm run db:seed-leadership`
+   - Education courses CMS: `/admin/content/courses` → `education_courses` (slug, опис основний/додатковий, CTA); сітка «Наші курси» = `CoursesCatalogSection` + кнопка «Дізнатися більше» → `/education/courses/[slug]` (`CourseDetailView`). Seed: `npm run db:seed-education-courses`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`; YouTube embeds на тренінгах **только после** `marketing === true` (`YoutubeConsentEmbed`)
 8. Trainings: `TrainingLesson` → sequential `modules[]` (YouTube + quiz each; anti forward-seek) → server score `POST /api/trainings/[slug]/score` ≥ `passThresholdPercent` + name confirm → certificate: **named PDF** when `courseCode` set (`POST` issue + `GET ?downloadToken=`, Neon `training_certificates`) else static locale PDF via pass token `GET ?token=`; video IDs may be empty until upload (`videoPending`)
@@ -53,7 +54,7 @@
 | Concern | Location |
 |---|---|
 | Legacy тело страниц | `src/content/pages/{uk,en}/**` |
-| CMS pages / news / leadership | Neon `pages`, `news_posts`, `leadership_people` (public news feed = published `news_posts` only) |
+| CMS pages / news / leadership / courses | Neon `pages`, `news_posts`, `leadership_people`, `education_courses` (public news feed = published `news_posts` only; courses grid = published `education_courses` або legacy) |
 | Legacy news TSX (article fallback + import source) | `src/content/pages/{uk,en}/news/*.tsx` |
 | Metadata / sitemap inventory | `src/content/page-metadata.json` (+ CMS news in `sitemap.ts`) |
 | Media inventory (legacy) | `src/content/media-manifest.json` |

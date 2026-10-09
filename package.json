@@ -7,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/site.test.mjs tests/enrollment-classify.test.mjs tests/enrollment-brevo.test.mjs tests/enrollment-members.test.mjs tests/enrollment-files.test.mjs tests/enrollment-member-status.test.mjs tests/contact-brevo.test.mjs tests/admin-confirm-delete.test.mjs tests/admin-password-policy.test.mjs tests/admin-member-registry.test.mjs tests/consent-parse.test.mjs tests/security-hygiene.test.mjs tests/audit-fix-wiring.test.mjs tests/certificate-number.test.mjs tests/module-attempt-budget.test.mjs",
+    "test": "node --test tests/site.test.mjs tests/enrollment-classify.test.mjs tests/enrollment-brevo.test.mjs tests/enrollment-members.test.mjs tests/enrollment-files.test.mjs tests/enrollment-member-status.test.mjs tests/contact-brevo.test.mjs tests/admin-confirm-delete.test.mjs tests/admin-password-policy.test.mjs tests/admin-member-registry.test.mjs tests/consent-parse.test.mjs tests/security-hygiene.test.mjs tests/audit-form-wiring.test.mjs tests/certificate-number.test.mjs tests/module-attempt-budget.test.mjs tests/rich-text-links.test.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:import-news": "node scripts/import-legacy-news.mjs",
-    "db:seed-leadership": "node scripts/seed-leadership.mjs"
+    "db:seed-leadership": "node scripts/seed-leadership.mjs",
+    "db:seed-education-courses": "node scripts/seed-education-courses.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

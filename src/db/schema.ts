@@ -91,6 +91,34 @@ export const leadershipPeople = pgTable("leadership_people", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * RU: Маркетинговий каталог «Наші курси» (/education/courses).
+ * EN: Marketing course catalog grid on /education/courses.
+ */
+export const educationCourses = pgTable("education_courses", {
+  id: serial("id").primaryKey(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  /** URL segment for /education/courses/[slug]. */
+  slug: varchar("slug", { length: 160 }).notNull().default(""),
+  imageUrl: text("image_url").notNull().default(""),
+  levelUk: text("level_uk").notNull().default(""),
+  levelEn: text("level_en").notNull().default(""),
+  titleUk: text("title_uk").notNull().default(""),
+  titleEn: text("title_en").notNull().default(""),
+  /** Short text on catalog card. */
+  descriptionUk: text("description_uk").notNull().default(""),
+  descriptionEn: text("description_en").notNull().default(""),
+  /** Full details on course page («Дізнатися більше»). */
+  descriptionExtraUk: text("description_extra_uk").notNull().default(""),
+  descriptionExtraEn: text("description_extra_en").notNull().default(""),
+  ctaUrl: text("cta_url").notNull().default(""),
+  ctaLabelUk: text("cta_label_uk").notNull().default(""),
+  ctaLabelEn: text("cta_label_en").notNull().default(""),
+  status: varchar("status", { length: 32 }).notNull().default("published"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [uniqueIndex("education_courses_slug_uidx").on(table.slug)]);
+
 export const members = pgTable("members", {
   id: serial("id").primaryKey(),
   publicId: varchar("public_id", { length: 32 }).notNull(),

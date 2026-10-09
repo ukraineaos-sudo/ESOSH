@@ -16,6 +16,7 @@ const rooms = [
   { href: "/admin", label: "Огляд", group: "main", icon: "⌂" },
   { href: "/admin/content/news", label: "Новини", group: "content", icon: "✎" },
   { href: "/admin/content/leadership", label: "Керівний склад", group: "content", icon: "◆" },
+  { href: "/admin/content/courses", label: "Курси", group: "content", icon: "▤" },
   // CMS «Сторінки» приховано — див. docs/PAGES_CMS.md (WYSIWYG + імпорт перед увімкненням).
   // { href: "/admin/content/pages", label: "Сторінки", group: "content", icon: "▦" },
   { href: "/admin/media", label: "Медіа", group: "content", icon: "▣" },
