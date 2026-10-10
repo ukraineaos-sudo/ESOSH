@@ -518,6 +518,8 @@ src/content/pages/kk/education/trainings/emergency-actions.tsx
 src/components/trainings/TrainingsCatalog.tsx
 src/content/trainings/risk-assessment-intro.ts
 src/components/trainings/RiskAssessmentIntro.tsx
+src/content/trainings/emergency-actions-intro.ts
+src/components/trainings/EmergencyActionsIntro.tsx
 public/assets/certificate/esosh-logo.png
 public/assets/certificate/esosh-logo-pdf.png
 public/assets/certificate/signature-olha-bohdanova.png
@@ -587,3 +589,5 @@ src/lib/cms/rich-text-links.ts
 src/components/cms/RichTextWithLinks.tsx
 tests/rich-text-links.test.mjs
 src/app/admin/admin.css
+public/images/education/trainings/risk-assessment.png
+public/images/education/trainings/emergency-actions.png

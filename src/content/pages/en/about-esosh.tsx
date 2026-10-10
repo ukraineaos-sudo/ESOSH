@@ -545,25 +545,38 @@ export default function PageContent() {
               className={"wrapper is--grid-text-spacing"}
             >
               <div className={"wrapper is--max-width-584"}>
-                <h2 className={"h2 is--margin-bottom-24 is--max-width-440"}>{"Impressum"}</h2>
+                <h2 className={"h2 is--margin-bottom-24 is--max-width-440"}>
+                  {"Legal information / Impressum"}
+                </h2>
                 <div className={"text-spacing-wrapper"}>
                   <p className={"regular-l"}>
                     {
-                      "The European Society of Occupational Safety&Health, ESOSH. Register number 42755196"
+                      "Public Union “European Society of Occupational Safety and Health” (ESOSH)"
                     }
                   </p>
+                  <p className={"regular-l"}>{"EDRPOU 42755196"}</p>
+                  <p className={"regular-l"}>{"Registration date 15.01.2019"}</p>
+                  <p className={"regular-l"}>{"Chair of the Board Olha Bohdanova"}</p>
                   <div className={"wrapper is--w-100p"}>
                     <div className={"wrapper is--margin-bottom-24"}>
-                      <div className={"bold-l is--margin-bottom-12"}>{"Address"}</div>
-                      <p>{"Kyiv, Ukraine, 04107, Tatarska str. 21, office A.."}</p>
+                      <div className={"bold-l is--margin-bottom-12"}>{"Legal address"}</div>
+                      <p>
+                        {
+                          "Ukraine, 04107, Kyiv, 21 Tatarska St., building letter A"
+                        }
+                      </p>
                     </div>
                     <div className={"wrapper is--margin-bottom-24"}>
-                      <div className={"bold-l is--margin-bottom-12"}>{"Post"}</div>
-                      <p>{"Kyiv, Ukraine, 02081, PO Box 23, office@esosh.net"}</p>
+                      <div className={"bold-l is--margin-bottom-12"}>{"Postal address"}</div>
+                      <p>{"Kyiv, 02081, PO Box 23"}</p>
                     </div>
                     <div className={"wrapper"}>
-                      <div className={"bold-l is--margin-bottom-12"}>{"Contacts"}</div>
-                      <p>{"+38 (050) 44-19-936 Olha Bohdanova"}</p>
+                      <div className={"bold-l is--margin-bottom-12"}>{"e-mail"}</div>
+                      <p>
+                        <a href={"mailto:office@esosh.net"} className={"is--accent"}>
+                          {"office@esosh.net"}
+                        </a>
+                      </p>
                     </div>
                   </div>
                   <LocaleDocLink docId="offer" locale="en" className={"btn is--primary w-button"}>

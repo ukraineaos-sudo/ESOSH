@@ -20,7 +20,7 @@ export default function PageContent() {
                   <div className={"wrapper is--max-width-720"}>
                     <p className={"medium-xs is--margin-bottom-16"}>
                       <a href={"/education/trainings"} className={"is--accent"}>
-                        {"Тренінги"}
+                        {"Онлайн-тренінги"}
                       </a>
                     </p>
                     <h1 className={"h1"}>

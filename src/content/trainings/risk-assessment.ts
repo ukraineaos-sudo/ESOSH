@@ -112,8 +112,8 @@ export const riskAssessmentTraining: TrainingDetail = {
   },
   courseCode: "RA",
   duration: {
-    uk: "30 хвилин",
-    en: "30 minutes",
+    uk: "1 академічна година",
+    en: "1 academic hour",
   },
   certificateTitles: {
     uk: "ОЦІНЮВАННЯ РИЗИКІВ: ВСТУПНИЙ КУРС",
@@ -152,10 +152,10 @@ export const riskAssessmentTraining: TrainingDetail = {
           [
             "Повна відсутність будь-яких суворих правил",
             "Ілюзія безпеки та втрата пильності",
-            "Використання застарілого обладнання в цеху",
+            "Неправильно організовані процеси",
             "Свідоме порушення інструкцій співробітником",
           ],
-          2,
+          3,
         ),
         q(
           102,

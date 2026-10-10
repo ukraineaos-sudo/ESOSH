@@ -314,7 +314,7 @@ export async function buildNamedCertificatePdf(
   placeLine(payload.courseTitleEn, fontBold, titleEnSize, 12);
 
   placeLine(
-    `Тривалість / Duration: ${payload.durationUk} / ${payload.durationEn}`,
+    `Тривалість курсу з тестуванням / Duration of the course with testing: ${payload.durationUk} / ${payload.durationEn}`,
     font,
     9.5,
     0,

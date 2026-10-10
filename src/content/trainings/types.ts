@@ -82,6 +82,12 @@ export type TrainingDetail = {
   href: string;
   title: LocalizedString;
   summary: LocalizedString;
+  /**
+   * When false, hide from the public catalog and detail URL (404).
+   * Content + certificate codes stay for admin / already-issued PDFs.
+   * Default: published (undefined or true).
+   */
+  published?: boolean;
   modules: TrainingModule[];
   quizUi: TrainingQuizUi;
   /**

@@ -50,6 +50,15 @@ export const riskAssessmentIntro: RiskAssessmentIntroCopy = {
       az: "As a community of occupational safety and health professionals, we care about your safety and invite you to take this course free of charge. You will learn risk-based thinking, the risk assessment matrix, and the hierarchy of controls, so you can apply this knowledge to protect yourself and others.",
       kk: "As a community of occupational safety and health professionals, we care about your safety and invite you to take this course free of charge. You will learn risk-based thinking, the risk assessment matrix, and the hierarchy of controls, so you can apply this knowledge to protect yourself and others.",
     },
+    {
+      uk: "Курс підготовлено на основі матеріалів і рекомендацій Міжнародної організації праці (ILO), Європейського агентства з безпеки та гігієни праці (EU-OSHA) та положень Рамкової директиви Ради 89/391/ЄЕС. Для опрацювання й представлення матеріалів використано інструменти штучного інтелекту.",
+      en: "The course was prepared based on materials and recommendations of the International Labour Organization (ILO), the European Agency for Safety and Health at Work (EU-OSHA), and the provisions of Council Framework Directive 89/391/EEC. Artificial intelligence tools were used to process and present the materials.",
+      de: "The course was prepared based on materials and recommendations of the International Labour Organization (ILO), the European Agency for Safety and Health at Work (EU-OSHA), and the provisions of Council Framework Directive 89/391/EEC. Artificial intelligence tools were used to process and present the materials.",
+      es: "The course was prepared based on materials and recommendations of the International Labour Organization (ILO), the European Agency for Safety and Health at Work (EU-OSHA), and the provisions of Council Framework Directive 89/391/EEC. Artificial intelligence tools were used to process and present the materials.",
+      fr: "The course was prepared based on materials and recommendations of the International Labour Organization (ILO), the European Agency for Safety and Health at Work (EU-OSHA), and the provisions of Council Framework Directive 89/391/EEC. Artificial intelligence tools were used to process and present the materials.",
+      az: "The course was prepared based on materials and recommendations of the International Labour Organization (ILO), the European Agency for Safety and Health at Work (EU-OSHA), and the provisions of Council Framework Directive 89/391/EEC. Artificial intelligence tools were used to process and present the materials.",
+      kk: "The course was prepared based on materials and recommendations of the International Labour Organization (ILO), the European Agency for Safety and Health at Work (EU-OSHA), and the provisions of Council Framework Directive 89/391/EEC. Artificial intelligence tools were used to process and present the materials.",
+    },
   ],
   inviteTrainings: {
     uk: "Запрошуємо на наші поглиблені тренінги «Фахівець з оцінки ризиків», курси для підприємств з практикою оцінювання та контролю ризиків на робочих місцях — {email}.",

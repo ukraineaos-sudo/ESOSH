@@ -70,6 +70,8 @@ const quizUi: TrainingQuizUi = {
 export const uavAttacksTraining: TrainingDetail = {
   slug: "uav-attacks",
   href: "/education/trainings/uav-attacks",
+  /** Client request: temporarily disable this training on the public site. */
+  published: false,
   title: {
     uk: "Дії під час атак БПЛА",
     en: "Actions during UAV attacks",

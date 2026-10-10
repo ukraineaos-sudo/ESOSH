@@ -22,6 +22,40 @@ function cardCopy(item: TrainingListItem, locale: LocaleCode): { title: string; 
   };
 }
 
+const TRAINING_CARD_ICONS: Record<string, string> = {
+  "risk-assessment": "/images/education/trainings/risk-assessment.png",
+  "emergency-actions": "/images/education/trainings/emergency-actions.png",
+};
+
+function cardIconSrc(slug: string): string {
+  return TRAINING_CARD_ICONS[slug] ?? "/images/education-projects/Security-fe65e152.svg";
+}
+
+function TrainingCard({ item, locale }: { item: TrainingListItem; locale: LocaleCode }) {
+  const { title, summary } = cardCopy(item, locale);
+  return (
+    <Link
+      href={item.href}
+      className={
+        "block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block trainings-card"
+      }
+    >
+      <div className="trainings-card__head">
+        <img
+          src={cardIconSrc(item.slug)}
+          loading={"lazy"}
+          alt={""}
+          className={"trainings-card__icon is--icon-size-40"}
+          width={40}
+          height={40}
+        />
+        <h3 className={"h3 trainings-card__title"}>{title}</h3>
+      </div>
+      <p className={"regular-l trainings-card__summary"}>{summary}</p>
+    </Link>
+  );
+}
+
 /** RU: Секції каталогу тренінгів (basic / professional). EN: Trainings catalog sections. */
 export function TrainingsCatalog({ locale }: TrainingsCatalogProps) {
   const basic = trainingsByTier("basic");
@@ -29,6 +63,12 @@ export function TrainingsCatalog({ locale }: TrainingsCatalogProps) {
   const basicHeading = sectionTitle(trainingsListingCopy.basicTitle, locale);
   const professionalHeading = sectionTitle(trainingsListingCopy.professionalTitle, locale);
   const comingSoon = sectionTitle(trainingsListingCopy.comingSoon, locale);
+  const professionalContactTemplate =
+    pickLocalized(trainingsListingCopy.professionalContact, locale) ??
+    trainingsListingCopy.professionalContact.en;
+  const professionalEmail = trainingsListingCopy.professionalContactEmail;
+  const [professionalContactBefore, professionalContactAfter = ""] =
+    professionalContactTemplate.split("{email}");
 
   return (
     <div className={"trainings-catalog"}>
@@ -40,27 +80,9 @@ export function TrainingsCatalog({ locale }: TrainingsCatalogProps) {
         </div>
         {basic.length > 0 ? (
           <div className={"w-layout-grid is--grid-block-2-columns--a-1column"}>
-            {basic.map((item) => {
-              const { title, summary } = cardCopy(item, locale);
-              return (
-                <Link
-                  key={item.slug}
-                  href={item.href}
-                  className={
-                    "block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"
-                  }
-                >
-                  <img
-                    src={"/images/education-projects/Security-fe65e152.svg"}
-                    loading={"lazy"}
-                    alt={""}
-                    className={"is--icon-size-40 is--margin-bottom-24"}
-                  />
-                  <h3 className={"h3 is--margin-bottom-12"}>{title}</h3>
-                  <p className={"regular-l"}>{summary}</p>
-                </Link>
-              );
-            })}
+            {basic.map((item) => (
+              <TrainingCard key={item.slug} item={item} locale={locale} />
+            ))}
           </div>
         ) : (
           <p className={"trainings-section__empty regular-l"}>{comingSoon}</p>
@@ -75,30 +97,18 @@ export function TrainingsCatalog({ locale }: TrainingsCatalogProps) {
         </div>
         {professional.length > 0 ? (
           <div className={"w-layout-grid is--grid-block-2-columns--a-1column"}>
-            {professional.map((item) => {
-              const { title, summary } = cardCopy(item, locale);
-              return (
-                <Link
-                  key={item.slug}
-                  href={item.href}
-                  className={
-                    "block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"
-                  }
-                >
-                  <img
-                    src={"/images/education-projects/Security-fe65e152.svg"}
-                    loading={"lazy"}
-                    alt={""}
-                    className={"is--icon-size-40 is--margin-bottom-24"}
-                  />
-                  <h3 className={"h3 is--margin-bottom-12"}>{title}</h3>
-                  <p className={"regular-l"}>{summary}</p>
-                </Link>
-              );
-            })}
+            {professional.map((item) => (
+              <TrainingCard key={item.slug} item={item} locale={locale} />
+            ))}
           </div>
         ) : (
-          <p className={"trainings-section__empty regular-l"}>{comingSoon}</p>
+          <p className={"trainings-section__empty regular-l"}>
+            {professionalContactBefore}
+            <a href={`mailto:${professionalEmail}`} className={"is--accent"}>
+              {professionalEmail}
+            </a>
+            {professionalContactAfter}
+          </p>
         )}
       </section>
     </div>

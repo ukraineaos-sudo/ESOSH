@@ -536,26 +536,37 @@ export default function PageContent() {
             >
               <div className={"wrapper is--max-width-584"}>
                 <h2 className={"h2 is--margin-bottom-24 is--max-width-440"}>
-                  {"Реквізити / Impressum"}
+                  {"Юридична інформація / Impressum"}
                 </h2>
                 <div className={"text-spacing-wrapper"}>
                   <p className={"regular-l"}>
                     {
-                      "Європейське співтовариство з охорони праці (ESOSH). ЄДРПОУ 42755196"
+                      "Громадська спілка «Європейське співтовариство з охорони праці» (ГС ЄСОП)"
                     }
                   </p>
+                  <p className={"regular-l"}>{"ЄДРПОУ 42755196"}</p>
+                  <p className={"regular-l"}>{"Дата реєстрації 15.01.2019"}</p>
+                  <p className={"regular-l"}>{"Голова Правління Ольга Богданова"}</p>
                   <div className={"wrapper is--w-100p"}>
                     <div className={"wrapper is--margin-bottom-24"}>
-                      <div className={"bold-l is--margin-bottom-12"}>{"Адреса"}</div>
-                      <p>{"Україна, 04107, м. Київ, вул. Татарська, 21, офіс А"}</p>
+                      <div className={"bold-l is--margin-bottom-12"}>{"Юридична адреса"}</div>
+                      <p>
+                        {
+                          "Україна, 04107, м. Київ, вул. Татарська, буд. 21, літера А"
+                        }
+                      </p>
                     </div>
                     <div className={"wrapper is--margin-bottom-24"}>
                       <div className={"bold-l is--margin-bottom-12"}>{"Поштова адреса"}</div>
-                      <p>{"Україна, 02081, м. Київ, а/с 23, office@esosh.net"}</p>
+                      <p>{"м. Київ, 02081, п/с 23"}</p>
                     </div>
                     <div className={"wrapper"}>
-                      <div className={"bold-l is--margin-bottom-12"}>{"Контакти"}</div>
-                      <p>{"+38 (050) 44-19-936 Ольга Богданова"}</p>
+                      <div className={"bold-l is--margin-bottom-12"}>{"e-mail"}</div>
+                      <p>
+                        <a href={"mailto:office@esosh.net"} className={"is--accent"}>
+                          {"office@esosh.net"}
+                        </a>
+                      </p>
                     </div>
                   </div>
                   <LocaleDocLink docId="offer" locale="uk" className={"btn is--primary w-button"}>

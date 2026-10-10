@@ -21,7 +21,7 @@ export default function PageContent() {
                   <div className={"wrapper is--max-width-720"}>
                     <p className={"medium-xs is--margin-bottom-16"}>
                       <a href={"/en/education/trainings"} className={"is--accent"}>
-                        {"Trainings"}
+                        {"Online trainings"}
                       </a>
                     </p>
                     <h1 className={"h1"}>

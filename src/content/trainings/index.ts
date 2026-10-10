@@ -1,4 +1,10 @@
-import type { LocaleCode, LocalizedString, TrainingListItem, TrainingTier } from "./types";
+import type {
+  LocaleCode,
+  LocalizedString,
+  TrainingDetail,
+  TrainingListItem,
+  TrainingTier,
+} from "./types";
 import { emergencyActionsTraining } from "./emergency-actions";
 import { riskAssessmentTraining } from "./risk-assessment";
 import { uavAttacksTraining } from "./uav-attacks";
@@ -32,32 +38,36 @@ export const trainingsListingCopy = {
     az: "Tezliklə",
     kk: "Жақында",
   } satisfies Record<LocaleCode, string>,
-} as const satisfies Record<string, LocalizedString>;
+  /** Empty professional section CTA; `{email}` → mailto link. */
+  professionalContact: {
+    uk: "Ласкаво просимо {email}",
+    en: "Welcome {email}",
+    de: "Willkommen {email}",
+    es: "Bienvenidos {email}",
+    fr: "Bienvenue {email}",
+    az: "Xoş gəlmisiniz {email}",
+    kk: "Қош келдіңіз {email}",
+  } satisfies Record<LocaleCode, string>,
+  professionalContactEmail: "office@esosh.net",
+} as const;
 
-/** RU: Каталог тренінгів для лістингу. EN: Training catalog for the listing page. */
+function toListItem(training: TrainingDetail, tier: TrainingTier): TrainingListItem | null {
+  if (training.published === false) return null;
+  return {
+    slug: training.slug,
+    href: training.href,
+    title: training.title,
+    summary: training.summary,
+    tier,
+  };
+}
+
+/** RU: Каталог тренінгів для лістингу (лише published). EN: Listing catalog (published only). */
 export const trainingsCatalog: TrainingListItem[] = [
-  {
-    slug: riskAssessmentTraining.slug,
-    href: riskAssessmentTraining.href,
-    title: riskAssessmentTraining.title,
-    summary: riskAssessmentTraining.summary,
-    tier: "basic",
-  },
-  {
-    slug: uavAttacksTraining.slug,
-    href: uavAttacksTraining.href,
-    title: uavAttacksTraining.title,
-    summary: uavAttacksTraining.summary,
-    tier: "basic",
-  },
-  {
-    slug: emergencyActionsTraining.slug,
-    href: emergencyActionsTraining.href,
-    title: emergencyActionsTraining.title,
-    summary: emergencyActionsTraining.summary,
-    tier: "basic",
-  },
-];
+  toListItem(riskAssessmentTraining, "basic"),
+  toListItem(uavAttacksTraining, "basic"),
+  toListItem(emergencyActionsTraining, "basic"),
+].filter((item): item is TrainingListItem => item !== null);
 
 /** RU: Фільтр каталогу за рівнем. EN: Filter catalog by tier. */
 export function trainingsByTier(tier: TrainingTier): TrainingListItem[] {
@@ -66,6 +76,7 @@ export function trainingsByTier(tier: TrainingTier): TrainingListItem[] {
 
 export { emergencyActionsTraining } from "./emergency-actions";
 export { riskAssessmentTraining } from "./risk-assessment";
+export { emergencyActionsIntro } from "./emergency-actions-intro";
 export { riskAssessmentIntro } from "./risk-assessment-intro";
 export { uavAttacksTraining } from "./uav-attacks";
 export type {

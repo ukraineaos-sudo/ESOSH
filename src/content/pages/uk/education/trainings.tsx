@@ -15,7 +15,7 @@ export default function PageContent() {
                 <div className={"wrapper is--hero-internal-text-wrapper"}>
                   <div className={"wrapper is--max-width-600"}>
                     <h1 className={"h1"}>
-                      {"Тренінги "}
+                      {"Онлайн-тренінги "}
                       <span className={"is--accent"}>{"ESOSH"}</span>
                     </h1>
                   </div>

@@ -450,8 +450,8 @@
     "image": null
   },
   "/en/education/trainings": {
-    "title": "ESOSH — Trainings",
-    "description": "ESOSH basic and professional safety trainings.",
+    "title": "ESOSH — Online trainings",
+    "description": "ESOSH basic and professional online safety trainings.",
     "locale": "en",
     "alternates": {
       "uk": "/education/trainings",
@@ -465,8 +465,8 @@
     "image": null
   },
   "/education/trainings": {
-    "title": "ESOSH — Тренінги",
-    "description": "Базові та професійні тренінги ESOSH з безпеки праці.",
+    "title": "ESOSH — Онлайн-тренінги",
+    "description": "Базові та професійні онлайн-тренінги ESOSH з безпеки праці.",
     "locale": "uk",
     "alternates": {
       "uk": "/education/trainings",
@@ -540,7 +540,7 @@
     "image": null
   },
   "/en/education/trainings/emergency-actions": {
-    "title": "ESOSH — Citizen actions in emergency situations",
+    "title": "ESOSH — Actions in emergency situations. Basic course",
     "description": "Training on citizen actions in emergencies. Video, quiz, and certificate coming soon.",
     "locale": "en",
     "alternates": {
@@ -555,8 +555,8 @@
     "image": null
   },
   "/education/trainings/emergency-actions": {
-    "title": "ESOSH — Порядок дій громадян у разі виникнення надзвичайних ситуацій",
-    "description": "Тренінг про порядок дій громадян у надзвичайних ситуаціях. Відео, тест і сертифікат з’являться незабаром.",
+    "title": "ESOSH — Дії у надзвичайних ситуаціях. Базовий курс",
+    "description": "Базовий онлайн-тренінг про дії у надзвичайних ситуаціях: відео, перевірка знань і сертифікат.",
     "locale": "uk",
     "alternates": {
       "uk": "/education/trainings/emergency-actions",

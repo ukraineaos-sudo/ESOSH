@@ -277,35 +277,38 @@ export default function PageContent() {
             <div id={"w-node-bee42958-44c0-3e52-7377-fa0107d5d77b-4f5ccd80"} className={"wrapper is--grid-text-spacing"}>
               <div className={"wrapper is--max-width-584"}>
                 <h2 className={"h2 is--margin-bottom-24 is--max-width-440"}>
-                  {"Impressum"}
+                  {"Rechtliche Informationen / Impressum"}
                 </h2>
                 <div className={"text-spacing-wrapper"}>
                   <p className={"regular-l"}>
-                    {"Die Europäische Gesellschaft für Sicherheit und Gesundheitsschutz am Arbeitsplatz, ESOSH. Registernummer 42755196"}
+                    {
+                      "Öffentliche Vereinigung „Europäische Gesellschaft für Sicherheit und Gesundheitsschutz am Arbeitsplatz“ (ESOSH)"
+                    }
                   </p>
+                  <p className={"regular-l"}>{"EDRPOU 42755196"}</p>
+                  <p className={"regular-l"}>{"Registrierungsdatum 15.01.2019"}</p>
+                  <p className={"regular-l"}>{"Vorstandsvorsitzende Olha Bohdanova"}</p>
                   <div className={"wrapper is--w-100p"}>
                     <div className={"wrapper is--margin-bottom-24"}>
                       <div className={"bold-l is--margin-bottom-12"}>
-                        {"Adresse"}
+                        {"Juristische Adresse"}
                       </div>
                       <p>
-                        {"Kiew, Ukraine, 04107, Tatarska-Str. 21, Büro A."}
+                        {"Ukraine, 04107, Kiew, Tatarska-Str. 21, Gebäude Buchstabe A"}
                       </p>
                     </div>
                     <div className={"wrapper is--margin-bottom-24"}>
                       <div className={"bold-l is--margin-bottom-12"}>
                         {"Postanschrift"}
                       </div>
-                      <p>
-                        {"Kyiv, Ukraine, 02081, PO Box 23, office@esosh.net"}
-                      </p>
+                      <p>{"Kiew, 02081, Postfach 23"}</p>
                     </div>
                     <div className={"wrapper"}>
-                      <div className={"bold-l is--margin-bottom-12"}>
-                        {"Kontakt"}
-                      </div>
+                      <div className={"bold-l is--margin-bottom-12"}>{"e-mail"}</div>
                       <p>
-                        {"+38 (050) 44-19-936 Olha Bohdanova"}
+                        <a href={"mailto:office@esosh.net"} className={"is--accent"}>
+                          {"office@esosh.net"}
+                        </a>
                       </p>
                     </div>
                   </div>

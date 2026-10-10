@@ -1,5 +1,6 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { EmergencyActionsIntro } from "@/components/trainings/EmergencyActionsIntro";
 import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { emergencyActionsTraining } from "@/content/trainings";
 import { toPublicTraining } from "@/lib/trainings/public";
@@ -20,7 +21,7 @@ export default function PageContent() {
                   <div className={"wrapper is--max-width-720"}>
                     <p className={"medium-xs is--margin-bottom-16"}>
                       <a href={"/en/education/trainings"} className={"is--accent"}>
-                        {"Trainings"}
+                        {"Online trainings"}
                       </a>
                     </p>
                     <h1 className={"h1"}>
@@ -35,6 +36,7 @@ export default function PageContent() {
       </section>
       <section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
+          <EmergencyActionsIntro locale="en" />
           <div className={"training-detail-lead"}>
             <p className={"regular-l"}>{training.summary.en}</p>
           </div>

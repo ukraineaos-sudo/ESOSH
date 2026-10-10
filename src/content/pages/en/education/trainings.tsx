@@ -16,7 +16,7 @@ export default function PageContent() {
                   <div className={"wrapper is--max-width-600"}>
                     <h1 className={"h1"}>
                       {"ESOSH "}
-                      <span className={"is--accent"}>{"Trainings"}</span>
+                      <span className={"is--accent"}>{"Online trainings"}</span>
                     </h1>
                   </div>
                 </div>

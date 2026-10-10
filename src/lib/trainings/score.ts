@@ -15,9 +15,19 @@ const TRAININGS_BY_SLUG: Record<string, TrainingDetail> = {
   [emergencyActionsTraining.slug]: emergencyActionsTraining,
 };
 
-/** RU: Тренінг за slug (server-only). EN: Resolve training by slug (server-only). */
-export function getTrainingBySlug(slug: string): TrainingDetail | null {
-  return TRAININGS_BY_SLUG[slug] ?? null;
+/**
+ * RU: Тренінг за slug (server-only).
+ * EN: Resolve training by slug (server-only).
+ * Unpublished trainings are hidden unless `includeUnpublished` (certificates).
+ */
+export function getTrainingBySlug(
+  slug: string,
+  opts?: { includeUnpublished?: boolean },
+): TrainingDetail | null {
+  const training = TRAININGS_BY_SLUG[slug] ?? null;
+  if (!training) return null;
+  if (training.published === false && !opts?.includeUnpublished) return null;
+  return training;
 }
 
 export type ModuleScoreResult = {
@@ -145,7 +155,7 @@ export function verifyTrainingPassToken(slug: string, token: string): TrainingPa
 
 /** RU: Чи бал токена проходить поріг курсу. EN: Whether token score meets course threshold. */
 export function passMeetsThreshold(slug: string, scorePercent: number): boolean {
-  const training = getTrainingBySlug(slug);
+  const training = getTrainingBySlug(slug, { includeUnpublished: true });
   if (!training) return false;
   const threshold = training.passThresholdPercent ?? 80;
   return scorePercent >= threshold;

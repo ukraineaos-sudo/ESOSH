@@ -72,8 +72,8 @@ describe("certificate API wiring", () => {
 
     const risk = readFileSync(join(root, "src/content/trainings/risk-assessment.ts"), "utf8");
     assert.match(risk, /courseCode:\s*"RA"/);
-    assert.match(risk, /30 хвилин/);
-    assert.match(risk, /30 minutes/);
+    assert.match(risk, /1 академічна година/);
+    assert.match(risk, /1 academic hour/);
 
     const uav = readFileSync(join(root, "src/content/trainings/uav-attacks.ts"), "utf8");
     assert.match(uav, /courseCode:\s*"UAV"/);
@@ -85,8 +85,8 @@ describe("certificate API wiring", () => {
       "utf8",
     );
     assert.match(emergency, /courseCode:\s*"EA"/);
-    assert.match(emergency, /30 хвилин/);
-    assert.match(emergency, /30 minutes/);
+    assert.match(emergency, /1 академічна година/);
+    assert.match(emergency, /1 academic hour/);
 
     const lesson = readFileSync(join(root, "src/components/trainings/TrainingLesson.tsx"), "utf8");
     assert.match(lesson, /certificateGenerating/);

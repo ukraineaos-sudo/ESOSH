@@ -36,6 +36,30 @@
   color: #64748b;
 }
 
+.trainings-card__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 12px;
+}
+
+.trainings-card__icon {
+  flex: 0 0 auto;
+  display: block;
+  object-fit: contain;
+}
+
+.trainings-card__title {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.trainings-card__summary {
+  margin: 0;
+}
+
 @media (max-width: 767px) {
   .trainings-catalog {
     gap: 48px;
@@ -44,6 +68,10 @@
   .trainings-section__heading {
     gap: 12px;
     margin-bottom: 24px;
+  }
+
+  .trainings-card__head {
+    gap: 12px;
   }
 }
 

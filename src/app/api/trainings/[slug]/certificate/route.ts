@@ -51,7 +51,8 @@ export async function POST(request: Request, ctx: Ctx) {
   if (rateBlock) return rateBlock;
 
   const { slug } = await ctx.params;
-  const training = getTrainingBySlug(slug);
+  // Allow unpublished courses so already-earned pass tokens can still issue a PDF.
+  const training = getTrainingBySlug(slug, { includeUnpublished: true });
   if (!training) {
     return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
   }
@@ -122,7 +123,7 @@ export async function POST(request: Request, ctx: Ctx) {
  */
 export async function GET(request: Request, ctx: Ctx) {
   const { slug } = await ctx.params;
-  const training = getTrainingBySlug(slug);
+  const training = getTrainingBySlug(slug, { includeUnpublished: true });
   if (!training) {
     return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
   }
