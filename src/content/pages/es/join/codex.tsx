@@ -2,6 +2,9 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
+import { CodexAccordion } from "@/components/join/CodexAccordion";
+import { CodexVideoSlot } from "@/components/join/CodexVideoSlot";
+import { CODEX_YOUTUBE_ID, CODEX_YOUTUBE_WATCH_URL } from "@/content/join/codex-video";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -73,6 +76,7 @@ export default function PageContent() {
                   {", Director General de la Sociedad Europea"}
                 </p>
               </div>
+              <CodexAccordion summary={"Texto completo del código"}>
               <div className={"wrapper is--margin-bottom-48"}>
                 <h3 className={"h3 is--margin-bottom-24"}>
                   {"Código de conducta para miembros de ESOSH"}
@@ -435,10 +439,19 @@ export default function PageContent() {
                     <br />
                     {"Si el Consejo de Gobierno de ESOSH decide que el participante ha violado el Código de Conducta, el Consejo decidirá excluirlo de los miembros de la Comunidad dentro de los límites de sus competencias y de acuerdo con el marco legal aplicable del país en el que opera ESOSH."}
                   </p>
-                  <LocaleDocLink docId="codex" locale="es" className={"btn is--primary w-button"}>
-                    {"Descargar Código"}
-                  </LocaleDocLink>
                 </div>
+              </div>
+              </CodexAccordion>
+              <CodexVideoSlot
+                youtubeId={CODEX_YOUTUBE_ID}
+                title={"Código de conducta ESOSH"}
+                watchUrl={CODEX_YOUTUBE_WATCH_URL}
+                openOnYoutubeLabel={"Abrir en YouTube"}
+              />
+              <div className={"wrapper is--margin-bottom-48"}>
+                <LocaleDocLink docId="codex" locale="es" className={"btn is--primary w-button"}>
+                  {"Descargar Código"}
+                </LocaleDocLink>
               </div>
             </div>
           </div>

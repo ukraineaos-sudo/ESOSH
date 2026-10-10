@@ -401,3 +401,68 @@ header.is--nav::before {
     padding: 32px 0;
   }
 }
+
+/*
+ * Codex video: 16:9 embed (native YouTube controls).
+ * Vertical Shorts fill the height; side bars are YouTube’s own letterboxing.
+ * Do not CSS-scale the iframe — it crops the control bar.
+ */
+.codex-video-slot__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid color-mix(in srgb, var(--accent, #1e4f91) 18%, transparent);
+}
+.codex-video-slot__frame--pending {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  aspect-ratio: auto;
+  min-height: 220px;
+  padding: 32px;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--accent, #1e4f91) 8%, var(--accent-light, #eef3f9));
+}
+.codex-video-slot__frame > p {
+  margin: 0;
+}
+.codex-video-slot__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.codex-video-slot__open {
+  display: inline-block;
+  margin-top: 12px;
+}
+.codex-accordion {
+  width: 100%;
+  border-top: 1px solid color-mix(in srgb, var(--accent, #1e4f91) 18%, transparent);
+}
+.codex-accordion__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+}
+.codex-accordion__chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.codex-accordion[open] > .codex-accordion__summary .codex-accordion__chevron {
+  transform: rotate(180deg);
+}
+.codex-accordion__body {
+  padding-bottom: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .codex-accordion__chevron {
+    transition: none;
+  }
+}

@@ -2,6 +2,9 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
+import { CodexAccordion } from "@/components/join/CodexAccordion";
+import { CodexVideoSlot } from "@/components/join/CodexVideoSlot";
+import { CODEX_YOUTUBE_ID, CODEX_YOUTUBE_WATCH_URL } from "@/content/join/codex-video";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -73,6 +76,7 @@ export default function PageContent() {
                   {", Director-General of the European Society"}
                 </p>
               </div>
+              <CodexAccordion summary={"Full text of the Code"}>
               <div className={"wrapper is--margin-bottom-48"}>
                 <h3 className={"h3 is--margin-bottom-24"}>
                   {"Code of Conduct for Members of the ESOSH"}
@@ -435,10 +439,19 @@ export default function PageContent() {
                     <br />
                     {"If the Governing Board of the ESOSH decides that the participant has violated the Code of Conduct, the Board shall decide to exclude him from the members of the Community within the limits of its powers and in accordance with the applicable legal framework of the country in which the ESOSH operates."}
                   </p>
-                  <LocaleDocLink docId="codex" locale="en" className={"btn is--primary w-button"}>
-                    {"Download Code"}
-                  </LocaleDocLink>
                 </div>
+              </div>
+              </CodexAccordion>
+              <CodexVideoSlot
+                youtubeId={CODEX_YOUTUBE_ID}
+                title={"ESOSH Code of Conduct"}
+                watchUrl={CODEX_YOUTUBE_WATCH_URL}
+                openOnYoutubeLabel={"Open on YouTube"}
+              />
+              <div className={"wrapper is--margin-bottom-48"}>
+                <LocaleDocLink docId="codex" locale="en" className={"btn is--primary w-button"}>
+                  {"Download Code"}
+                </LocaleDocLink>
               </div>
             </div>
           </div>

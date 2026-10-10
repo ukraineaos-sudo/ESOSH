@@ -2,6 +2,9 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
+import { CodexAccordion } from "@/components/join/CodexAccordion";
+import { CodexVideoSlot } from "@/components/join/CodexVideoSlot";
+import { CODEX_YOUTUBE_ID, CODEX_YOUTUBE_WATCH_URL } from "@/content/join/codex-video";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -73,6 +76,7 @@ export default function PageContent() {
                   {", Avropa Cəmiyyətinin Baş Direktoru"}
                 </p>
               </div>
+              <CodexAccordion summary={"Kodeksin tam mətni"}>
               <div className={"wrapper is--margin-bottom-48"}>
                 <h3 className={"h3 is--margin-bottom-24"}>
                   {"ESOSH Üzvləri üçün Davranış Kodeksi"}
@@ -435,10 +439,19 @@ export default function PageContent() {
                     <br />
                     {"ESOSH-ın İdarə Heyəti iştirakçının Davranış Kodeksini pozduğuna qərar verərsə, Şura öz səlahiyyətləri çərçivəsində və ESOSH-in fəaliyyət göstərdiyi ölkənin qüvvədə olan qanunvericilik bazasına uyğun olaraq, onu Birlik üzvlərindən xaric etmək barədə qərar qəbul edir."}
                   </p>
-                  <LocaleDocLink docId="codex" locale="az" className={"btn is--primary w-button"}>
-                    {"Kodu yükləyin"}
-                  </LocaleDocLink>
                 </div>
+              </div>
+              </CodexAccordion>
+              <CodexVideoSlot
+                youtubeId={CODEX_YOUTUBE_ID}
+                title={"ESOSH Davranış Kodeksi"}
+                watchUrl={CODEX_YOUTUBE_WATCH_URL}
+                openOnYoutubeLabel={"YouTube-da açın"}
+              />
+              <div className={"wrapper is--margin-bottom-48"}>
+                <LocaleDocLink docId="codex" locale="az" className={"btn is--primary w-button"}>
+                  {"Kodu yükləyin"}
+                </LocaleDocLink>
               </div>
             </div>
           </div>

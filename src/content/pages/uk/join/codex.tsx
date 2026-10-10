@@ -2,6 +2,9 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LocaleDocLink } from "@/components/docs/LocaleDocLink";
+import { CodexAccordion } from "@/components/join/CodexAccordion";
+import { CodexVideoSlot } from "@/components/join/CodexVideoSlot";
+import { CODEX_YOUTUBE_ID, CODEX_YOUTUBE_WATCH_URL } from "@/content/join/codex-video";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -73,6 +76,7 @@ export default function PageContent() {
                   {", Генеральний Директор ЄСОП"}
                 </p>
               </div>
+              <CodexAccordion summary={"Повний текст кодексу"}>
               <div className={"wrapper is--margin-bottom-48"}>
                 <h3 className={"h3 is--margin-bottom-24"}>
                   {"Кодекс поведінки учасників ЄСОП"}
@@ -435,10 +439,19 @@ export default function PageContent() {
                     <br />
                     {"У разі, якщо Правління ЄСОП вирішить, що даний учасник порушив Кодекс поведінки, Правління приймає рішення про виключення його з членів співтовариства у рамках своїх повноважень та згідно чинної нормативно-правової бази країни, де здійснює свою діяльність ЄСОП."}
                   </p>
-                  <LocaleDocLink docId="codex" locale="uk" className={"btn is--primary w-button"}>
-                    {"Завантажити кодекс"}
-                  </LocaleDocLink>
                 </div>
+              </div>
+              </CodexAccordion>
+              <CodexVideoSlot
+                youtubeId={CODEX_YOUTUBE_ID}
+                title={"Кодекс поведінки учасників ESOSH"}
+                watchUrl={CODEX_YOUTUBE_WATCH_URL}
+                openOnYoutubeLabel={"Відкрити на YouTube"}
+              />
+              <div className={"wrapper is--margin-bottom-48"}>
+                <LocaleDocLink docId="codex" locale="uk" className={"btn is--primary w-button"}>
+                  {"Завантажити кодекс"}
+                </LocaleDocLink>
               </div>
             </div>
           </div>

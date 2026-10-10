@@ -591,3 +591,14 @@ tests/rich-text-links.test.mjs
 src/app/admin/admin.css
 public/images/education/trainings/risk-assessment.png
 public/images/education/trainings/emergency-actions.png
+src/components/join/CodexVideoSlot.tsx
+src/components/join/CodexAccordion.tsx
+src/content/join/codex-video.ts
+src/content/pages/uk/join/codex.tsx
+src/content/pages/en/join/codex.tsx
+src/content/pages/de/join/codex.tsx
+src/content/pages/es/join/codex.tsx
+src/content/pages/fr/join/codex.tsx
+src/content/pages/az/join/codex.tsx
+src/content/pages/kk/join/codex.tsx
+src/styles/refinements.css
