@@ -602,3 +602,6 @@ src/content/pages/fr/join/codex.tsx
 src/content/pages/az/join/codex.tsx
 src/content/pages/kk/join/codex.tsx
 src/styles/refinements.css
+src/lib/seo-host.ts
+tests/seo-host.test.mjs
+package.json
