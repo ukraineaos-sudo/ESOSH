@@ -15,6 +15,7 @@ export default async function AdminNewsPage() {
     title: string;
     excerpt: string;
     coverUrl: string | null;
+    coverFormat: string;
     body: CmsBlock[];
     status: string;
     publishedAt: Date | null;
@@ -34,6 +35,7 @@ export default async function AdminNewsPage() {
         title: row.title,
         excerpt: row.excerpt,
         coverUrl: row.coverUrl,
+        coverFormat: row.coverFormat || "auto",
         body: Array.isArray(row.body) ? (row.body as CmsBlock[]) : [],
         status: row.status,
         publishedAt: row.publishedAt,

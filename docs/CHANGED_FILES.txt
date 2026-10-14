@@ -606,3 +606,5 @@ src/lib/seo-host.ts
 tests/seo-host.test.mjs
 package.json
 public/googlee683119d131be6e9.html
+src/lib/cms/news-cover-format.ts
+drizzle/0009_news_cover_format.sql

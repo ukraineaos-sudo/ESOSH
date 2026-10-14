@@ -68,6 +68,8 @@ export const newsPosts = pgTable("news_posts", {
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull().default(""),
   coverUrl: text("cover_url"),
+  /** auto | landscape | portrait | square — how cover is framed on the site. */
+  coverFormat: varchar("cover_format", { length: 32 }).notNull().default("auto"),
   body: jsonb("body").notNull().default([]),
   status: varchar("status", { length: 32 }).notNull().default("draft"),
   publishedAt: timestamp("published_at", { withTimezone: true }),

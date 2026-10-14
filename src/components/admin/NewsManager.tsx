@@ -8,6 +8,13 @@ import { AdminRichTextEditor } from "@/components/admin/AdminRichTextEditor";
 import { ADMIN_DELETE_CONFIRM } from "@/lib/admin/confirm-delete";
 import type { CmsBlock } from "@/lib/cms/blocks";
 import { newBlockId } from "@/lib/cms/blocks";
+import {
+  NEWS_COVER_FORMATS,
+  NEWS_COVER_FORMAT_DEFAULT,
+  NEWS_COVER_FORMAT_LABELS_UK,
+  parseNewsCoverFormat,
+  type NewsCoverFormat,
+} from "@/lib/cms/news-cover-format";
 import { newsPublicPath, slugifyTitle } from "@/lib/cms/slugify";
 
 type NewsItem = {
@@ -17,10 +24,15 @@ type NewsItem = {
   title: string;
   excerpt: string;
   coverUrl: string | null;
+  coverFormat?: string | null;
   body: CmsBlock[];
   status: string;
   publishedAt?: string | Date | null;
 };
+
+function withCoverFormat(item: NewsItem): NewsItem & { coverFormat: NewsCoverFormat } {
+  return { ...item, coverFormat: parseNewsCoverFormat(item.coverFormat) };
+}
 
 function emptyNewsBody(): CmsBlock[] {
   return [{ id: newBlockId(), type: "richText", html: "<p></p>" }];
@@ -149,10 +161,12 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
     setMessage("Чернетку створено.");
     await refresh();
     if (data.item) {
-      setEditing({
-        ...data.item,
-        body: Array.isArray(data.item.body) ? data.item.body : emptyNewsBody(),
-      });
+      setEditing(
+        withCoverFormat({
+          ...data.item,
+          body: Array.isArray(data.item.body) ? data.item.body : emptyNewsBody(),
+        }),
+      );
       setSlugManual(true);
     }
   }
@@ -165,6 +179,7 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
     const nextStatus = opts.status ?? (editing.status === "published" ? "published" : "draft");
     const payload = {
       ...editing,
+      coverFormat: parseNewsCoverFormat(editing.coverFormat),
       status: nextStatus,
       bumpPublishedAt: Boolean(opts.bumpPublishedAt),
       slug: editing.slug.trim(),
@@ -183,11 +198,11 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
       const data = await response.json().catch(() => ({}));
       setEditing(
         data.item
-          ? {
+          ? withCoverFormat({
               ...data.item,
               body: Array.isArray(data.item.body) ? data.item.body : emptyNewsBody(),
-            }
-          : { ...editing, status: nextStatus },
+            })
+          : withCoverFormat({ ...editing, status: nextStatus }),
       );
       setMessage(
         nextStatus === "published" ? "Опубліковано — новина на сайті." : "Чернетку збережено.",
@@ -206,6 +221,7 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...item,
+        coverFormat: parseNewsCoverFormat(item.coverFormat),
         status,
         bumpPublishedAt: status === "published" && item.status !== "published",
       }),
@@ -216,7 +232,7 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
     }
     setMessage(status === "published" ? "На сайті." : "Приховано з сайту (чернетка).");
     if (editing?.id === item.id) {
-      setEditing({ ...item, status });
+      setEditing(withCoverFormat({ ...item, status }));
     }
     await refresh();
   }
@@ -401,7 +417,11 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
             <span className="admin-label-text">Обкладинка</span>
             {editing.coverUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img className="admin-cover-preview" src={editing.coverUrl} alt="" />
+              <img
+                className={`admin-cover-preview admin-cover-preview--${parseNewsCoverFormat(editing.coverFormat)}`}
+                src={editing.coverUrl}
+                alt=""
+              />
             ) : (
               <p className="admin-muted">Ще не вибрано</p>
             )}
@@ -423,6 +443,28 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
                 </button>
               ) : null}
             </div>
+            <label>
+              Формат показу на сайті
+              <select
+                value={parseNewsCoverFormat(editing.coverFormat)}
+                onChange={(e) =>
+                  setEditing({
+                    ...editing,
+                    coverFormat: parseNewsCoverFormat(e.target.value),
+                  })
+                }
+              >
+                {NEWS_COVER_FORMATS.map((format) => (
+                  <option key={format} value={format}>
+                    {NEWS_COVER_FORMAT_LABELS_UK[format]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="admin-muted admin-note">
+              «Авто» — без обрізки, як завантажили (і вертикальне, і горизонтальне). Інші пункти
+              задають рамку показу на сторінці новини.
+            </p>
             <label>
               Або вставте посилання на зображення
               <input
@@ -527,10 +569,12 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
                     onClick={() => {
                       setCreating(false);
                       setSlugManual(true);
-                      setEditing({
-                        ...item,
-                        body: Array.isArray(item.body) ? item.body : emptyNewsBody(),
-                      });
+                      setEditing(
+                        withCoverFormat({
+                          ...item,
+                          body: Array.isArray(item.body) ? item.body : emptyNewsBody(),
+                        }),
+                      );
                     }}
                   >
                     Редагувати
@@ -579,7 +623,13 @@ export function NewsManager({ initialItems }: { initialItems: NewsItem[] }) {
         open={mediaOpen}
         onClose={() => setMediaOpen(false)}
         onPick={(url) => {
-          if (editing) setEditing({ ...editing, coverUrl: url });
+          if (editing) {
+            setEditing({
+              ...editing,
+              coverUrl: url,
+              coverFormat: editing.coverFormat || NEWS_COVER_FORMAT_DEFAULT,
+            });
+          }
         }}
       />
 

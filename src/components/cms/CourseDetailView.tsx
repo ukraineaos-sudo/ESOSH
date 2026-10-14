@@ -114,16 +114,22 @@ export function CourseDetailView({
           ) : null}
           <TextBlock text={primary} className="regular-l" />
           <TextBlock text={extra} className="regular-l" />
-          {external ? (
+          {ctaUrl ? (
             <p style={{ marginTop: 32 }}>
-              <a
-                href={ctaUrl}
-                className="btn is--primary w-button"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {ctaLabel}
-              </a>
+              {external ? (
+                <a
+                  href={ctaUrl}
+                  className="btn is--primary w-button"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {ctaLabel}
+                </a>
+              ) : (
+                <Link href={ctaUrl.startsWith("/") ? ctaUrl : `/${ctaUrl}`} className="btn is--primary w-button">
+                  {ctaLabel}
+                </Link>
+              )}
             </p>
           ) : null}
         </div>

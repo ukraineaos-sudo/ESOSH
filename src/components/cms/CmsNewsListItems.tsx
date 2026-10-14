@@ -1,4 +1,5 @@
 import { listPublishedCmsNews } from "@/lib/cms/public";
+import { newsCoverListClass } from "@/lib/cms/news-cover-format";
 import { LOCALE_BCP47, localePathPrefix, type AppLocale } from "@/lib/locale";
 
 type Props = {
@@ -49,16 +50,16 @@ export async function CmsNewsListItems({ locale, limit, showEmpty = false }: Pro
       {posts.map((post) => (
         <div key={post.id} role="listitem" className="collection-item w-dyn-item">
           <a href={`${prefix}/news/${post.slug}`} className="collection-link-wrapper w-inline-block">
-            <div className="collection-image-wrapper is--height-240--t-360--m-240 is--overflow-hidden">
+            <div
+              className={`collection-image-wrapper is--height-240--t-360--m-240 is--overflow-hidden cms-news-cover-list-wrap cms-news-cover-list-wrap--${post.coverFormat}`}
+            >
               {post.coverUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   loading="lazy"
                   alt={post.title}
                   src={post.coverUrl}
-                  className="collection-image"
-                  width={1200}
-                  height={675}
+                  className={newsCoverListClass(post.coverFormat)}
                   decoding="async"
                 />
               ) : (

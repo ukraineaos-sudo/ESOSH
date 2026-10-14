@@ -54,7 +54,7 @@
 | Concern | Location |
 |---|---|
 | Legacy тело страниц | `src/content/pages/{uk,en}/**` |
-| CMS pages / news / leadership / courses | Neon `pages`, `news_posts`, `leadership_people`, `education_courses` (public news feed = published `news_posts` only; courses grid = published `education_courses` або legacy) |
+| CMS pages / news / leadership / courses | Neon `pages`, `news_posts` (+ `cover_format`: auto/landscape/portrait/square), `leadership_people`, `education_courses` (public news feed = published `news_posts` only; courses grid = published `education_courses` або legacy) |
 | Legacy news TSX (article fallback + import source) | `src/content/pages/{uk,en}/news/*.tsx` |
 | Metadata / sitemap inventory | `src/content/page-metadata.json` (+ CMS news in `sitemap.ts`) |
 | Media inventory (legacy) | `src/content/media-manifest.json` |
@@ -130,7 +130,7 @@
 - `npm run build`
 - `npm test` (после build; поднимает `next start` + mock webhook; unit `tests/consent-parse.test.mjs`, `tests/security-hygiene.test.mjs`, `tests/audit-fix-wiring.test.mjs`)
 - `npm run db:generate` — SQL-міграції з `src/db/schema.ts` у `drizzle/` (snapshot-и після `0002` не повні — нові DDL краще писати hand-written як `0003+`, ідемпотентно)
-- `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`); ланцюг `0000`…`0006` покриває CMS + enrollment + rate limit + certificates (+ pass redemptions)
+- `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`); ланцюг `0000`…`0009` (CMS + enrollment + rate limit + certificates + courses + `news_posts.cover_format`)
 - `npm run db:push` — швидкий sync схеми на Neon без journal (dev); прод/preview краще тримати на `db:migrate`
 
 ## Инварианты

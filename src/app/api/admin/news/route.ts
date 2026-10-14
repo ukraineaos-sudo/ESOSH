@@ -4,6 +4,10 @@ import { getDb } from "@/db";
 import { newsPosts } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { newBlockId, type CmsBlock } from "@/lib/cms/blocks";
+import {
+  NEWS_COVER_FORMAT_DEFAULT,
+  parseNewsCoverFormat,
+} from "@/lib/cms/news-cover-format";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 function emptyNewsBody(): CmsBlock[] {
@@ -54,6 +58,7 @@ export async function POST(request: Request) {
         title,
         excerpt: String(body.excerpt || ""),
         coverUrl: body.coverUrl || null,
+        coverFormat: parseNewsCoverFormat(body.coverFormat ?? NEWS_COVER_FORMAT_DEFAULT),
         body: asBody(body.body),
         status,
         publishedAt: status === "published" ? new Date() : null,
@@ -106,6 +111,9 @@ export async function PUT(request: Request) {
       title: String(body.title || ""),
       excerpt: String(body.excerpt || ""),
       coverUrl: body.coverUrl || null,
+      coverFormat: parseNewsCoverFormat(
+        body.coverFormat !== undefined ? body.coverFormat : existing.coverFormat,
+      ),
       body: asBody(body.body),
       status,
       publishedAt,

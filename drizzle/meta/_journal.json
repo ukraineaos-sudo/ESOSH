@@ -64,6 +64,13 @@
       "when": 1790943209880,
       "tag": "0008_education_courses_detail",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790943209881,
+      "tag": "0009_news_cover_format",
+      "breakpoints": true
     }
   ]
 }

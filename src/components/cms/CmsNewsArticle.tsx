@@ -2,6 +2,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CmsBlocksView } from "@/components/cms/CmsBlocksView";
 import type { CmsNewsDoc } from "@/lib/cms/public";
+import { newsCoverArticleClass } from "@/lib/cms/news-cover-format";
 import { LOCALE_BCP47, localePathPrefix, type AppLocale, isAppLocale } from "@/lib/locale";
 
 function formatNewsDate(value: Date | string | null | undefined, uiLocale: string): string | null {
@@ -73,14 +74,15 @@ export function CmsNewsArticle({
             </div>
           ) : null}
           {post.coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              className="image is--w-100p is--radius-6 is--margin-bottom-40"
-              src={post.coverUrl}
-              alt={post.title}
-              width={1200}
-              height={675}
-            />
+            <div className={`cms-news-cover-wrap cms-news-cover-wrap--${post.coverFormat}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className={newsCoverArticleClass(post.coverFormat)}
+                src={post.coverUrl}
+                alt={post.title}
+                decoding="async"
+              />
+            </div>
           ) : null}
           {post.excerpt ? <p className="regular-l is--margin-bottom-40">{post.excerpt}</p> : null}
         </div>

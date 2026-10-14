@@ -2,6 +2,10 @@ import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { newsPosts, pages } from "@/db/schema";
 import type { CmsBlock } from "@/lib/cms/blocks";
+import {
+  parseNewsCoverFormat,
+  type NewsCoverFormat,
+} from "@/lib/cms/news-cover-format";
 import { getAdminSession } from "@/lib/admin/auth";
 import { localizedPath } from "@/lib/locale";
 import { routing } from "@/i18n/routing";
@@ -28,6 +32,7 @@ export type CmsNewsDoc = {
   title: string;
   excerpt: string;
   coverUrl: string | null;
+  coverFormat: NewsCoverFormat;
   body: CmsBlock[];
   status: string;
   publishedAt: Date | null;
@@ -103,6 +108,7 @@ export async function getCmsNews(
       title: row.title,
       excerpt: row.excerpt,
       coverUrl: row.coverUrl,
+      coverFormat: parseNewsCoverFormat(row.coverFormat),
       body: asBlocks(row.body),
       status: row.status,
       publishedAt: row.publishedAt,
@@ -168,6 +174,7 @@ export async function listPublishedCmsNews(
       title: row.title,
       excerpt: row.excerpt,
       coverUrl: row.coverUrl,
+      coverFormat: parseNewsCoverFormat(row.coverFormat),
       body: asBlocks(row.body),
       status: row.status,
       publishedAt: row.publishedAt,
