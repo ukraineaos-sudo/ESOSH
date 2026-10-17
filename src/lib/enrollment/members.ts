@@ -1,16 +1,53 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { members } from "@/db/schema";
 import { createPublicId } from "./ids";
 import type { EnrollmentPayload } from "./schema";
 
+/** RU: Нормалізація ПІБ для зіставлення. EN: Normalize person name for matching. */
+export function normalizePersonNamePart(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+/** RU: Знаходить учасників за primary email (email може повторюватися). EN: Find members by primary email. */
+export async function findMembersByPrimaryEmail(db: Db, email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return [];
+  return db.select().from(members).where(eq(members.primaryEmail, normalized));
+}
+
 /** RU: Знаходить учасника за primary email. EN: Find member by primary email only. */
 export async function findMemberByPrimaryEmail(db: Db, email: string) {
-  const normalized = email.trim().toLowerCase();
+  const rows = await findMembersByPrimaryEmail(db, email);
+  return rows[0] ?? null;
+}
+
+/**
+ * RU: Якір людини для публічної анкети / імпорту: нормалізовані прізвище+ім’я+email.
+ * EN: Person anchor: normalized last+first+email.
+ */
+export async function findMemberByNameAndPrimaryEmail(
+  db: Db,
+  lastName: string,
+  firstName: string,
+  email: string,
+) {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) return null;
+  const last = normalizePersonNamePart(lastName);
+  const first = normalizePersonNamePart(firstName);
+  if (!last && !first) return null;
+
   const rows = await db
     .select()
     .from(members)
-    .where(eq(members.primaryEmail, normalized))
+    .where(
+      and(
+        eq(members.primaryEmail, normalizedEmail),
+        sql`lower(trim(regexp_replace(${members.lastName}, '\\s+', ' ', 'g'))) = ${last}`,
+        sql`lower(trim(regexp_replace(${members.firstName}, '\\s+', ' ', 'g'))) = ${first}`,
+      ),
+    )
     .limit(1);
   return rows[0] ?? null;
 }
@@ -18,6 +55,7 @@ export async function findMemberByPrimaryEmail(db: Db, email: string) {
 /** RU: Знаходить учасника за secondary email. EN: Find member by secondary email. */
 export async function findMemberBySecondaryEmail(db: Db, email: string) {
   const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
   const rows = await db
     .select()
     .from(members)
@@ -48,10 +86,11 @@ export function buildMemberProfileFromEnrollment(
 }
 
 /**
- * RU: Публічна анкета: новий member або link до існуючого за primary email.
+ * RU: Публічна анкета: новий member або link за якіром прізвище+ім’я+primary email.
  * Існуючу картку НЕ оновлює (PII лише в applications.payload → merge адміном).
+ * Той самий email + інше ПІБ → нова картка (оргпошта).
  * Secondary — тільки conflict-check, ніколи ключ overwrite.
- * EN: Public enrollment creates or links by primary; never mutates existing member PII.
+ * EN: Public enrollment links by name+email; same email different name creates a new card.
  */
 export async function upsertMemberFromEnrollment(
   db: Db,
@@ -62,26 +101,33 @@ export async function upsertMemberFromEnrollment(
   const secondary = payload.secondaryEmail?.trim().toLowerCase() || null;
   const nextProfile = buildMemberProfileFromEnrollment(payload, profileExtra);
 
-  const byPrimary = await findMemberByPrimaryEmail(db, email);
+  const byNameEmail = await findMemberByNameAndPrimaryEmail(
+    db,
+    payload.lastName,
+    payload.firstName,
+    email,
+  );
+
   const emailAsOthersSecondary = await findMemberBySecondaryEmail(db, email);
-  if (emailAsOthersSecondary && emailAsOthersSecondary.id !== byPrimary?.id) {
+  if (emailAsOthersSecondary && emailAsOthersSecondary.id !== byNameEmail?.id) {
     throw new Error("email_conflict");
   }
 
   if (secondary && secondary !== email) {
-    const secAsPrimary = await findMemberByPrimaryEmail(db, secondary);
+    const secAsPrimary = await findMembersByPrimaryEmail(db, secondary);
     const secAsSecondary = await findMemberBySecondaryEmail(db, secondary);
-    if (secAsPrimary && secAsPrimary.id !== byPrimary?.id) {
+    const conflictsPrimary = secAsPrimary.some((row) => row.id !== byNameEmail?.id);
+    if (conflictsPrimary) {
       throw new Error("email_conflict");
     }
-    if (secAsSecondary && secAsSecondary.id !== byPrimary?.id) {
+    if (secAsSecondary && secAsSecondary.id !== byNameEmail?.id) {
       throw new Error("email_conflict");
     }
   }
 
-  // Existing member: link application only — no unauthenticated profile overwrite.
-  if (byPrimary) {
-    return { memberId: byPrimary.id, publicId: byPrimary.publicId, created: false };
+  // Existing member (same name + email): link application only — no unauthenticated profile overwrite.
+  if (byNameEmail) {
+    return { memberId: byNameEmail.id, publicId: byNameEmail.publicId, created: false };
   }
 
   const publicId = createPublicId("MBR");

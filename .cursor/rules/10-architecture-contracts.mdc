@@ -50,7 +50,7 @@ alwaysApply: true
 - канонические пути страниц (uk без префикса, en с `/en`);
 - ключи `nav` / `contact` / `consent` / `enrollment` в `messages/{uk,en}.json`;
 - `POST /api/contact` тело: `{ name, email, message, locale?, company?, privacyConsent: true }` (honeypot);
-- `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + опційні файли (`attachment_*`, legacy keys ще приймаються) + `cf-turnstile-response` (якщо увімкнено Turnstile); honeypot `company`; успіх = запис у Neon; сертифікати/документи **не обов’язкові**;
+- `POST /api/enrollment` multipart: `payload` (JSON по ТЗ) + опційні файли (`attachment_*`, legacy keys ще приймаються) + `cf-turnstile-response` (якщо увімкнено Turnstile); honeypot `company`; успіх = запис у Neon; сертифікати/документи **не обов’язкові**; link існуючого member лише за якіром ПІБ+email (не за email alone); `members.primary_email` nullable/не unique для легасі-реєстру, форма вступу email як і раніше обов’язковий;
 - env: `NEXT_PUBLIC_SITE_URL`, `CONTACT_ADMIN_EMAIL` (опц.), `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_TOKEN`, `ENROLLMENT_WEBHOOK_URL`, `ENROLLMENT_WEBHOOK_TOKEN`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `ENROLLMENT_ADMIN_EMAIL`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_SESSION_SECRET`, `ADMIN_BOOTSTRAP_USERNAME`, `ADMIN_BOOTSTRAP_PASSWORD`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`;
 - публичные файлы в `public/images/**`, `public/docs/**`;
 - sitemap / robots;

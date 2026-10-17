@@ -49,7 +49,7 @@ type Props = {
     publicId: string;
     firstName: string;
     lastName: string;
-    primaryEmail: string;
+    primaryEmail: string | null;
     secondaryEmail: string | null;
     phone: string | null;
   } | null;
@@ -233,7 +233,9 @@ export function ApplicationDetailClient(props: Props) {
       <div className="admin-panel">
         <h2>{props.application.publicId}</h2>
         <p className="admin-muted">
-          {props.member ? `${props.member.lastName} ${props.member.firstName} · ${props.member.primaryEmail}` : "Без картки члена"}
+          {props.member
+            ? `${props.member.lastName} ${props.member.firstName} · ${props.member.primaryEmail || "—"}`
+            : "Без картки члена"}
           {props.member?.phone ? ` · ${props.member.phone}` : ""}
         </p>
         <p>

@@ -22,9 +22,10 @@ alwaysApply: false
 
 ## Форма вступу (enrollment)
 
-- Публичный `POST /api/enrollment` не должен перезаписывать существующую карточку `members` по известному email.
-- При совпадении primary email: новая `applications` + link на member; PII только в `payload`; merge профиля — админ/подтверждение владения.
+- Публичный `POST /api/enrollment` не должен перезаписывать существующую карточку `members` без аутентификации.
+- Link к существующему member только по якорю нормализованные ФИО + primary email; тот же email + другое ФИО → новая карточка (оргпочта / легаси). PII карточки с публичной анкеты не overwrite; merge — админ.
 - `email_conflict` (secondary пересекается с чужой карточкой) → 409.
+- `members.primary_email` в БД может быть NULL / неуникальным (легаси-реестр); новая анкета по-прежнему требует email.
 - Файлы: тип только по magic bytes; несоответствие заявленного MIME → reject; выдача админу без `text/html`/`svg`, с `nosniff`.
 
 ## Секреты и окружение

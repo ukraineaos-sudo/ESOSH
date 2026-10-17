@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -126,17 +128,25 @@ export const members = pgTable("members", {
   publicId: varchar("public_id", { length: 32 }).notNull(),
   firstName: varchar("first_name", { length: 80 }).notNull().default(""),
   lastName: varchar("last_name", { length: 80 }).notNull().default(""),
-  primaryEmail: varchar("primary_email", { length: 256 }).notNull(),
+  /** Nullable for legacy registry rows; new enrollment still requires email in the form. */
+  primaryEmail: varchar("primary_email", { length: 256 }),
   secondaryEmail: varchar("secondary_email", { length: 256 }),
   phone: varchar("phone", { length: 64 }),
   status: varchar("status", { length: 32 }).notNull().default("candidate"),
   level: varchar("level", { length: 64 }),
+  /** Legacy ESOSH registration number from club registry (unique when present). */
+  registrationNumber: varchar("registration_number", { length: 64 }),
+  registeredAt: timestamp("registered_at", { withTimezone: true }),
   profile: jsonb("profile").notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   uniqueIndex("members_public_id_uidx").on(table.publicId),
-  uniqueIndex("members_primary_email_uidx").on(table.primaryEmail),
+  // Shared org emails / missing emails are allowed (legacy registry). Dedup key is name+email in app logic.
+  index("members_primary_email_idx").on(table.primaryEmail),
+  uniqueIndex("members_registration_number_uidx")
+    .on(table.registrationNumber)
+    .where(sql`${table.registrationNumber} is not null`),
 ]);
 
 export const applications = pgTable("applications", {

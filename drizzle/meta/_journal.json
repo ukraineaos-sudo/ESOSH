@@ -71,6 +71,13 @@
       "when": 1790943209881,
       "tag": "0009_news_cover_format",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790943209882,
+      "tag": "0010_members_legacy_registry",
+      "breakpoints": true
     }
   ]
 }

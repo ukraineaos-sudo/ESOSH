@@ -97,7 +97,7 @@
   - якщо задано `TURNSTILE_SECRET_KEY` — обов’язковий успішний Cloudflare siteverify; інакше капча вимкнена (dev)
   - Blob файлів заявок: **private за замовчуванням**; `ENROLLMENT_BLOB_ACCESS=public` лише явно
   - `testAnswers` у payload **не** зберігаються (лише `testScore` + `quizVersion`); `testPassedAt` лише при score ≥ 100
-  - існуючий `members.primaryEmail`: нова заявка лінкується до картки, **PII картки не overwrite** з публічної анкети (`created: false`, `existingMemberLinked`, `requiresManualReview`); дані лише в `applications.payload`
+  - якір людини: нормалізовані `lastName`+`firstName`+`primaryEmail` (не сам email): збіг → link без overwrite PII (`created: false`, `existingMemberLinked`); той самий email + інше ПІБ → нова картка (оргпошта); `primaryEmail` у БД nullable / не unique (легасі-реєстр), нова анкета email вимагає через zod; опційно `registration_number` / `registered_at`
   - файли заявки: збережений `contentType` = sniff (pdf/jpeg/png); client MIME mismatch → `bad_type`; admin GET: `safeServeContentType` + `X-Content-Type-Options: nosniff`, без `text/html`
   - honeypot → `{ ok: true, honeypot: true }`; duplicate idempotency → `{ ok, duplicate, applicationPublicId, autoLevel, autoLevelLabelUk }`
 - Admin: `/admin/login` (username + password), session cookie `esosh_admin_session`, roles `admin` | `editor`; зміна пароля `/admin/security` → `POST /api/admin/password` (мін. 8 символів; інші сесії відкликаються)
@@ -111,6 +111,8 @@
 - News import: `npm run db:import-news` (+ `--dry-run` / `--upsert`); див. `docs/NEWS_IMPORT.md`; DELETE news = `{ confirm: "так" }`
 - Pages CMS: UI вимкнено — критерії re-enable у `docs/PAGES_CMS.md`
 - Admin members registry: `GET /api/admin/members?q&status&level&industry&oshFunctions&minOshYears` → `{ items, stats, facets }`; статистика рахується по **відфільтрованому** набору; профіль з `members.profile` + fallback з останньої заявки
+- Admin members Excel: `GET /api/admin/members/export` (ті самі фільтри) → `.xlsx` по канону анкети/БД + легасі колонки (`registration_number`, короткі S/As/CE/ChE); колонки в `src/lib/admin/members-excel.ts`
+- Admin members import: `POST /api/admin/members/import` multipart (`file`, `mode=dry-run|commit`, для commit `confirm=IMPORT`) — канонічний Excel; логіка в `src/lib/admin/members-import.ts`; легасі-файл клієнта — `scripts/import-legacy-members.mjs`
 - Admin application PATCH: `confirmed`/`confirmed_no_level` → member active; `rejected`/`needs_info` → demote member лише якщо немає іншої confirmed-заявки (`shouldDemoteMemberAfterApplicationDecision`)
 - Admin CRM (applications/members/files/CSV): лише `canManageRegistry` (role `admin`); editor бачить контент, CRM nav/badge приховані
 - Admin mutating POST/PATCH/PUT/DELETE: `assertSameOrigin` (`src/lib/http/same-origin.ts`); CSV export/members: `csvCell` formula-safe
@@ -130,7 +132,7 @@
 - `npm run build`
 - `npm test` (после build; поднимает `next start` + mock webhook; unit `tests/consent-parse.test.mjs`, `tests/security-hygiene.test.mjs`, `tests/audit-fix-wiring.test.mjs`)
 - `npm run db:generate` — SQL-міграції з `src/db/schema.ts` у `drizzle/` (snapshot-и після `0002` не повні — нові DDL краще писати hand-written як `0003+`, ідемпотентно)
-- `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`); ланцюг `0000`…`0009` (CMS + enrollment + rate limit + certificates + courses + `news_posts.cover_format`)
+- `npm run db:migrate` — застосувати pending міграції (`drizzle-kit migrate`); ланцюг `0000`…`0010` (CMS + enrollment + rate limit + certificates + courses + `news_posts.cover_format` + members legacy registry)
 - `npm run db:push` — швидкий sync схеми на Neon без journal (dev); прод/preview краще тримати на `db:migrate`
 
 ## Инварианты

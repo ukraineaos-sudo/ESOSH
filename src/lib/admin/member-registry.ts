@@ -10,7 +10,7 @@ export type MemberRegistryItem = {
   publicId: string;
   firstName: string;
   lastName: string;
-  primaryEmail: string;
+  primaryEmail: string | null;
   secondaryEmail: string | null;
   phone: string | null;
   status: string;
@@ -136,7 +136,7 @@ export function filterMemberRegistryItems(
         item.publicId,
         item.firstName,
         item.lastName,
-        item.primaryEmail,
+        item.primaryEmail || "",
         item.secondaryEmail || "",
         item.phone || "",
         item.jobTitle || "",
