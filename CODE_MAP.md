@@ -107,7 +107,7 @@
 - Admin DELETE: `DELETE /api/admin/applications/[id]`, `DELETE /api/admin/members/[id]`, `DELETE /api/admin/news/[id]`, `DELETE /api/admin/certificates` — тіло `{ confirm: "так" }` (+ для сертифікатів `mode: one|course|all`); заявка каскадно чистить `application_files`/`application_events` (+ best-effort Blob); видалення члена лише відв’язує заявки (`member_id` → null), не видаляє їх; відкликання сертифіката не чіпає `training_certificate_counters`
 - News public feed: `CmsNewsListItems` → `listPublishedCmsNews()` завжди **uk** CMS (`NEWS_CONTENT_LOCALE`); картки ведуть на `/{uiLocale}/news/{slug}`; без DB / порожня таблиця → порожній список
 - News article (`/[locale]/news/[slug]`): тіло з uk CMS → uk legacy TSX; `ContentTranslationPending` для новин не показуємо, якщо uk існує; chrome Header/Footer з UI-локалі
-- Home members stub: `HomeMembersStat` → `countJoinedMembers()` (усі рядки `members`); без DB → блок не рендериться
+- Home members count: `HomeMembersStat` → `getJoinedMembersBreakdown()` (`active` + `active_no_level`; рівні specialist/інші; країни з profile або phone/email); без DB → блок не рендериться
 - News import: `npm run db:import-news` (+ `--dry-run` / `--upsert`); див. `docs/NEWS_IMPORT.md`; DELETE news = `{ confirm: "так" }`
 - Pages CMS: UI вимкнено — критерії re-enable у `docs/PAGES_CMS.md`
 - Admin members registry: `GET /api/admin/members?q&status&level&industry&oshFunctions&minOshYears` → `{ items, stats, facets }`; статистика рахується по **відфільтрованому** набору; профіль з `members.profile` + fallback з останньої заявки

@@ -190,7 +190,7 @@ export default function PageContent() {
             <h2 className={"h2 is--white is--center is--margin-bottom-24"}>
               {"ESOSH qaydalar və kod"}
             </h2>
-            <a href={"#"} className={"btn is--secondary is--white-btn w-button"}>
+            <a href={"/az/join/terms"} className={"btn is--secondary is--white-btn w-button"}>
               {"Ətraflı məlumat əldə edin"}
             </a>
           </div>

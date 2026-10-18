@@ -97,11 +97,9 @@ export function ApplicationDetailClient(props: Props) {
       const data = await response.json();
       if (!response.ok) {
         setError(
-          data.error === "comment_required"
-            ? "Коментар обов’язковий при зміні рівня"
-            : data.error === "password_change_required"
-              ? "Спочатку змініть пароль у розділі «Безпека»"
-              : "Помилка збереження",
+          data.error === "password_change_required"
+            ? "Спочатку змініть пароль у розділі «Безпека»"
+            : "Помилка збереження",
         );
         return;
       }
@@ -225,7 +223,7 @@ export function ApplicationDetailClient(props: Props) {
             {pendingFiles > 0 ? ` (${pendingFiles} очікують перевірки)` : ""} і позначте статус кожного.
           </li>
           <li>Оберіть статус і затверджений рівень у блоці «Рішення».</li>
-          <li>За потреби напишіть внутрішній коментар (обов’язково при зміні рівня).</li>
+          <li>За потреби напишіть внутрішній коментар (необов’язково). Рішення адміна щодо рівня має повний пріоритет.</li>
           <li>Натисніть «Зберегти рішення» внизу сторінки. Кандидату лист піде лише якщо увімкнете сповіщення в блоці «Рішення».</li>
         </ol>
       </div>
@@ -374,6 +372,9 @@ export function ApplicationDetailClient(props: Props) {
             onChange={(e) => {
               const next = e.target.value;
               setStatus(next);
+              if (next === "confirmed" && !approvedLevel) {
+                setApprovedLevel("specialist");
+              }
               if (next === "confirmed_no_level") setApprovedLevel("");
             }}
           >
@@ -398,8 +399,13 @@ export function ApplicationDetailClient(props: Props) {
         </label>
         {status === "confirmed_no_level" ? (
           <p className="admin-muted admin-note">
-            Для статусу «Підтверджено без рівня» затверджений професійний рівень не обирається — учасник лишається без
-            підтвердженого рівня.
+            «Підтверджено без рівня»: у картці члена буде збережено рівень «Фахівець» (порожнього рівня більше не
+            використовуємо). Краще одразу оберіть статус «Підтверджено» і потрібний рівень.
+          </p>
+        ) : null}
+        {status === "confirmed" && !approvedLevel ? (
+          <p className="admin-muted admin-note">
+            Якщо рівень не обрано, при збереженні буде підставлено «Фахівець».
           </p>
         ) : null}
         <label className="admin-label">

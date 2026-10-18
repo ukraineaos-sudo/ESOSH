@@ -16,6 +16,7 @@ import {
   type LevelCode,
 } from "@/lib/enrollment/levels";
 import {
+  DEFAULT_MEMBER_LEVEL,
   memberFieldsAfterConfirm,
   shouldDemoteMemberAfterApplicationDecision,
 } from "@/lib/enrollment/member-status";
@@ -121,21 +122,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
   }
 
   const resolvedStatus = nextStatus || row.application.status;
-  const resolvedLevel =
+  let resolvedLevel =
     resolvedStatus === "confirmed_no_level"
       ? null
       : nextLevel === undefined
         ? row.application.approvedLevel
         : nextLevel;
 
-  if (
-    resolvedStatus !== "confirmed_no_level" &&
-    nextLevel !== undefined &&
-    nextLevel !== null &&
-    nextLevel !== row.application.autoLevel &&
-    !(body.adminComment || row.application.adminComment)?.trim()
-  ) {
-    return NextResponse.json({ ok: false, error: "comment_required" }, { status: 400 });
+  // Admin decision is authoritative: confirmed apps always get a level (default specialist).
+  if (resolvedStatus === "confirmed" && !resolvedLevel) {
+    resolvedLevel = DEFAULT_MEMBER_LEVEL;
   }
 
   const [updated] = await db

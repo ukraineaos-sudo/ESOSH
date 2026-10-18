@@ -307,7 +307,7 @@ export default function PageContent() {
             <h2 className={"h2 is--white is--center is--margin-bottom-24"}>
               {"Положення та кодекс ЄСОП"}
             </h2>
-            <a href={"https://drive.google.com/drive/u/0/folders/1KPpnjR_MbWzw8G-0jxoyKRU_ld7rs_OD"} target={"_blank"} className={"btn is--secondary is--white-btn w-button"} rel="noopener noreferrer">
+            <a href={"/join/terms"} className={"btn is--secondary is--white-btn w-button"}>
               {"Дізнатись більше"}
             </a>
           </div>

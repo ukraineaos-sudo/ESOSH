@@ -320,7 +320,7 @@ export default function PageContent() {
             <h2 className={"h2 is--white is--center is--margin-bottom-24"}>
               {"Règlements et cod'ESOSH"}
             </h2>
-            <a href={"#"} className={"btn is--secondary is--white-btn w-button"}>
+            <a href={"/fr/join/terms"} className={"btn is--secondary is--white-btn w-button"}>
               {"En savoir plus"}
             </a>
           </div>

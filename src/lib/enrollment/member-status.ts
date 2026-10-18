@@ -1,9 +1,12 @@
-import type { ApplicationStatus } from "./levels";
+import type { ApplicationStatus, LevelCode } from "./levels";
 
 const CONFIRMED_APPLICATION_STATUSES = new Set<ApplicationStatus>([
   "confirmed",
   "confirmed_no_level",
 ]);
+
+/** Default professional level when none was chosen (product: no “empty” members). */
+export const DEFAULT_MEMBER_LEVEL: LevelCode = "specialist";
 
 /**
  * RU: Чи можна відкатити member у candidate після reject/needs_info по одній заявці.
@@ -22,18 +25,28 @@ export function shouldDemoteMemberAfterApplicationDecision(input: {
 }
 
 /**
- * RU: Статус/рівень member після confirm.
- * EN: Member fields after confirm decision.
+ * RU: Статус/рівень member після рішення адміна.
+ * Рішення адміна (approvedLevel) має повний пріоритет над autoLevel.
+ * Порожній рівень → specialist (не community).
+ * EN: Member fields after admin decision. Admin approvedLevel always wins over autoLevel.
  */
-export function memberFieldsAfterConfirm(status: "confirmed" | "confirmed_no_level", approvedLevel: string | null, autoLevel: string | null) {
-  if (status === "confirmed") {
-    return {
-      status: "active" as const,
-      level: approvedLevel || autoLevel,
-    };
-  }
+export function memberFieldsAfterConfirm(
+  status: "confirmed" | "confirmed_no_level",
+  approvedLevel: string | null,
+  autoLevel: string | null,
+) {
+  // Admin choice first; classifier only fills a gap; never leave empty.
+  const resolved =
+    (approvedLevel as LevelCode | null) ||
+    (autoLevel as LevelCode | null) ||
+    DEFAULT_MEMBER_LEVEL;
+
+  const level = resolved === "community" ? DEFAULT_MEMBER_LEVEL : resolved;
+
+  // Product: no “empty level” members — both confirm paths become active + level.
+  void status;
   return {
-    status: "active_no_level" as const,
-    level: "community" as const,
+    status: "active" as const,
+    level,
   };
 }

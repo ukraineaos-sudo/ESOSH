@@ -156,13 +156,13 @@ export function splitLegacyFio(raw: string): {
   };
 }
 
-function statusForLevel(level: LevelCode | null): MemberStatus {
-  if (level && level !== "community") return "active";
-  return "active_no_level";
+function statusForLevel(_level: LevelCode | null): MemberStatus {
+  // Product: imported members are active (empty level → specialist via levelForEmpty).
+  return "active";
 }
 
 function levelForEmpty(): LevelCode {
-  return "community";
+  return "specialist";
 }
 
 /** RU: Чернетка з канонічного рядка Excel. EN: Draft from canonical Excel row. */

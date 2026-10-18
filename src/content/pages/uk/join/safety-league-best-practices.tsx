@@ -2,6 +2,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MailtoActionLink } from "@/components/MailtoActionLink";
+import { SAFETY_LEAGUE_STANDARDS_DRIVE } from "@/content/join/safety-league-standards";
 
 /** RU: Содержимое страницы. EN: Static page content. */
 export default function PageContent() {
@@ -64,31 +65,62 @@ export default function PageContent() {
           <h2 className={"h2 is--margin-bottom-40"}>
             {"Стандарти ліги безпеки"}
           </h2>
-          <div className={"w-layout-grid is--grid-3-columns--t-1--m-1"}>
-            <div id={"w-node-a8fc6e88-52a4-48a3-e92b-1c7387e55702-ee71c280"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24"}>
+          <div className={"w-layout-grid is--grid-block-2-columns--a-1column safety-league-standards-grid"}>
+            <a
+              href={SAFETY_LEAGUE_STANDARDS_DRIVE.risk}
+              target={"_blank"}
+              rel="noopener noreferrer"
+              id={"w-node-a8fc6e88-52a4-48a3-e92b-1c7387e55702-ee71c280"}
+              className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24 is--link w-inline-block"}
+            >
               <img src={"/images/join-safety-league-best-practices/Fork-cb975775.svg"} loading={"lazy"} alt={""} className={"is--icon-size-28"} />
               <div className={"wrapper is--max-width-480"}>
                 <h3 className={"h3"}>
                   {"Стандарт управління ризиками"}
                 </h3>
               </div>
-            </div>
-            <div id={"w-node-a865993d-6456-7ef6-f689-5e3f6f2f30a4-ee71c280"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24"}>
+            </a>
+            <a
+              href={SAFETY_LEAGUE_STANDARDS_DRIVE.lototo}
+              target={"_blank"}
+              rel="noopener noreferrer"
+              id={"w-node-a865993d-6456-7ef6-f689-5e3f6f2f30a4-ee71c280"}
+              className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24 is--link w-inline-block"}
+            >
               <img src={"/images/join-safety-league-best-practices/Flash-17f8f49a.svg"} loading={"lazy"} alt={""} className={"is--icon-size-28"} />
               <div className={"wrapper is--max-width-480"}>
                 <h3 className={"h3"}>
                   {"Блокування джерел енергії LOTOTO"}
                 </h3>
               </div>
-            </div>
-            <div id={"w-node-_7fc22dad-cf86-f826-f5fd-38ab1d8289b5-ee71c280"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24"}>
+            </a>
+            <a
+              href={SAFETY_LEAGUE_STANDARDS_DRIVE.kpi}
+              target={"_blank"}
+              rel="noopener noreferrer"
+              id={"w-node-_7fc22dad-cf86-f826-f5fd-38ab1d8289b5-ee71c280"}
+              className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24 is--link w-inline-block"}
+            >
               <img src={"/images/home/User-Team-8fa295aa.svg"} loading={"lazy"} alt={""} className={"is--icon-size-28"} />
               <div className={"wrapper is--max-width-480"}>
                 <h3 className={"h3"}>
                   {"Ключові показники ефективності"}
                 </h3>
               </div>
-            </div>
+            </a>
+            <a
+              href={SAFETY_LEAGUE_STANDARDS_DRIVE.height}
+              target={"_blank"}
+              rel="noopener noreferrer"
+              className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--h-flex-top-left is--c-gap-24 is--link w-inline-block"}
+            >
+              <img src={"/images/join-enrollment/Enterprise-e10200cc.svg"} loading={"lazy"} alt={""} className={"is--icon-size-28"} />
+              <div className={"wrapper is--max-width-480"}>
+                <h3 className={"h3"}>
+                  {"Роботи на висоті"}
+                </h3>
+              </div>
+            </a>
           </div>
         </div>
       </section>
@@ -102,7 +134,7 @@ export default function PageContent() {
               <p className={"regular-l is--white is--center is--margin-bottom-24"}>
                 {"Отримайте доступ до повного переліку наявних документів у нашій базі знань ESOSH."}
               </p>
-              <a href={"https://drive.google.com/drive/u/0/folders/1KPpnjR_MbWzw8G-0jxoyKRU_ld7rs_OD"} target={"_blank"} className={"btn is--secondary is--white-btn w-button"} rel="noopener noreferrer">
+              <a href={SAFETY_LEAGUE_STANDARDS_DRIVE.all} target={"_blank"} className={"btn is--secondary is--white-btn w-button"} rel="noopener noreferrer">
                 {"До практик"}
               </a>
             </div>

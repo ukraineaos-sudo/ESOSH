@@ -1,4 +1,4 @@
-/* Public ESOSH content captured 2026-09-07. Edit text and media here. */
+﻿/* Public ESOSH content captured 2026-09-07. Edit text and media here. */
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -44,13 +44,13 @@ export default function PageContent() {
                 {"Aidez l'Alliance pour les travailleurs ukrainiens"}
               </h3>
             </a>
-            <a href={"https://ohoronapraci.kiev.ua/"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
+            <a href={"https://ohoronapraci.kiev.ua/seminar/kursi-ta-zapisi-vebinariv/anglijskij-rozmovnij-klub-health-and-safety-english-speaking-club-hse-sc"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
               <img src={"/images/about-esosh/Globe-e0dc32eb.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
               <h3 className={"h3 is--w-100p"}>
                 {"Club anglophone sur la sécurité au travail"}
               </h3>
             </a>
-            <a href={"https://www.ilo.org/global/lang--en/index.htm"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
+            <a href={"https://www.ilo.org/uk/resource/технічні-вебінари-для-україни-«компетенції-з-безпеки-праці-базовий-курс»"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
               <img src={"/images/home/Presentation-file-d50be3ea.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
               <h3 className={"h3 is--w-100p"}>
                 {"Webinaires techniques sur un projet de sécurité soutenu par l'OIT"}
@@ -60,6 +60,18 @@ export default function PageContent() {
               <img src={"/images/education-projects/Security-fe65e152.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
               <h3 className={"h3 is--w-100p"}>
                 {"La sécurité au travail pendant la guerre – un projet soutenu par l’OIT"}
+              </h3>
+            </a>
+            <a href={"https://www.loewen-defence.com/"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
+              <img src={"/images/home/User-Team-8fa295aa.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
+              <h3 className={"h3 is--w-100p"}>
+                {"Protection du Lion (Löwen Defence)"}
+              </h3>
+            </a>
+            <a href={"https://eriskcontrol.com/uk"} target={"_blank"} className={"block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block"} rel="noopener noreferrer">
+              <img src={"/images/join-safety-league-best-practices/Flash-17f8f49a.svg"} loading={"lazy"} alt={""} className={"is--icon-size-40 is--margin-bottom-40"} />
+              <h3 className={"h3 is--w-100p"}>
+                {"eRisk-Control"}
               </h3>
             </a>
           </div>
@@ -83,7 +95,7 @@ export default function PageContent() {
             <h2 className={"h2 is--white is--center is--margin-bottom-24"}>
               {"Règlements et cod'ESOSH"}
             </h2>
-            <a href={"#"} className={"btn is--secondary is--white-btn w-button"}>
+            <a href={"/fr/join/terms"} className={"btn is--secondary is--white-btn w-button"}>
               {"En savoir plus"}
             </a>
           </div>
