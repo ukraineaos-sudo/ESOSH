@@ -52,9 +52,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "file_too_large" }, { status: 400 });
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
+  // exceljs typings expect classic Buffer; @types/node 26+ uses Buffer<ArrayBufferLike>.
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer);
+  await workbook.xlsx.load(Buffer.from(await file.arrayBuffer()) as never);
   const sheet = workbook.worksheets[0];
   if (!sheet) {
     return NextResponse.json({ ok: false, error: "empty_workbook" }, { status: 400 });
