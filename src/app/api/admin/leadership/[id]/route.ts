@@ -8,6 +8,7 @@ import {
   passwordChangeRequiredResponse,
 } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -45,5 +46,6 @@ export async function DELETE(request: Request, ctx: Ctx) {
   if (!existing[0]) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
 
   await db.delete(leadershipPeople).where(eq(leadershipPeople.id, id));
+  bustTag(CACHE_TAGS.cmsLeadership);
   return NextResponse.json({ ok: true });
 }

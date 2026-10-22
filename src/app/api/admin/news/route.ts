@@ -8,6 +8,7 @@ import {
   NEWS_COVER_FORMAT_DEFAULT,
   parseNewsCoverFormat,
 } from "@/lib/cms/news-cover-format";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 function emptyNewsBody(): CmsBlock[] {
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
         publishedAt: status === "published" ? new Date() : null,
       })
       .returning();
+    bustTag(CACHE_TAGS.cmsNews);
     return NextResponse.json({ ok: true, item: row });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -123,5 +125,6 @@ export async function PUT(request: Request) {
     })
     .where(eq(newsPosts.id, id))
     .returning();
+  bustTag(CACHE_TAGS.cmsNews);
   return NextResponse.json({ ok: true, item: row });
 }

@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { educationCourses } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { normalizeCourseSlug } from "@/lib/cms/course-slug";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 async function ensureUniqueSlug(
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
         sortOrder: typeof body.sortOrder === "number" ? body.sortOrder : nextOrder,
       })
       .returning();
+    bustTag(CACHE_TAGS.cmsCourses);
     return NextResponse.json({ ok: true, item: row });
   } catch (err) {
     const message = err instanceof Error ? err.message : "";
@@ -147,6 +149,7 @@ export async function PUT(request: Request) {
       .returning();
 
     if (!row) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
+    bustTag(CACHE_TAGS.cmsCourses);
     return NextResponse.json({ ok: true, item: row });
   } catch (err) {
     const message = err instanceof Error ? err.message : "";

@@ -1,6 +1,9 @@
 import { and, asc, eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { getDb } from "@/db";
 import { educationCourses } from "@/db/schema";
+import { DbUnavailableError, isDbUnavailable } from "@/lib/cache/db-unavailable";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export type EducationCourseCard = {
   id: number;
@@ -20,6 +23,8 @@ export type EducationCourseCard = {
   ctaLabelEn: string;
   status: string;
 };
+
+const COURSES_REVALIDATE_SEC = 60 * 60;
 
 function mapRow(row: typeof educationCourses.$inferSelect): EducationCourseCard {
   return {
@@ -42,8 +47,7 @@ function mapRow(row: typeof educationCourses.$inferSelect): EducationCourseCard 
   };
 }
 
-/** RU: Опубліковані курси каталогу. EN: Published education course cards. */
-export async function listPublishedEducationCourses(): Promise<EducationCourseCard[]> {
+async function loadPublishedEducationCoursesFromDb(): Promise<EducationCourseCard[]> {
   const db = getDb();
   if (!db) return [];
   try {
@@ -53,8 +57,24 @@ export async function listPublishedEducationCourses(): Promise<EducationCourseCa
       .where(eq(educationCourses.status, "published"))
       .orderBy(asc(educationCourses.sortOrder), asc(educationCourses.id));
     return rows.map(mapRow);
-  } catch {
-    return [];
+  } catch (err) {
+    throw new DbUnavailableError(err);
+  }
+}
+
+const listPublishedEducationCoursesCached = unstable_cache(
+  async () => loadPublishedEducationCoursesFromDb(),
+  ["cms-courses-list-v1"],
+  { revalidate: COURSES_REVALIDATE_SEC, tags: [CACHE_TAGS.cmsCourses] },
+);
+
+/** RU: Опубліковані курси каталогу. EN: Published education course cards. */
+export async function listPublishedEducationCourses(): Promise<EducationCourseCard[]> {
+  try {
+    return await listPublishedEducationCoursesCached();
+  } catch (err) {
+    if (isDbUnavailable(err)) return [];
+    throw err;
   }
 }
 
@@ -62,18 +82,31 @@ export async function listPublishedEducationCourses(): Promise<EducationCourseCa
 export async function getPublishedEducationCourseBySlug(
   slug: string,
 ): Promise<EducationCourseCard | null> {
-  const db = getDb();
-  if (!db || !slug.trim()) return null;
+  const trimmed = slug.trim();
+  if (!trimmed) return null;
   try {
-    const rows = await db
-      .select()
-      .from(educationCourses)
-      .where(
-        and(eq(educationCourses.slug, slug.trim()), eq(educationCourses.status, "published")),
-      )
-      .limit(1);
-    return rows[0] ? mapRow(rows[0]) : null;
-  } catch {
-    return null;
+    return await unstable_cache(
+      async () => {
+        const db = getDb();
+        if (!db) return null;
+        try {
+          const rows = await db
+            .select()
+            .from(educationCourses)
+            .where(
+              and(eq(educationCourses.slug, trimmed), eq(educationCourses.status, "published")),
+            )
+            .limit(1);
+          return rows[0] ? mapRow(rows[0]) : null;
+        } catch (err) {
+          throw new DbUnavailableError(err);
+        }
+      },
+      ["cms-course-slug-v1", trimmed],
+      { revalidate: COURSES_REVALIDATE_SEC, tags: [CACHE_TAGS.cmsCourses] },
+    )();
+  } catch (err) {
+    if (isDbUnavailable(err)) return null;
+    throw err;
   }
 }

@@ -11,6 +11,7 @@ import {
   planMemberImport,
   type MemberImportDraft,
 } from "@/lib/admin/members-import";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 export const runtime = "nodejs";
@@ -85,6 +86,10 @@ export async function POST(request: Request) {
 
   const plan = await planMemberImport(db, drafts);
   const result = await applyMemberImport(db, plan, { dryRun });
+
+  if (!dryRun && (result.created > 0 || result.updated > 0)) {
+    bustTag(CACHE_TAGS.membersPublicStats);
+  }
 
   return NextResponse.json({
     ok: true,

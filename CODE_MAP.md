@@ -13,7 +13,7 @@
 ## Архитектурные потоки
 1. Публичная страница: `src/app/[locale]/**/page.tsx` → `getPage()` dual-read → CMS blocks **или** legacy `src/content/pages/{uk|en}/**` **или** `ContentTranslationPending` для новых локалей без тела
 2. Layout подключает reference CSS + `NextIntlClientProvider` (`nav`, `contact`, `consent`, `enrollment`, `trainings`, `content`, `docs`) + `ConsentProvider` + условный `BinotelWidgets`
-3. Chrome: `Header` / `Footer` → footer читает `site_settings` (fallback на `SITE`); ссылки Privacy / Cookies / cookie settings
+3. Chrome: `Header` / `Footer` → footer читает `site_settings` через `unstable_cache` (fallback на `SITE`); ссылки Privacy / Cookies / cookie settings
 4. Контакты: `ContactForm` → `POST /api/contact` → zod (`privacyConsent: true`) → `deliverContact` (Brevo → иначе webhook)
 5. Форма вступу: `/join/apply` → Turnstile gate → `EnrollmentForm` → `POST /api/enrollment` (+ `cf-turnstile-response`) → Neon `applications`/`members` + private Blob; адмін `/admin/applications`
 6. Admin: `/admin` shell (sidebar + sticky chrome) → session cookie → `/api/admin/*` → Neon/Blob
@@ -24,7 +24,7 @@
    - Education courses CMS: `/admin/content/courses` → `education_courses` (slug, опис основний/додатковий, CTA); сітка «Наші курси» = `CoursesCatalogSection` + кнопка «Дізнатися більше» → `/education/courses/[slug]` (`CourseDetailView`). Seed: `npm run db:seed-education-courses`
    - Pages CMS room **прихована** до WYSIWYG + імпорту; див. `docs/PAGES_CMS.md`; enrollment CRM statuses unchanged (`APPLICATION_STATUSES`)
 7. Consent / cookies: first-party banner (`esosh_consent`); Binotel **только после** `communications === true`; YouTube embeds на тренінгах **только после** `marketing === true` (`YoutubeConsentEmbed`)
-8. Trainings: `TrainingLesson` → sequential `modules[]` (YouTube + quiz each; anti forward-seek) → server score `POST /api/trainings/[slug]/score` ≥ `passThresholdPercent` + name confirm → certificate: **named PDF** when `courseCode` set (`POST` issue + `GET ?downloadToken=`, Neon `training_certificates`) else static locale PDF via pass token `GET ?token=`; video IDs may be empty until upload (`videoPending`)
+8. Trainings: `TrainingLesson` → sequential `modules[]` (YouTube + quiz each; anti forward-seek) → server score `POST /api/trainings/[slug]/score` (hydrate via `GET .../progress`) ≥ `passThresholdPercent` + name confirm → certificate: **named PDF** when `courseCode` set (`POST` issue + `GET ?downloadToken=`, Neon `training_certificates`) else static locale PDF via pass token `GET ?token=`; video IDs may be empty until upload (`videoPending`)
 9. Политики: `/privacy-policy`, `/cookie-policy` (uk+en) — типовые тексты UA/международные (по решению заказчика без отдельного юр. review)
 
 ## Точки входа
@@ -38,7 +38,7 @@
 | Enrollment classify / quiz | `src/lib/enrollment/**` |
 | Trainings catalog / quiz content | `src/content/trainings/**` |
 | Training quiz UI / YouTube gate | `src/components/trainings/**` (`TrainingLesson`, `YoutubeConsentEmbed`, `TrainingQuiz`) |
-| Training score / certificate API | `src/app/api/trainings/[slug]/{score,certificate}/route.ts` + `src/lib/trainings/**` |
+| Training score / progress / certificate API | `src/app/api/trainings/[slug]/{score,progress,certificate}/route.ts` + `src/lib/trainings/**` |
 | Training named PDF (runtime) | `src/lib/trainings/certificate-pdf.ts` + assets `public/assets/certificate/**` (pdf-lib + Noto Sans) |
 | Training static cert PDFs (legacy) | `scripts/generate-training-certificate.py` → `public/docs/trainings/*` |
 | Admin UI | `src/app/admin/**` |
@@ -48,7 +48,8 @@
 | Binotel widgets | `src/components/BinotelWidgets.tsx` + `src/lib/binotel.ts` |
 | i18n routing | `src/i18n/routing.ts` |
 | Site constants (fallback) | `src/lib/site.ts` (`SITE`, `ROUTES`) |
-| Runtime contacts | `src/lib/site-settings.ts` |
+| Runtime contacts | `src/lib/site-settings.ts` (Data Cache tag `site-contacts`) |
+| Public Neon read cache | `src/lib/cache/tags.ts` + `unstable_cache` на contacts / members stats / CMS / leadership / courses; bust через `revalidateTag` после admin write |
 
 ## Источники истины
 | Concern | Location |
@@ -117,7 +118,7 @@
 - Admin CRM (applications/members/files/CSV): лише `canManageRegistry` (role `admin`); editor бачить контент, CRM nav/badge приховані
 - Admin mutating POST/PATCH/PUT/DELETE: `assertSameOrigin` (`src/lib/http/same-origin.ts`); CSV export/members: `csvCell` formula-safe
 - Rate limit (Neon `rate_limit_buckets`): login/contact/enrollment/preview/training_certificate/training_score → 429 + `Retry-After` (схема в `src/db/schema.ts`; міграції `drizzle/0002_*`…`0006_enrollment_schema_parity.sql` — `db:migrate` або `db:push`)
-- Named training certificates: Neon `training_certificates` + `training_certificate_counters` + one-time `training_pass_redemptions` (jti); number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName + NUL + jti)`; progress via HttpOnly cookie `esosh_tp` (not client `allModuleAnswers`); quiz attempts capped server-side (5 per IP+course+module / 12h) in `rate_limit_buckets` (`training_module_score:{sha256}`, `src/lib/trainings/module-attempt-budget.ts`) — cookie wipe does not reset; quiz score at issue from signed pass token; download via long-lived `downloadToken`; admin registry `/admin/certificates`
+- Named training certificates: Neon `training_certificates` + `training_certificate_counters` + one-time `training_pass_redemptions` (jti); number `ESOSH-{CODE}-{YEAR}-{######}`; identity = `sha256(slug + NUL + normalizedName + NUL + jti)`; progress via HttpOnly cookie `esosh_tp` + `GET /api/trainings/[slug]/progress` hydrate; visitor cookie `esosh_tv` for fair NAT budgets; dual attempt caps in `rate_limit_buckets` — visitor 10/module/12h (`training_module_score_v:*`) + IP ceiling 120/module/12h (`training_module_score:*`); identical-answer POST is idempotent (no re-consume); quiz score at issue from signed pass token; download via long-lived `downloadToken`; admin registry `/admin/certificates`
 - Enrollment POST: compensating rollback (blobs + application cascade; orphan member лише якщо `created` у цьому запиті)
 - News CMS: draft/deleted slug → `notFound()` без legacy TSX fallback (`getCmsNewsPresence`); DELETE = soft `status=deleted`
 - Admin file GET: `/api/admin/applications/[id]/files/[fileId]?disposition=inline|attachment` (inline — перегляд у вкладці, attachment — збереження)

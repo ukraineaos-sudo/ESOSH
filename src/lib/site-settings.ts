@@ -1,6 +1,9 @@
 import { eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { getDb } from "@/db";
 import { siteSettings } from "@/db/schema";
+import { DbUnavailableError, isDbUnavailable } from "@/lib/cache/db-unavailable";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { SITE } from "@/lib/site";
 
 export type ContactSettings = {
@@ -19,6 +22,7 @@ export type ContactSettings = {
 };
 
 const CONTACTS_KEY = "contacts";
+const CONTACTS_REVALIDATE_SEC = 60 * 60;
 
 /** RU: Контакты по умолчанию из кода. EN: Default contact settings from code constants. */
 export function defaultContactSettings(): ContactSettings {
@@ -32,8 +36,8 @@ export function defaultContactSettings(): ContactSettings {
   };
 }
 
-/** RU: Читает контакты из БД или fallback. EN: Load contacts from DB with code fallback. */
-export async function getContactSettings(): Promise<ContactSettings> {
+/** Throws DbUnavailableError on transient Neon failure (not cached). */
+async function loadContactSettingsFromDb(): Promise<ContactSettings> {
   const db = getDb();
   if (!db) return defaultContactSettings();
   try {
@@ -41,8 +45,24 @@ export async function getContactSettings(): Promise<ContactSettings> {
     const value = rows[0]?.value;
     if (!value || typeof value !== "object") return defaultContactSettings();
     return { ...defaultContactSettings(), ...(value as ContactSettings) };
-  } catch {
-    return defaultContactSettings();
+  } catch (err) {
+    throw new DbUnavailableError(err);
+  }
+}
+
+const getContactSettingsCached = unstable_cache(
+  async () => loadContactSettingsFromDb(),
+  ["site-contacts-v1"],
+  { revalidate: CONTACTS_REVALIDATE_SEC, tags: [CACHE_TAGS.siteContacts] },
+);
+
+/** RU: Читает контакты из БД или fallback (кэш; збої Neon не кешуються). */
+export async function getContactSettings(): Promise<ContactSettings> {
+  try {
+    return await getContactSettingsCached();
+  } catch (err) {
+    if (isDbUnavailable(err)) return defaultContactSettings();
+    throw err;
   }
 }
 
@@ -56,5 +76,6 @@ export async function saveContactSettings(next: ContactSettings): Promise<"ok" |
   } else {
     await db.insert(siteSettings).values({ key: CONTACTS_KEY, value: next });
   }
+  bustTag(CACHE_TAGS.siteContacts);
   return "ok";
 }

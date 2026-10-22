@@ -3,6 +3,7 @@ import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { leadershipPeople } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список керівного складу. EN: List leadership people. */
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
       status: body.status === "draft" ? "draft" : "published",
     })
     .returning();
+  bustTag(CACHE_TAGS.cmsLeadership);
   return NextResponse.json({ ok: true, item: row });
 }
 
@@ -98,5 +100,6 @@ export async function PUT(request: Request) {
     .returning();
 
   if (!row) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
+  bustTag(CACHE_TAGS.cmsLeadership);
   return NextResponse.json({ ok: true, item: row });
 }

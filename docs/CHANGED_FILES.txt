@@ -558,3 +558,10 @@ tests/members-public-stats.test.mjs
 src/content/join/safety-league-standards.ts
 src/lib/members/infer-country.ts
 tests/members-infer-country.test.mjs
+
+src/lib/trainings/training-visitor.ts
+src/app/api/trainings/[slug]/progress/route.ts
+
+src/lib/cache/tags.ts
+src/lib/cache/db-unavailable.ts
+tests/public-neon-cache.test.mjs

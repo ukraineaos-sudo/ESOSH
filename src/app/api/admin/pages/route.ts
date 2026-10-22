@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { pages } from "@/db/schema";
 import { canEditContent, getAdminSession, passwordChangeRequiredResponse } from "@/lib/admin/auth";
 import { emptyBlocks } from "@/lib/cms/blocks";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 /** RU: Список CMS-страниц. EN: List CMS pages. */
@@ -35,8 +36,10 @@ export async function POST(request: Request) {
   const existing = await db.select().from(pages).where(and(eq(pages.locale, locale), eq(pages.route, route))).limit(1);
   if (existing[0]) {
     const [row] = await db.update(pages).set({ title, status, blocks, updatedAt: new Date() }).where(eq(pages.id, existing[0].id)).returning();
+    bustTag(CACHE_TAGS.cmsPages);
     return NextResponse.json({ ok: true, item: row });
   }
   const [row] = await db.insert(pages).values({ locale, route, title, status, blocks }).returning();
+  bustTag(CACHE_TAGS.cmsPages);
   return NextResponse.json({ ok: true, item: row });
 }

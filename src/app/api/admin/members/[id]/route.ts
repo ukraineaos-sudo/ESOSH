@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { applications, members } from "@/db/schema";
 import { getAdminSession, passwordChangeRequiredResponse, requireAdmin } from "@/lib/admin/auth";
 import { isAdminDeleteConfirm } from "@/lib/admin/confirm-delete";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -48,6 +49,7 @@ export async function DELETE(request: Request, ctx: Ctx) {
   const linkedCount = Number(linked[0]?.value ?? 0);
 
   await db.delete(members).where(eq(members.id, id));
+  bustTag(CACHE_TAGS.membersPublicStats);
 
   return NextResponse.json({ ok: true, unlinkedApplications: linkedCount });
 }

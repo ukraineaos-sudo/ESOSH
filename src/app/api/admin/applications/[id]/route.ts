@@ -23,6 +23,7 @@ import {
 import { deleteEnrollmentBlobs } from "@/lib/enrollment/files";
 import { deliverEnrollmentNotify } from "@/lib/enrollment/notify";
 import type { AppLocale } from "@/i18n/routing";
+import { bustTag, CACHE_TAGS } from "@/lib/cache/tags";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -209,6 +210,10 @@ export async function PATCH(request: Request, ctx: Ctx) {
       message: body.candidateMessage || undefined,
       locale: (updated.locale as AppLocale) || "uk",
     });
+  }
+
+  if (row.member) {
+    bustTag(CACHE_TAGS.membersPublicStats);
   }
 
   return NextResponse.json({ ok: true, item: updated });

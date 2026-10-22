@@ -1,6 +1,9 @@
 import { inArray } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { getDb } from "@/db";
 import { members } from "@/db/schema";
+import { DbUnavailableError, isDbUnavailable } from "@/lib/cache/db-unavailable";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   inferMemberCountry,
   type InferredCountryCode,
@@ -30,18 +33,18 @@ export type JoinedMembersBreakdown = {
   countries: CountryBucket[];
 };
 
+const MEMBERS_STATS_REVALIDATE_SEC = 15 * 60;
+
 function asRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return value as Record<string, unknown>;
 }
 
-/**
- * RU: Агрегати для блоку на головній: total / рівні / країни (без PII).
- * EN: Homepage aggregates: total / levels / countries (no PII).
- */
-export async function getJoinedMembersBreakdown(): Promise<JoinedMembersBreakdown | null> {
+/** Throws DbUnavailableError on transient Neon failure (not cached by unstable_cache). */
+async function loadJoinedMembersBreakdownFromDb(): Promise<JoinedMembersBreakdown | null> {
   const db = getDb();
   if (!db) return null;
+
   try {
     const rows = await db
       .select({
@@ -75,7 +78,6 @@ export async function getJoinedMembersBreakdown(): Promise<JoinedMembersBreakdow
         phone: row.phone,
         email: row.primaryEmail,
       });
-      // Public site: unknown → other (same bucket for visitors).
       if (code === "UNKNOWN") code = "OTHER";
 
       countryCounts.set(code, (countryCounts.get(code) ?? 0) + 1);
@@ -95,8 +97,28 @@ export async function getJoinedMembersBreakdown(): Promise<JoinedMembersBreakdow
       });
 
     return { total, levels, countries };
-  } catch {
-    return null;
+  } catch (err) {
+    throw new DbUnavailableError(err);
+  }
+}
+
+const getJoinedMembersBreakdownCached = unstable_cache(
+  async () => loadJoinedMembersBreakdownFromDb(),
+  // v2: invalidate pre-fix poisoned null entries (failures used to return null and get cached).
+  ["members-public-stats-v2"],
+  { revalidate: MEMBERS_STATS_REVALIDATE_SEC, tags: [CACHE_TAGS.membersPublicStats] },
+);
+
+/**
+ * RU: Агрегати для блоку на головній: total / рівні / країни (без PII).
+ * EN: Homepage aggregates: total / levels / countries (no PII).
+ */
+export async function getJoinedMembersBreakdown(): Promise<JoinedMembersBreakdown | null> {
+  try {
+    return await getJoinedMembersBreakdownCached();
+  } catch (err) {
+    if (isDbUnavailable(err)) return null;
+    throw err;
   }
 }
 
