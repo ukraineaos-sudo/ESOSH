@@ -326,13 +326,19 @@
     "youtubeWatched": "Vídeo visto",
     "youtubeLoading": "Cargando reproductor…",
     "quizScoreError": "No se pudieron comprobar las respuestas. Inténtelo de nuevo.",
-    "quizScoring": "Comprobando…",
+    "quizScoring": "Su solicitud se está procesando…",
     "certificateParticipationNote": "Este es un certificado de participación, no una acreditación de cualificación.",
     "certificateConfirmTitle": "El certificado se emitirá a nombre de:",
     "certificateConfirmBack": "Atrás / Corregir",
     "certificateConfirmSubmit": "Confirmar y generar",
     "certificateGenerating": "Preparando el certificado…",
-    "certificateGenerateError": "No se pudo generar el certificado. Inténtelo de nuevo."
+    "certificateGenerateError": "No se pudo generar el certificado. Inténtelo de nuevo.",
+    "quizScoreErrorTooManyAttempts": "No quedan intentos de comprobación para este módulo. Inténtelo más tarde o desde otro dispositivo / red.",
+    "quizScoreErrorTooManyAttemptsHours": "No quedan intentos de comprobación para este módulo. Inténtelo en unas {hours} h.",
+    "quizScoreErrorUnavailable": "La comprobación no está disponible temporalmente. Inténtelo de nuevo en un minuto.",
+    "quizScoreErrorNetwork": "No se pudo contactar con el servidor. Compruebe la conexión e inténtelo de nuevo.",
+    "quizScoreProcessing": "Espere — estamos comprobando las respuestas. No pulse el botón de nuevo.",
+    "quizScoreCooldown": "Espere {seconds} s…"
   },
   "content": {
     "pendingTitle": "Traducción de la página en curso",

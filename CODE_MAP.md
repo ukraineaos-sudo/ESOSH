@@ -63,7 +63,7 @@
 | Nav / form / consent / trainings / content / docs UI strings | `messages/{uk,en,de,es,fr,az,kk}.json` |
 | Footer markup | `src/content/chrome/**` (uk chrome; EN chrome + `localePrefix` for all prefixed locales) |
 | Visual parity CSS | `src/styles/reference.css` (+ navigation/contact/enrollment/consent/trainings/refinements) |
-| Trainings listing + quiz copy | `src/content/trainings/**` (`tier`: basic\|professional; `trainingsListingCopy`; pages → `TrainingsCatalog`; `pickLocalized` — no silent fallback) |
+| Trainings listing + quiz copy | `src/content/trainings/**` (`tier`: basic\|professional; `trainingsListingCopy`; pages → `TrainingsCatalog`; `pickLocalized` — no silent fallback; `height-praktykum` → static `/praktykum/height/`) |
 | Admin UI CSS | `src/app/admin/admin.css` |
 | Contact validation | `src/lib/contact.ts` (`appLocaleSchema`) |
 | Contact delivery | `src/lib/contact/deliver-contact.ts` (Brevo `brevo-contact.ts`, webhook fallback) |
@@ -86,7 +86,7 @@
 - Locales: `uk` (default, no prefix), `en` `/en/...`, `de` `/de/...`, `es` `/es/...`, `fr` `/fr/...`, `az` `/az/...`, `kk` `/kk/...`; `localeDetection: false`
 - Full marketing TSX bodies: all `CONTENT_LOCALES` (`uk|en|de|es|fr|az|kk`) for core routes including education/trainings*; honest `ContentTranslationPending` only when a loader is still missing
 - Routes: зеркало slug esosh.net; список — `page-loaders` / `page-metadata`; CMS может перекрыть маршрут после publish
-  - Education trainings: `/education/trainings`, `/education/trainings/risk-assessment`, `/education/trainings/uav-attacks`, `/education/trainings/emergency-actions` (+ `/{locale}/...`); quiz/UI strings in `src/content/trainings/**`; certificate PDFs still uk+en only for shipped courses (`DOC_INVENTORY`; `emergency-actions` cert pending)
+  - Education trainings: `/education/trainings`, `/education/trainings/risk-assessment`, `/education/trainings/uav-attacks`, `/education/trainings/emergency-actions`, `/education/trainings/oil-gas-site-safety` (+ `/{locale}/...`); quiz/UI strings in `src/content/trainings/**`; optional `practice3d` (iframe after modules; OGS → `/praktykum/oil-gas/`); certificate independent of 3D; certificate PDFs still uk+en only for shipped courses (`DOC_INVENTORY`; `oil-gas-site-safety` videos pending)
 - Contact API body: `{ name, email, message, locale?, company?, privacyConsent: true }` (`locale` ∈ uk|en|de|es|fr|az|kk)
   - без `privacyConsent: true` → 400; honeypot `company` → `{ ok: true }` без доставки (згода не змінює honeypot-семантику)
   - delivery: Brevo (`BREVO_*` + `CONTACT_ADMIN_EMAIL` або `ENROLLMENT_ADMIN_EMAIL`) → інакше `CONTACT_WEBHOOK_*`

@@ -25,21 +25,21 @@ function cardCopy(item: TrainingListItem, locale: LocaleCode): { title: string; 
 const TRAINING_CARD_ICONS: Record<string, string> = {
   "risk-assessment": "/images/education/trainings/risk-assessment.png",
   "emergency-actions": "/images/education/trainings/emergency-actions.png",
+  "oil-gas-site-safety": "/images/education/trainings/emergency-actions.png",
+  "height-praktykum": "/images/education/trainings/risk-assessment.png",
 };
 
 function cardIconSrc(slug: string): string {
   return TRAINING_CARD_ICONS[slug] ?? "/images/education-projects/Security-fe65e152.svg";
 }
 
+const cardClassName =
+  "block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block trainings-card";
+
 function TrainingCard({ item, locale }: { item: TrainingListItem; locale: LocaleCode }) {
   const { title, summary } = cardCopy(item, locale);
-  return (
-    <Link
-      href={item.href}
-      className={
-        "block is--radius-6 is--spacing-32-32--m-24-32 is--border-light-blue is--link w-inline-block trainings-card"
-      }
-    >
+  const body = (
+    <>
       <div className="trainings-card__head">
         <img
           src={cardIconSrc(item.slug)}
@@ -52,6 +52,19 @@ function TrainingCard({ item, locale }: { item: TrainingListItem; locale: Locale
         <h3 className={"h3 trainings-card__title"}>{title}</h3>
       </div>
       <p className={"regular-l trainings-card__summary"}>{summary}</p>
+    </>
+  );
+  // Static SPA under public/ — keep absolute path (no locale prefix).
+  if (item.staticAsset) {
+    return (
+      <a href={item.href} className={cardClassName}>
+        {body}
+      </a>
+    );
+  }
+  return (
+    <Link href={item.href} className={cardClassName}>
+      {body}
     </Link>
   );
 }

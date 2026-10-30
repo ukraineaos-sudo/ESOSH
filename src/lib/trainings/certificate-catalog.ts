@@ -1,5 +1,6 @@
 import {
   emergencyActionsTraining,
+  oilGasSiteSafetyTraining,
   riskAssessmentTraining,
   uavAttacksTraining,
 } from "@/content/trainings";
@@ -16,6 +17,7 @@ const KNOWN: TrainingDetail[] = [
   riskAssessmentTraining,
   uavAttacksTraining,
   emergencyActionsTraining,
+  oilGasSiteSafetyTraining,
 ];
 
 /** RU: Відомі коди курсів з контенту (заготовка під майбутні тренінги). EN: Known course codes from content. */

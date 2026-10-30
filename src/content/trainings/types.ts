@@ -77,6 +77,31 @@ export type PublicTrainingModule = Omit<TrainingModule, "quiz"> & {
   quiz: PublicQuizQuestion[];
 };
 
+/** Optional interactive 3D practice block after video/quiz modules. */
+export type TrainingPractice3d = {
+  title: LocalizedString;
+  summary: LocalizedString;
+  /** Status line inside the empty stage while `ready` is not true. */
+  pendingLabel: LocalizedString;
+  /**
+   * When false/undefined, UI shows a pending placeholder (model/instructions later).
+   * When true, embed `src` (iframe) if provided.
+   */
+  ready?: boolean;
+  /**
+   * Public URL of the interactive model (e.g. `/praktykum/oil-gas/index.html`).
+   * Shown when `ready` and either `openAccess` or modules are finished.
+   */
+  src?: string;
+  /**
+   * When true, embed is available without finishing videos/quizzes first.
+   * Default: gated until all modules are done.
+   */
+  openAccess?: boolean;
+  /** Label while modules are not finished yet (ignored when `openAccess`). */
+  lockedLabel?: LocalizedString;
+};
+
 export type TrainingDetail = {
   slug: string;
   href: string;
@@ -89,6 +114,8 @@ export type TrainingDetail = {
    */
   published?: boolean;
   modules: TrainingModule[];
+  /** Optional 3D reinforcement section below modules (stub until ready). */
+  practice3d?: TrainingPractice3d;
   quizUi: TrainingQuizUi;
   /**
    * Locale-doc id for completion certificate (preferred over hardcoded paths).
@@ -131,4 +158,9 @@ export type TrainingListItem = {
   summary: LocalizedString;
   /** Drives listing sections (basic vs professional). */
   tier: TrainingTier;
+  /**
+   * Static file under `public/` (e.g. interactive SPA).
+   * Render as plain `<a href>` — do not locale-prefix via next-intl Link.
+   */
+  staticAsset?: boolean;
 };

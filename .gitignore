@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+/trainings/**/node_modules
+/trainings/**/dist
+/trainings/**/test-results
 /.pnp
 .pnp.*
 .yarn/*

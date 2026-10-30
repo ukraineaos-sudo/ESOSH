@@ -88,6 +88,17 @@ describe("certificate API wiring", () => {
     assert.match(emergency, /1 академічна година/);
     assert.match(emergency, /1 academic hour/);
 
+    const oilGas = readFileSync(
+      join(root, "src/content/trainings/oil-gas-site-safety.ts"),
+      "utf8",
+    );
+    assert.match(oilGas, /courseCode:\s*"OGS"/);
+    assert.match(oilGas, /practice3d/);
+    assert.match(oilGas, /openAccess:\s*true/);
+    assert.match(oilGas, /youtubeId:\s*"1opmd986LvA"/);
+    assert.match(oilGas, /youtubeId:\s*"pm7QzjyjXk4"/);
+    assert.match(oilGas, /youtubeId:\s*"he1Ftni_pb4"/);
+
     const lesson = readFileSync(join(root, "src/components/trainings/TrainingLesson.tsx"), "utf8");
     assert.match(lesson, /certificateGenerating/);
     assert.match(lesson, /downloadToken/);

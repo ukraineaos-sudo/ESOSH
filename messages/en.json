@@ -326,13 +326,19 @@
     "youtubeWatched": "Video watched",
     "youtubeLoading": "Loading player…",
     "quizScoreError": "Could not score your answers. Please try again.",
-    "quizScoring": "Checking…",
+    "quizScoring": "Your request is being processed…",
     "certificateParticipationNote": "This is a participation certificate, not a professional qualification attestation.",
     "certificateConfirmTitle": "The certificate will be issued to:",
     "certificateConfirmBack": "Back / Edit",
     "certificateConfirmSubmit": "Confirm and generate",
     "certificateGenerating": "Preparing your certificate…",
-    "certificateGenerateError": "Could not generate the certificate. Please try again."
+    "certificateGenerateError": "Could not generate the certificate. Please try again.",
+    "quizScoreErrorTooManyAttempts": "No more scoring attempts left for this module. Try again later, or from another device / network.",
+    "quizScoreErrorTooManyAttemptsHours": "No more scoring attempts left for this module. Try again in about {hours} h.",
+    "quizScoreErrorUnavailable": "Scoring is temporarily unavailable. Please try again in a minute.",
+    "quizScoreErrorNetwork": "Could not reach the server. Check your connection and try again.",
+    "quizScoreProcessing": "Please wait — we are checking your answers. Do not click the button again.",
+    "quizScoreCooldown": "Wait {seconds} s…"
   },
   "content": {
     "pendingTitle": "Page translation in progress",

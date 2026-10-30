@@ -11,6 +11,7 @@ import {
   readTrainingProgress,
   writeTrainingProgressModule,
 } from "@/lib/trainings/progress-cookie";
+import { fingerprintModuleAnswers } from "@/lib/trainings/module-attempt-budget";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 import { assertModuleScoreBudget, assertRateLimit } from "@/lib/rate-limit";
 
@@ -21,13 +22,28 @@ const scoreBodySchema = z.object({
   answers: z.record(z.string(), z.string()),
 });
 
+function scoreLog(
+  level: "info" | "warn",
+  payload: Record<string, string | number | boolean | null | undefined>,
+) {
+  const line = JSON.stringify({ scope: "training_score", ...payload });
+  if (level === "warn") console.warn(line);
+  else console.info(line);
+}
+
 /** RU: Серверна оцінка квізу модуля (+ unlock сертифіката через progress cookie). */
 export async function POST(request: Request, ctx: Ctx) {
   const originBlock = assertSameOrigin(request);
-  if (originBlock) return originBlock;
+  if (originBlock) {
+    scoreLog("warn", { event: "reject", error: "invalid_origin" });
+    return originBlock;
+  }
 
   const rateBlock = await assertRateLimit(request, "training_score");
-  if (rateBlock) return rateBlock;
+  if (rateBlock) {
+    scoreLog("warn", { event: "reject", error: "rate_limited", status: rateBlock.status });
+    return rateBlock;
+  }
 
   const { slug } = await ctx.params;
   const training = getTrainingBySlug(slug);
@@ -53,31 +69,53 @@ export async function POST(request: Request, ctx: Ctx) {
     return NextResponse.json({ ok: false, error: "invalid_module" }, { status: 400 });
   }
 
-  // Модуль, уже зданий на поріг курсу, не переоцінюємо: повторні спроби не дають oracle і не знижують бал.
-  // A module already recorded at/above the course threshold is not re-scored: replays give no oracle.
+  const answersFp = fingerprintModuleAnswers(answers);
   const threshold = training.passThresholdPercent ?? 80;
   const previous = (await readTrainingProgress(slug))?.modules[moduleId];
   let effective = { score: result.score, total: result.total, scorePercent: result.scorePercent };
   let attempts = 1;
   let skipWrite = false;
+  let skipBudget = false;
+  let attemptsRemaining: number | null = null;
 
   const previousPercent =
     previous && previous.total > 0 ? (previous.score / previous.total) * 100 : null;
-  if (previous && previousPercent !== null && previousPercent >= threshold) {
+
+  // Ідемпотентний повтор тих самих відповідей — без нового списання бюджету (подвійний клік / retry після обриву).
+  // Idempotent replay of the same answers — no new budget consume (double-click / retry after drop).
+  if (previous && previous.answersFp && previous.answersFp === answersFp && previous.total > 0) {
+    effective = {
+      score: previous.score,
+      total: previous.total,
+      scorePercent: previousPercent ?? (previous.score / previous.total) * 100,
+    };
+    skipWrite = true;
+    skipBudget = true;
+    attempts = previous.attempts ?? 1;
+  } else if (previous && previousPercent !== null && previousPercent >= threshold) {
+    // Модуль уже зданий на поріг курсу: повторні спроби не дають oracle і не знижують бал.
     effective = { score: previous.score, total: previous.total, scorePercent: previousPercent };
     skipWrite = true;
+    skipBudget = true;
+    attempts = previous.attempts ?? 1;
   }
 
-  if (!skipWrite) {
-    // Авторитетний бюджет: Neon, ключ IP+курс+модуль, списується ДО відповіді; cookie його не скидає.
-    // Authoritative budget: Neon per IP+course+module, consumed BEFORE responding; cookies cannot reset it.
-    const budgetBlock = await assertModuleScoreBudget(request, slug, moduleId);
-    if (budgetBlock) return budgetBlock;
+  if (!skipBudget) {
+    const budget = await assertModuleScoreBudget(request, slug, moduleId);
+    if (!budget.ok) {
+      scoreLog("warn", { event: "reject", error: "budget", slug, moduleId, status: budget.response.status });
+      return budget.response;
+    }
+    attemptsRemaining = budget.attemptsRemaining;
 
     if (previous && previousPercent !== null) {
       attempts = (previous.attempts ?? 1) + 1;
       if (attempts > MAX_MODULE_SCORE_ATTEMPTS) {
-        return NextResponse.json({ ok: false, error: "too_many_attempts" }, { status: 429 });
+        scoreLog("warn", { event: "reject", error: "too_many_attempts_cookie", slug, moduleId, attempts });
+        return NextResponse.json(
+          { ok: false, error: "too_many_attempts", retryAfterSec: 3600 },
+          { status: 429, headers: { "Retry-After": "3600" } },
+        );
       }
     }
   }
@@ -88,6 +126,7 @@ export async function POST(request: Request, ctx: Ctx) {
         score: effective.score,
         total: effective.total,
         attempts,
+        answersFp,
       });
 
   let certificateToken: string | null = null;
@@ -98,13 +137,22 @@ export async function POST(request: Request, ctx: Ctx) {
     }
   }
 
+  scoreLog("info", {
+    event: "scored",
+    slug,
+    moduleId,
+    skipBudget,
+    skipWrite,
+    attemptsRemaining,
+  });
+
   // Лише агрегат модуля: без мапи «питання → правильність» і без ключів відповідей.
-  // Aggregate only: never return per-question correctness or answer keys.
   return NextResponse.json({
     ok: true,
     score: effective.score,
     total: effective.total,
     scorePercent: effective.scorePercent,
     certificateToken,
+    attemptsRemaining,
   });
 }

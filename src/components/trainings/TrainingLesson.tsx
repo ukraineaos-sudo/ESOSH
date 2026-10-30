@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { TrainingQuiz } from "@/components/trainings/TrainingQuiz";
+import { TrainingPractice3d } from "@/components/trainings/TrainingPractice3d";
 import {
   TrainingStatusMark,
   YoutubeConsentEmbed,
@@ -26,6 +27,12 @@ type QuizOutcome = {
   total: number;
   scorePercent: number;
   answers: Record<string, QuizOptionId>;
+};
+
+type StoredQuizOutcome = {
+  score: number;
+  total: number;
+  scorePercent: number;
 };
 
 type IssuedCertSession = {
@@ -52,6 +59,10 @@ function certIssuedStorageKey(slug: string) {
   return `esosh-training-cert-issued-v1:${slug}`;
 }
 
+function quizOutcomesStorageKey(slug: string) {
+  return `esosh-training-quiz-v1:${slug}`;
+}
+
 function normalizeNamePart(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
@@ -68,6 +79,58 @@ function emptyOutcomes(modules: PublicTrainingModule[]): Record<string, QuizOutc
   const map: Record<string, QuizOutcome | null> = {};
   for (const mod of modules) map[mod.id] = null;
   return map;
+}
+
+function readStoredQuizOutcomes(
+  slug: string,
+  modules: PublicTrainingModule[],
+): Record<string, QuizOutcome | null> {
+  const map = emptyOutcomes(modules);
+  if (typeof window === "undefined") return map;
+  try {
+    const raw = sessionStorage.getItem(quizOutcomesStorageKey(slug));
+    if (!raw) return map;
+    const parsed = JSON.parse(raw) as Record<string, StoredQuizOutcome>;
+    for (const mod of modules) {
+      const entry = parsed[mod.id];
+      if (
+        entry &&
+        typeof entry.score === "number" &&
+        typeof entry.total === "number" &&
+        entry.total > 0
+      ) {
+        map[mod.id] = {
+          score: entry.score,
+          total: entry.total,
+          scorePercent:
+            typeof entry.scorePercent === "number"
+              ? entry.scorePercent
+              : (entry.score / entry.total) * 100,
+          answers: {},
+        };
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return map;
+}
+
+function persistQuizOutcomes(slug: string, outcomes: Record<string, QuizOutcome | null>) {
+  try {
+    const payload: Record<string, StoredQuizOutcome> = {};
+    for (const [id, outcome] of Object.entries(outcomes)) {
+      if (!outcome) continue;
+      payload[id] = {
+        score: outcome.score,
+        total: outcome.total,
+        scorePercent: outcome.scorePercent,
+      };
+    }
+    sessionStorage.setItem(quizOutcomesStorageKey(slug), JSON.stringify(payload));
+  } catch {
+    /* ignore */
+  }
 }
 
 function triggerBlobDownload(blob: Blob, filename: string) {
@@ -152,7 +215,7 @@ export function TrainingLesson({ locale, training }: Props) {
     readVideoDoneMap(training.slug, modules),
   );
   const [quizByModule, setQuizByModule] = useState<Record<string, QuizOutcome | null>>(() =>
-    emptyOutcomes(modules),
+    readStoredQuizOutcomes(training.slug, modules),
   );
   const [certificateToken, setCertificateToken] = useState<string | null>(null);
   const [firstName, setFirstName] = useState(() => {
@@ -193,6 +256,57 @@ export function TrainingLesson({ locale, training }: Props) {
     },
     [training.slug],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch(
+          `/api/trainings/${encodeURIComponent(training.slug)}/progress`,
+          { credentials: "same-origin" },
+        );
+        if (!response.ok || cancelled) return;
+        const data = (await response.json()) as {
+          ok?: boolean;
+          modules?: Record<string, StoredQuizOutcome>;
+          certificateToken?: string | null;
+        };
+        if (!data.ok || !data.modules || cancelled) return;
+
+        setQuizByModule((prev) => {
+          const next = { ...prev };
+          let changed = false;
+          for (const mod of modules) {
+            const remote = data.modules?.[mod.id];
+            if (!remote || remote.total < 1) continue;
+            const local = next[mod.id];
+            if (local && local.total > 0) continue;
+            next[mod.id] = {
+              score: remote.score,
+              total: remote.total,
+              scorePercent:
+                typeof remote.scorePercent === "number"
+                  ? remote.scorePercent
+                  : (remote.score / remote.total) * 100,
+              answers: {},
+            };
+            changed = true;
+          }
+          if (changed) persistQuizOutcomes(training.slug, next);
+          return changed ? next : prev;
+        });
+
+        if (data.certificateToken) {
+          setCertificateToken(data.certificateToken);
+        }
+      } catch {
+        /* ignore — sessionStorage hydrate remains */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [modules, training.slug]);
 
   const markVideoDone = useCallback(
     (moduleId: string) => {
@@ -532,6 +646,15 @@ export function TrainingLesson({ locale, training }: Props) {
                 questions={mod.quiz}
                 ui={training.quizUi}
                 locked={hasVideo && !videoDone}
+                initialResult={
+                  quizByModule[mod.id]
+                    ? {
+                        score: quizByModule[mod.id]!.score,
+                        total: quizByModule[mod.id]!.total,
+                        scorePercent: quizByModule[mod.id]!.scorePercent,
+                      }
+                    : null
+                }
                 onResultChange={(result) => {
                   setQuizByModule((prev) => {
                     const previous = prev[mod.id];
@@ -545,16 +668,19 @@ export function TrainingLesson({ locale, training }: Props) {
                     ) {
                       return prev;
                     }
-                    if (!result) return { ...prev, [mod.id]: null };
-                    return {
-                      ...prev,
-                      [mod.id]: {
-                        score: result.score,
-                        total: result.total,
-                        scorePercent: result.scorePercent,
-                        answers: result.answers,
-                      },
-                    };
+                    const next = !result
+                      ? { ...prev, [mod.id]: null }
+                      : {
+                          ...prev,
+                          [mod.id]: {
+                            score: result.score,
+                            total: result.total,
+                            scorePercent: result.scorePercent,
+                            answers: result.answers,
+                          },
+                        };
+                    persistQuizOutcomes(training.slug, next);
+                    return next;
                   });
                   if (result?.certificateToken) {
                     setCertificateToken(result.certificateToken);
@@ -568,6 +694,17 @@ export function TrainingLesson({ locale, training }: Props) {
           </section>
         );
       })}
+
+      {training.practice3d ? (
+        <TrainingPractice3d
+          locale={locale}
+          practice={training.practice3d}
+          unlocked={
+            training.practice3d.openAccess === true ||
+            (totals.allSubmitted && allVideosDone)
+          }
+        />
+      ) : null}
 
       <div className="training-lesson__footer-status">
         <TrainingStatusMark done={totals.allSubmitted} label={overallStatusLabel} />

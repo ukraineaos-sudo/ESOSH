@@ -326,13 +326,19 @@
     "youtubeWatched": "Vidéo visionnée",
     "youtubeLoading": "Chargement du lecteur…",
     "quizScoreError": "Impossible de vérifier les réponses. Réessayez.",
-    "quizScoring": "Vérification…",
+    "quizScoring": "Votre demande est en cours de traitement…",
     "certificateParticipationNote": "Il s’agit d’un certificat de participation, non d’une attestation de qualification.",
     "certificateConfirmTitle": "Le certificat sera délivré au nom de :",
     "certificateConfirmBack": "Retour / Modifier",
     "certificateConfirmSubmit": "Confirmer et générer",
     "certificateGenerating": "Préparation du certificat…",
-    "certificateGenerateError": "Impossible de générer le certificat. Veuillez réessayer."
+    "certificateGenerateError": "Impossible de générer le certificat. Veuillez réessayer.",
+    "quizScoreErrorTooManyAttempts": "Plus de tentatives de vérification pour ce module. Réessayez plus tard, ou depuis un autre appareil / réseau.",
+    "quizScoreErrorTooManyAttemptsHours": "Plus de tentatives de vérification pour ce module. Réessayez dans environ {hours} h.",
+    "quizScoreErrorUnavailable": "La vérification est temporairement indisponible. Réessayez dans une minute.",
+    "quizScoreErrorNetwork": "Impossible de joindre le serveur. Vérifiez la connexion et réessayez.",
+    "quizScoreProcessing": "Veuillez patienter — vérification des réponses en cours. Ne cliquez pas à nouveau.",
+    "quizScoreCooldown": "Attendez {seconds} s…"
   },
   "content": {
     "pendingTitle": "Traduction de la page en cours",

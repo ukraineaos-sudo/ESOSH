@@ -37,10 +37,27 @@ test("toPublicTraining strips correct answers from quiz payload", async () => {
     "src/content/pages/fr/education/trainings/emergency-actions.tsx",
     "src/content/pages/az/education/trainings/emergency-actions.tsx",
     "src/content/pages/kk/education/trainings/emergency-actions.tsx",
+    "src/content/pages/uk/education/trainings/oil-gas-site-safety.tsx",
+    "src/content/pages/en/education/trainings/oil-gas-site-safety.tsx",
+    "src/content/pages/de/education/trainings/oil-gas-site-safety.tsx",
+    "src/content/pages/es/education/trainings/oil-gas-site-safety.tsx",
+    "src/content/pages/fr/education/trainings/oil-gas-site-safety.tsx",
+    "src/content/pages/az/education/trainings/oil-gas-site-safety.tsx",
+    "src/content/pages/kk/education/trainings/oil-gas-site-safety.tsx",
   ]) {
     const src = readFileSync(join(root, rel), "utf8");
-    assert.match(src, /toPublicTraining\(/, rel);
+    assert.match(
+      src,
+      /toPublicTraining\(|OilGasSiteSafetyTrainingPage/,
+      rel,
+    );
   }
+
+  const oilGasShell = readFileSync(
+    join(root, "src/components/trainings/OilGasSiteSafetyTrainingPage.tsx"),
+    "utf8",
+  );
+  assert.match(oilGasShell, /toPublicTraining\(/);
 
   const quizUi = readFileSync(join(root, "src/components/trainings/TrainingQuiz.tsx"), "utf8");
   assert.match(quizUi, /\/api\/trainings\/\$\{encodeURIComponent\(slug\)\}\/score/);

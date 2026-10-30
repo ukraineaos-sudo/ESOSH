@@ -1,0 +1,31 @@
+---
+description: "Дешёвая проверка перед commit/push ESOSH — tsc и контроль Vercel Ready."
+alwaysApply: true
+---
+
+# ESOSH: дешёвая проверка перед выкатом
+
+Урок из прод-инцидента: `main` ушёл в GitHub, а Vercel Production оставался на старом Ready из‑за падения `tsc` (Excel `Buffer` / `@types/node`). Локальный `next dev` это не ловит.
+
+## Когда обязательно
+
+Перед **любым** `git commit` / `git push` в `ukraineaos-sudo/ESOSH` (`main` или ветка, которая уйдёт в Production), если в коммите есть код/конфиг (`src/`, `tests/`, `package.json`, lock, `tsconfig*`, Next/Vercel config):
+
+1. Запусти локально: `npx tsc --noEmit -p tsconfig.json`
+2. Дождись exit 0. При ошибках — исправь и повтори; **не** пушь «починить на Vercel».
+3. После push — напомни или сам проверь в Vercel Deployments: статус **Ready**, commit SHA = запушенный, окружение **Production**.
+
+Опционально (если правка широкая: маршруты, CMS, layout, зависимости): `npm run build` дополнительно к `tsc`.
+
+## Когда можно не гонять полный build
+
+- Только docs / `.cursor/rules` / комментарии без TS.
+- Пользователь явно запретил долгие проверки — тогда минимум `tsc`, если менялся TypeScript.
+
+## Запрещено
+
+- Считать push = успешный прод без Ready.
+- Ослаблять типы (`as never` / `as any`) только чтобы обойти `tsc`, без понимания причины — допустим узкий cast с комментарием *почему* (как exceljs ↔ Node 26 Buffer), не как привычка.
+- Утверждать «задеплоено», если не подтверждён Ready / SHA.
+
+См. также `30-testing-quality.mdc` (выбор тестов после изменения).

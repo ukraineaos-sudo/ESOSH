@@ -18,6 +18,8 @@ export type ModuleProgressEntry = {
   total: number;
   /** Кількість спроб; відсутнє у старих cookie → 1. Attempts so far; absent in legacy cookies → 1. */
   attempts?: number;
+  /** Відбиток відповідей для ідемпотентного POST. Answers fingerprint for idempotent POST. */
+  answersFp?: string;
 };
 
 export type TrainingProgressPayload = {

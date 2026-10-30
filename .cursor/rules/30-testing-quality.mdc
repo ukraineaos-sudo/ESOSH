@@ -45,4 +45,6 @@ alwaysApply: false
 4. `npm test` после build, если затронуты маршруты, форма, sitemap, медиа-манифест.
 5. Diff: нет секретов, мусора, несвязанных правок.
 
+Перед **commit/push в Production**: обязательная дешёвая проверка — см. `31-pre-deploy-checks.mdc` (`npx tsc --noEmit`, затем Vercel Ready + SHA).
+
 Не заявляй о проверках, которые не запускались.

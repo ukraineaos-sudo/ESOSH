@@ -257,6 +257,81 @@
   margin: 8px auto 0;
 }
 
+.training-practice-3d {
+  max-width: 960px;
+  margin: 48px auto 0;
+  padding-top: 28px;
+  border-top: 1px solid #d9e2f1;
+}
+
+.training-practice-3d__header {
+  margin-bottom: 12px;
+}
+
+.training-practice-3d__eyebrow {
+  margin: 0 0 6px;
+  color: #5a6b82;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.training-practice-3d__title {
+  margin: 0;
+}
+
+.training-practice-3d__summary {
+  margin: 0 0 20px;
+  max-width: 720px;
+}
+
+.training-practice-3d__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 24px;
+  border: 1px dashed #b7c5db;
+  border-radius: 6px;
+  background: #f5f8fc;
+}
+
+.training-practice-3d__pending {
+  margin: 0;
+  max-width: 420px;
+  text-align: center;
+  color: #5a6b82;
+}
+
+.training-practice-3d__frame-wrap {
+  width: 100%;
+}
+
+.training-practice-3d__frame {
+  display: block;
+  width: 100%;
+  min-height: min(72vh, 720px);
+  height: 72vh;
+  border: 1px solid #d9e2f1;
+  border-radius: 6px;
+  background: #f4f5ed;
+}
+
+.training-practice-3d__open {
+  margin: 10px 0 0;
+}
+
+.training-practice-3d__open a {
+  color: #1f6feb;
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .training-practice-3d__frame {
+    min-height: 70vh;
+    height: 70vh;
+  }
+}
+
 .training-lesson__cert {
   max-width: 800px;
   margin: 20px auto 48px;

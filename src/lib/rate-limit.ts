@@ -2,7 +2,12 @@ import { neon } from "@neondatabase/serverless";
 import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { bumpWindowCounter } from "@/lib/rate-limit-counter";
-import { consumeModuleAttempt } from "@/lib/trainings/module-attempt-budget";
+import {
+  MODULE_ATTEMPT_LIMIT,
+  consumeModuleAttempt,
+  consumeVisitorModuleAttempt,
+} from "@/lib/trainings/module-attempt-budget";
+import { ensureTrainingVisitorId } from "@/lib/trainings/training-visitor";
 
 export type RateLimitBucket =
   | "admin_login"
@@ -18,42 +23,84 @@ const LIMITS: Record<RateLimitBucket, { limit: number; windowMs: number }> = {
   enrollment: { limit: 5, windowMs: 60 * 60 * 1000 },
   enrollment_preview: { limit: 30, windowMs: 60 * 60 * 1000 },
   training_certificate: { limit: 20, windowMs: 60 * 60 * 1000 },
-  training_score: { limit: 60, windowMs: 60 * 60 * 1000 },
+  // Align with dual module budgets (visitor × modules × retries under shared IP).
+  training_score: { limit: 180, windowMs: 60 * 60 * 1000 },
 };
 
+export type ModuleScoreBudgetOk = {
+  ok: true;
+  visitorUsed: number;
+  ipUsed: number;
+  attemptsRemaining: number;
+};
+
+export type ModuleScoreBudgetResult = ModuleScoreBudgetOk | { ok: false; response: NextResponse };
+
+function tooManyAttemptsResponse(retryAfterSec: number): NextResponse {
+  return NextResponse.json(
+    { ok: false, error: "too_many_attempts", retryAfterSec },
+    { status: 429, headers: { "Retry-After": String(retryAfterSec) } },
+  );
+}
+
 /**
- * RU: Серверний бюджет спроб на (IP, курс, модуль) у Neon; cookie не впливає. Production без DB — 503.
- * EN: Server-side attempt budget per (IP, course, module) in Neon; cookie-independent. No DB in production → 503.
+ * RU: Подвійний бюджет: visitor cookie (справедливий за NAT) + IP-стеля (анти-wipe).
+ * Production без DB — 503.
+ * EN: Dual budget: visitor cookie (fair under NAT) + IP ceiling (anti-wipe). No DB in production → 503.
  */
 export async function assertModuleScoreBudget(
   request: Request,
   slug: string,
   moduleId: string,
-): Promise<NextResponse | null> {
+): Promise<ModuleScoreBudgetResult> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl || !getDb()) {
     if (process.env.NODE_ENV === "production") {
-      return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
+      return {
+        ok: false,
+        response: NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 }),
+      };
     }
-    return null;
+    return { ok: true, visitorUsed: 0, ipUsed: 0, attemptsRemaining: MODULE_ATTEMPT_LIMIT };
   }
 
-  let decision;
+  const sql = neon(databaseUrl);
+  const ip = clientIpFromRequest(request);
+  let visitorId: string;
   try {
-    decision = await consumeModuleAttempt(
-      neon(databaseUrl),
-      clientIpFromRequest(request),
-      slug,
-      moduleId,
-    );
+    visitorId = await ensureTrainingVisitorId();
   } catch {
-    return NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 });
+    return {
+      ok: false,
+      response: NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 }),
+    };
   }
-  if (decision.allowed) return null;
-  return NextResponse.json(
-    { ok: false, error: "too_many_attempts" },
-    { status: 429, headers: { "Retry-After": String(decision.retryAfterSec) } },
-  );
+
+  let visitorDecision;
+  let ipDecision;
+  try {
+    visitorDecision = await consumeVisitorModuleAttempt(sql, visitorId, slug, moduleId);
+    if (!visitorDecision.allowed) {
+      return { ok: false, response: tooManyAttemptsResponse(visitorDecision.retryAfterSec) };
+    }
+    ipDecision = await consumeModuleAttempt(sql, ip, slug, moduleId);
+  } catch {
+    return {
+      ok: false,
+      response: NextResponse.json({ ok: false, error: "unavailable" }, { status: 503 }),
+    };
+  }
+
+  if (!ipDecision.allowed) {
+    return { ok: false, response: tooManyAttemptsResponse(ipDecision.retryAfterSec) };
+  }
+
+  return {
+    ok: true,
+    visitorUsed: visitorDecision.used,
+    ipUsed: ipDecision.used,
+    attemptsRemaining: Math.max(0, MODULE_ATTEMPT_LIMIT - visitorDecision.used),
+  };
 }
 
 /** RU: IP клієнта з proxy-заголовків. EN: Client IP from trusted proxy headers. */
@@ -98,7 +145,7 @@ export async function assertRateLimit(
     const windowStartMs = counter.windowStartMs;
     const retryAfter = Math.max(1, Math.ceil((windowStartMs + windowMs - now) / 1000));
     return NextResponse.json(
-      { ok: false, error: "rate_limited" },
+      { ok: false, error: "rate_limited", retryAfterSec: retryAfter },
       { status: 429, headers: { "Retry-After": String(retryAfter) } },
     );
   }

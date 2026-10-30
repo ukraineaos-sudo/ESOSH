@@ -326,13 +326,19 @@
     "youtubeWatched": "Video izlənilib",
     "youtubeLoading": "Pleyer yüklənir…",
     "quizScoreError": "Cavabları yoxlamaq mümkün olmadı. Yenidən cəhd edin.",
-    "quizScoring": "Yoxlanılır…",
+    "quizScoring": "Sorğunuz emal olunur…",
     "certificateParticipationNote": "Bu iştirak sertifikatıdır, peşə ixtisas attestatı deyil.",
     "certificateConfirmTitle": "Sertifikat bu ada veriləcək:",
     "certificateConfirmBack": "Geri / Düzəliş",
     "certificateConfirmSubmit": "Təsdiq et və yarat",
     "certificateGenerating": "Sertifikat hazırlanır…",
-    "certificateGenerateError": "Sertifikat yaradılmadı. Yenidən cəhd edin."
+    "certificateGenerateError": "Sertifikat yaradılmadı. Yenidən cəhd edin.",
+    "quizScoreErrorTooManyAttempts": "Bu modul üçün yoxlama cəhdləri bitib. Daha sonra və ya başqa cihaz / şəbəkədən yenidən cəhd edin.",
+    "quizScoreErrorTooManyAttemptsHours": "Bu modul üçün yoxlama cəhdləri bitib. Təxminən {hours} saat sonra yenidən cəhd edin.",
+    "quizScoreErrorUnavailable": "Yoxlama xidməti müvəqqəti əlçatan deyil. Bir dəqiqə sonra yenidən cəhd edin.",
+    "quizScoreErrorNetwork": "Serverə qoşulmaq mümkün olmadı. İnterneti yoxlayıb yenidən cəhd edin.",
+    "quizScoreProcessing": "Zəhmət olmasa gözləyin — cavablar yoxlanılır. Düyməyə təkrar basmayın.",
+    "quizScoreCooldown": "{seconds} san gözləyin…"
   },
   "content": {
     "pendingTitle": "Səhifə tərcüməsi hazırlanır",

@@ -326,13 +326,19 @@
     "youtubeWatched": "Video angesehen",
     "youtubeLoading": "Player wird geladen…",
     "quizScoreError": "Antworten konnten nicht geprüft werden. Bitte erneut versuchen.",
-    "quizScoring": "Wird geprüft…",
+    "quizScoring": "Ihre Anfrage wird bearbeitet…",
     "certificateParticipationNote": "Dies ist eine Teilnahmebescheinigung, keine Qualifikationsbescheinigung.",
     "certificateConfirmTitle": "Das Zertifikat wird ausgestellt auf:",
     "certificateConfirmBack": "Zurück / Bearbeiten",
     "certificateConfirmSubmit": "Bestätigen und erstellen",
     "certificateGenerating": "Zertifikat wird vorbereitet…",
-    "certificateGenerateError": "Zertifikat konnte nicht erstellt werden. Bitte erneut versuchen."
+    "certificateGenerateError": "Zertifikat konnte nicht erstellt werden. Bitte erneut versuchen.",
+    "quizScoreErrorTooManyAttempts": "Keine Bewertungsversuche mehr für dieses Modul. Versuchen Sie es später oder über ein anderes Gerät / Netzwerk.",
+    "quizScoreErrorTooManyAttemptsHours": "Keine Bewertungsversuche mehr für dieses Modul. Versuchen Sie es in etwa {hours} Std. erneut.",
+    "quizScoreErrorUnavailable": "Die Bewertung ist vorübergehend nicht verfügbar. Bitte in einer Minute erneut versuchen.",
+    "quizScoreErrorNetwork": "Server nicht erreichbar. Prüfen Sie die Verbindung und versuchen Sie es erneut.",
+    "quizScoreProcessing": "Bitte warten — Antworten werden geprüft. Bitte die Schaltfläche nicht erneut klicken.",
+    "quizScoreCooldown": "{seconds} Sek. warten…"
   },
   "content": {
     "pendingTitle": "Seitenübersetzung in Arbeit",

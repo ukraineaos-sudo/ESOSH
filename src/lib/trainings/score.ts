@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import {
   emergencyActionsTraining,
+  oilGasSiteSafetyTraining,
   riskAssessmentTraining,
   uavAttacksTraining,
 } from "@/content/trainings";
@@ -13,6 +14,7 @@ const TRAININGS_BY_SLUG: Record<string, TrainingDetail> = {
   [riskAssessmentTraining.slug]: riskAssessmentTraining,
   [uavAttacksTraining.slug]: uavAttacksTraining,
   [emergencyActionsTraining.slug]: emergencyActionsTraining,
+  [oilGasSiteSafetyTraining.slug]: oilGasSiteSafetyTraining,
 };
 
 /**

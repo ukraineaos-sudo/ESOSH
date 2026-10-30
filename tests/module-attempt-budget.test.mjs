@@ -6,8 +6,12 @@ import { fileURLToPath } from "node:url";
 import {
   MODULE_ATTEMPT_LIMIT,
   MODULE_ATTEMPT_WINDOW_MS,
+  MODULE_IP_ATTEMPT_LIMIT,
   consumeModuleAttempt,
+  consumeVisitorModuleAttempt,
+  fingerprintModuleAnswers,
   moduleAttemptKey,
+  moduleVisitorAttemptKey,
 } from "../src/lib/trainings/module-attempt-budget.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -32,31 +36,38 @@ function fakeNeon() {
   return { sql, table };
 }
 
-describe("durable per-module attempt budget (cookie-independent)", () => {
-  it("blocks the 6th attempt for the same IP+course+module; no cookie input exists", async () => {
+describe("durable per-module attempt budget (cookie-independent IP ceiling)", () => {
+  it("blocks after MODULE_IP_ATTEMPT_LIMIT+1 for the same IP+course+module", async () => {
     const { sql } = fakeNeon();
     const now = Date.now();
     const decisions = [];
-    // No cookie/progress argument is accepted at all: every call is a "fresh browser".
-    for (let i = 0; i < MODULE_ATTEMPT_LIMIT + 1; i++) {
+    for (let i = 0; i < MODULE_IP_ATTEMPT_LIMIT + 1; i++) {
       decisions.push(await consumeModuleAttempt(sql, "203.0.113.7", "risk-assessment", "m1", now));
     }
-    assert.deepEqual(
-      decisions.map((d) => d.allowed),
-      [true, true, true, true, true, false],
-    );
-    const blocked = decisions[5];
-    assert.equal(blocked.allowed, false);
-    assert.ok(blocked.retryAfterSec > 0 && blocked.retryAfterSec <= MODULE_ATTEMPT_WINDOW_MS / 1000);
-    // Further attempts stay blocked (window does not slide on rejected hits).
-    const again = await consumeModuleAttempt(sql, "203.0.113.7", "risk-assessment", "m1", now + 1000);
-    assert.equal(again.allowed, false);
+    assert.equal(decisions.filter((d) => d.allowed).length, MODULE_IP_ATTEMPT_LIMIT);
+    assert.equal(decisions[MODULE_IP_ATTEMPT_LIMIT].allowed, false);
   });
 
-  it("isolates budgets by IP, course and module", async () => {
+  it("visitor bucket is independent per visitor id (NAT-friendly)", async () => {
     const { sql } = fakeNeon();
     const now = Date.now();
     for (let i = 0; i < MODULE_ATTEMPT_LIMIT; i++) {
+      await consumeVisitorModuleAttempt(sql, "visitor-a", "risk-assessment", "part-2", now);
+    }
+    assert.equal(
+      (await consumeVisitorModuleAttempt(sql, "visitor-a", "risk-assessment", "part-2", now)).allowed,
+      false,
+    );
+    assert.equal(
+      (await consumeVisitorModuleAttempt(sql, "visitor-b", "risk-assessment", "part-2", now)).allowed,
+      true,
+    );
+  });
+
+  it("isolates IP budgets by IP, course and module", async () => {
+    const { sql } = fakeNeon();
+    const now = Date.now();
+    for (let i = 0; i < MODULE_IP_ATTEMPT_LIMIT; i++) {
       await consumeModuleAttempt(sql, "203.0.113.7", "risk-assessment", "m1", now);
     }
     assert.equal((await consumeModuleAttempt(sql, "203.0.113.7", "risk-assessment", "m1", now)).allowed, false);
@@ -69,11 +80,23 @@ describe("durable per-module attempt budget (cookie-independent)", () => {
     const { sql } = fakeNeon();
     const now = Date.now();
     for (let i = 0; i < MODULE_ATTEMPT_LIMIT + 1; i++) {
-      await consumeModuleAttempt(sql, "203.0.113.7", "s", "m", now);
+      await consumeVisitorModuleAttempt(sql, "v1", "s", "m", now);
     }
-    const justBefore = await consumeModuleAttempt(sql, "203.0.113.7", "s", "m", now + MODULE_ATTEMPT_WINDOW_MS - 1000);
+    const justBefore = await consumeVisitorModuleAttempt(
+      sql,
+      "v1",
+      "s",
+      "m",
+      now + MODULE_ATTEMPT_WINDOW_MS - 1000,
+    );
     assert.equal(justBefore.allowed, false);
-    const after = await consumeModuleAttempt(sql, "203.0.113.7", "s", "m", now + MODULE_ATTEMPT_WINDOW_MS + 1);
+    const after = await consumeVisitorModuleAttempt(
+      sql,
+      "v1",
+      "s",
+      "m",
+      now + MODULE_ATTEMPT_WINDOW_MS + 1,
+    );
     assert.equal(after.allowed, true);
   });
 
@@ -84,14 +107,27 @@ describe("durable per-module attempt budget (cookie-independent)", () => {
     );
   });
 
-  it("hashes the key: fits varchar(191), no raw IP, no truncation collisions", () => {
+  it("hashes keys: fits varchar(191), no raw IP, distinct visitor vs IP namespaces", () => {
     const longModule = "x".repeat(128);
     const a = moduleAttemptKey("2001:db8::1", "risk-assessment", longModule);
     const b = moduleAttemptKey("2001:db8::1", "risk-assessment", longModule.slice(0, -1) + "y");
+    const v = moduleVisitorAttemptKey("visitor-1", "risk-assessment", longModule);
     assert.ok(a.length <= 191);
+    assert.ok(v.length <= 191);
     assert.notEqual(a, b);
+    assert.notEqual(a, v);
     assert.ok(a.startsWith("training_module_score:"));
+    assert.ok(v.startsWith("training_module_score_v:"));
     assert.ok(!a.includes("2001:db8"));
+  });
+
+  it("fingerprintModuleAnswers is stable and order-independent", () => {
+    const a = fingerprintModuleAnswers({ "2": "B", "1": "A" });
+    const b = fingerprintModuleAnswers({ "1": "A", "2": "B" });
+    const c = fingerprintModuleAnswers({ "1": "A", "2": "C" });
+    assert.equal(a, b);
+    assert.notEqual(a, c);
+    assert.equal(a.length, 64);
   });
 });
 
@@ -101,10 +137,20 @@ describe("score route wiring", () => {
     const budget = route.indexOf("assertModuleScoreBudget(request, slug, moduleId)");
     const write = route.indexOf("writeTrainingProgressModule(slug, moduleId");
     assert.ok(budget > 0 && write > budget, "budget must be checked before progress write/response");
-    assert.match(route, /if \(!skipWrite\)\s*\{[\s\S]*assertModuleScoreBudget/);
+    assert.match(route, /if \(!skipBudget\)\s*\{[\s\S]*assertModuleScoreBudget/);
+    assert.match(route, /fingerprintModuleAnswers/);
 
     const limiter = readFileSync(join(root, "src/lib/rate-limit.ts"), "utf8");
     assert.match(limiter, /export async function assertModuleScoreBudget/);
+    assert.match(limiter, /consumeVisitorModuleAttempt\(/);
     assert.match(limiter, /consumeModuleAttempt\(/);
+    assert.match(limiter, /ensureTrainingVisitorId/);
+  });
+
+  it("progress GET restores aggregates without answer keys", () => {
+    const progress = readFileSync(join(root, "src/app/api/trainings/[slug]/progress/route.ts"), "utf8");
+    assert.match(progress, /readTrainingProgress/);
+    assert.match(progress, /certificateToken/);
+    assert.doesNotMatch(progress, /answersFp|correct/);
   });
 });

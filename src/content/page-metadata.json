@@ -569,6 +569,36 @@
     },
     "image": null
   },
+  "/en/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Oil and gas site safety",
+    "description": "Three modules on oil and gas site safety: videos (coming soon), quizzes, and a future 3D practice block.",
+    "locale": "en",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
+    },
+    "image": null
+  },
+  "/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Безпека нафтогазового майданчика",
+    "description": "Три модулі про безпеку нафтогазового майданчика: відео (згодом), тести та майбутній 3D-практикум.",
+    "locale": "uk",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
+    },
+    "image": null
+  },
   "/news/26-kvitnya-den-pamyati-pro-chornobilsku-katastrofu": {
     "title": "ESOSH — 26 квітня день пам'яті про чорнобильську катастрофу",
     "description": "Дізнайтесь більше про \"26 квітня день пам'яті про чорнобильську катастрофу\"",
@@ -4700,6 +4730,81 @@
       "fr": "/fr/education/trainings/emergency-actions",
       "az": "/az/education/trainings/emergency-actions",
       "kk": "/kk/education/trainings/emergency-actions"
+    },
+    "image": null
+  },
+  "/de/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Sicherheit auf Öl- und Gasstandorten",
+    "description": "Drei Module zur Sicherheit auf Öl- und Gasstandorten: Videos (folgt), Tests und künftige 3D-Übung.",
+    "locale": "de",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
+    },
+    "image": null
+  },
+  "/es/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Seguridad en emplazamientos de petróleo y gas",
+    "description": "Tres módulos sobre seguridad en emplazamientos de petróleo y gas: vídeos (próximamente), tests y práctica 3D futura.",
+    "locale": "es",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
+    },
+    "image": null
+  },
+  "/fr/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Sécurité sur les sites pétrolier et gazier",
+    "description": "Trois modules sur la sécurité des sites pétrolier et gazier : vidéos (à venir), quiz et pratique 3D future.",
+    "locale": "fr",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
+    },
+    "image": null
+  },
+  "/az/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Neft-qaz meydançasının təhlükəsizliyi",
+    "description": "Neft-qaz meydançasının təhlükəsizliyi üzrə üç modul: videolar (tezliklə), testlər və gələcək 3D praktikum.",
+    "locale": "az",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
+    },
+    "image": null
+  },
+  "/kk/education/trainings/oil-gas-site-safety": {
+    "title": "ESOSH — Мұнай-газ алаңының қауіпсіздігі",
+    "description": "Мұнай-газ алаңы қауіпсіздігі бойынша үш модуль: бейнелер (жақында), тесттер және болашақ 3D практикум.",
+    "locale": "kk",
+    "alternates": {
+      "uk": "/education/trainings/oil-gas-site-safety",
+      "en": "/en/education/trainings/oil-gas-site-safety",
+      "de": "/de/education/trainings/oil-gas-site-safety",
+      "es": "/es/education/trainings/oil-gas-site-safety",
+      "fr": "/fr/education/trainings/oil-gas-site-safety",
+      "az": "/az/education/trainings/oil-gas-site-safety",
+      "kk": "/kk/education/trainings/oil-gas-site-safety"
     },
     "image": null
   }

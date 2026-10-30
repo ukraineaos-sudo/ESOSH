@@ -326,13 +326,19 @@
     "youtubeWatched": "Бейне қаралды",
     "youtubeLoading": "Ойнатқыш жүктелуде…",
     "quizScoreError": "Жауаптарды тексеру мүмкін болмады. Қайта көріңіз.",
-    "quizScoring": "Тексерілуде…",
+    "quizScoring": "Сұрауыңыз өңделуде…",
     "certificateParticipationNote": "Бұл қатысу сертификаты, біліктілік аттестаты емес.",
     "certificateConfirmTitle": "Сертификат мына атқа беріледі:",
     "certificateConfirmBack": "Артқа / Түзету",
     "certificateConfirmSubmit": "Растау және құру",
     "certificateGenerating": "Сертификат дайындалуда…",
-    "certificateGenerateError": "Сертификатты құру мүмкін болмады. Қайта көріңіз."
+    "certificateGenerateError": "Сертификатты құру мүмкін болмады. Қайта көріңіз.",
+    "quizScoreErrorTooManyAttempts": "Осы модуль үшін тексеру әрекеттері таусылды. Кейінірек немесе басқа құрылғы / желі арқылы қайталаңыз.",
+    "quizScoreErrorTooManyAttemptsHours": "Осы модуль үшін тексеру әрекеттері таусылды. Шамамен {hours} сағ кейін қайталаңыз.",
+    "quizScoreErrorUnavailable": "Тексеру қызметі уақытша қолжетімсіз. Бір минуттан кейін қайталаңыз.",
+    "quizScoreErrorNetwork": "Серверге қосылу мүмкін болмады. Интернетті тексеріп, қайталаңыз.",
+    "quizScoreProcessing": "Күте тұрыңыз — жауаптар тексерілуде. Батырманы қайта баспаңыз.",
+    "quizScoreCooldown": "{seconds} с күтіңіз…"
   },
   "content": {
     "pendingTitle": "Бет аудармасы дайындалуда",

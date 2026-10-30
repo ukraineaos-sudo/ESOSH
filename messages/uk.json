@@ -326,13 +326,19 @@
     "youtubeWatched": "Відео переглянуте",
     "youtubeLoading": "Завантаження плеєра…",
     "quizScoreError": "Не вдалося перевірити відповіді. Спробуйте ще раз.",
-    "quizScoring": "Перевіряємо…",
+    "quizScoring": "Ваш запит обробляється…",
     "certificateParticipationNote": "Це сертифікат участі у тренінгу, не документ атестації кваліфікації.",
     "certificateConfirmTitle": "Сертифікат буде видано на ім’я:",
     "certificateConfirmBack": "Назад / Виправити",
     "certificateConfirmSubmit": "Підтвердити та сформувати",
     "certificateGenerating": "Готуємо сертифікат…",
-    "certificateGenerateError": "Не вдалося сформувати сертифікат. Спробуйте ще раз."
+    "certificateGenerateError": "Не вдалося сформувати сертифікат. Спробуйте ще раз.",
+    "quizScoreErrorTooManyAttempts": "Вичерпано спроби перевірки для цього модуля. Спробуйте пізніше або з іншого пристрою / мережі.",
+    "quizScoreErrorTooManyAttemptsHours": "Вичерпано спроби перевірки для цього модуля. Спробуйте приблизно через {hours} год.",
+    "quizScoreErrorUnavailable": "Сервіс перевірки тимчасово недоступний. Спробуйте ще раз за хвилину.",
+    "quizScoreErrorNetwork": "Немає зв’язку з сервером. Перевірте інтернет і спробуйте ще раз.",
+    "quizScoreProcessing": "Будь ласка, зачекайте — відповіді перевіряються. Не натискайте кнопку повторно.",
+    "quizScoreCooldown": "Зачекайте {seconds} с…"
   },
   "content": {
     "pendingTitle": "Переклад сторінки готується",

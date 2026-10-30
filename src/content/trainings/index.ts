@@ -6,6 +6,8 @@ import type {
   TrainingTier,
 } from "./types";
 import { emergencyActionsTraining } from "./emergency-actions";
+import { heightPraktykumListItem } from "./height-praktykum";
+import { oilGasSiteSafetyTraining } from "./oil-gas-site-safety";
 import { riskAssessmentTraining } from "./risk-assessment";
 import { uavAttacksTraining } from "./uav-attacks";
 
@@ -67,6 +69,8 @@ export const trainingsCatalog: TrainingListItem[] = [
   toListItem(riskAssessmentTraining, "basic"),
   toListItem(uavAttacksTraining, "basic"),
   toListItem(emergencyActionsTraining, "basic"),
+  toListItem(oilGasSiteSafetyTraining, "basic"),
+  heightPraktykumListItem,
 ].filter((item): item is TrainingListItem => item !== null);
 
 /** RU: Фільтр каталогу за рівнем. EN: Filter catalog by tier. */
@@ -75,6 +79,8 @@ export function trainingsByTier(tier: TrainingTier): TrainingListItem[] {
 }
 
 export { emergencyActionsTraining } from "./emergency-actions";
+export { heightPraktykumListItem } from "./height-praktykum";
+export { oilGasSiteSafetyTraining } from "./oil-gas-site-safety";
 export { riskAssessmentTraining } from "./risk-assessment";
 export { emergencyActionsIntro } from "./emergency-actions-intro";
 export { riskAssessmentIntro } from "./risk-assessment-intro";
@@ -91,6 +97,7 @@ export type {
   TrainingDetail,
   TrainingListItem,
   TrainingModule,
+  TrainingPractice3d,
   TrainingQuizUi,
   TrainingTier,
 } from "./types";
