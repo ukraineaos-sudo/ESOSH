@@ -316,15 +316,6 @@
   background: #f4f5ed;
 }
 
-.training-practice-3d__open {
-  margin: 10px 0 0;
-}
-
-.training-practice-3d__open a {
-  color: #1f6feb;
-  text-decoration: underline;
-}
-
 @media (max-width: 767px) {
   .training-practice-3d__frame {
     min-height: 70vh;

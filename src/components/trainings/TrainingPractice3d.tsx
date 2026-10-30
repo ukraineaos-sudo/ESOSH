@@ -44,11 +44,6 @@ export function TrainingPractice3d({ locale, practice, unlocked = true }: Props)
             referrerPolicy="no-referrer"
             allow="fullscreen"
           />
-          <p className="training-practice-3d__open regular-s">
-            <a href={src} target="_blank" rel="noopener noreferrer">
-              {locale === "uk" ? "Відкрити на повний екран" : "Open fullscreen"}
-            </a>
-          </p>
         </div>
       ) : (
         <div className="training-practice-3d__stage" role="status">
