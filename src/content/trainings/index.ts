@@ -81,6 +81,7 @@ export function trainingsByTier(tier: TrainingTier): TrainingListItem[] {
 export { emergencyActionsTraining } from "./emergency-actions";
 export { heightPraktykumListItem } from "./height-praktykum";
 export { oilGasSiteSafetyTraining } from "./oil-gas-site-safety";
+export { oilGasSiteSafetyIntro } from "./oil-gas-site-safety-intro";
 export { riskAssessmentTraining } from "./risk-assessment";
 export { emergencyActionsIntro } from "./emergency-actions-intro";
 export { riskAssessmentIntro } from "./risk-assessment-intro";

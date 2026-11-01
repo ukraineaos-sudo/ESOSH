@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "@/i18n/navigation";
+import { OilGasSiteSafetyIntro } from "@/components/trainings/OilGasSiteSafetyIntro";
 import { TrainingLesson } from "@/components/trainings/TrainingLesson";
 import { oilGasSiteSafetyTraining, pickLocalized } from "@/content/trainings";
 import type { LocaleCode } from "@/content/trainings/types";
@@ -47,6 +48,7 @@ export function OilGasSiteSafetyTrainingPage({ locale, breadcrumb }: Props) {
       </section>
       <section className={"section is--margin-top-144--t-128--m-104 is--margin-bottom-144--t-128--m-104"}>
         <div className={"w-layout-blockcontainer container w-container"}>
+          <OilGasSiteSafetyIntro locale={locale} />
           <div className={"training-detail-lead"}>
             <p className={"regular-l"}>{summary}</p>
           </div>

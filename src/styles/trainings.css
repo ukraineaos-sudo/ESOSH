@@ -184,6 +184,30 @@
   color: var(--grey-100, #1a2131);
 }
 
+.training-intro__section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.training-intro__section-title {
+  margin: 8px 0 0;
+  color: var(--grey-100, #1a2131);
+}
+
+.training-intro__list {
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.training-intro__list li {
+  margin: 0 0 6px;
+}
+
+.training-intro__list li:last-child {
+  margin-bottom: 0;
+}
+
 .training-intro__body {
   display: flex;
   flex-direction: column;

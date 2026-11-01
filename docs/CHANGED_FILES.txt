@@ -615,3 +615,5 @@ public/praktykum/oil-gas/models/separator_vessel.glb
 public/praktykum/oil-gas/models/permit_board.glb
 public/praktykum/oil-gas/models/service_platform.glb
 public/praktykum/oil-gas/models/exclusion_barrier.glb
+src/content/trainings/oil-gas-site-safety-intro.ts
+src/components/trainings/OilGasSiteSafetyIntro.tsx
