@@ -168,7 +168,7 @@ export const oilGasSiteSafetyTraining: TrainingDetail = {
     uk: "БЕЗПЕКА НАФТОГАЗОВОГО МАЙДАНЧИКА",
     en: "OIL AND GAS SITE SAFETY",
   },
-  passThresholdPercent: 75,
+  passThresholdPercent: 80,
   showSeekHint: false,
   quizUi,
   practice3d,

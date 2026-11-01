@@ -159,6 +159,11 @@ export type TrainingListItem = {
   /** Drives listing sections (basic vs professional). */
   tier: TrainingTier;
   /**
+   * When false, hide from the public catalog (default: published).
+   * Static SPA may still need a redirect/block for direct `/praktykum/...` URLs.
+   */
+  published?: boolean;
+  /**
    * Static file under `public/` (e.g. interactive SPA).
    * Render as plain `<a href>` — do not locale-prefix via next-intl Link.
    */

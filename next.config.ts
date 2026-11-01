@@ -12,6 +12,21 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-lib", "@pdf-lib/fontkit", "exceljs"],
   // Prevent Next from auto-writing AI rule files into the repo
   agentRules: false,
+  /** Height praktykum: off public catalog until learning logic is agreed. */
+  async redirects() {
+    return [
+      {
+        source: "/praktykum/height",
+        destination: "/education/trainings",
+        permanent: false,
+      },
+      {
+        source: "/praktykum/height/:path*",
+        destination: "/education/trainings",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

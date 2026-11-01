@@ -70,7 +70,7 @@ export const trainingsCatalog: TrainingListItem[] = [
   toListItem(uavAttacksTraining, "basic"),
   toListItem(emergencyActionsTraining, "basic"),
   toListItem(oilGasSiteSafetyTraining, "basic"),
-  heightPraktykumListItem,
+  heightPraktykumListItem.published === false ? null : heightPraktykumListItem,
 ].filter((item): item is TrainingListItem => item !== null);
 
 /** RU: Фільтр каталогу за рівнем. EN: Filter catalog by tier. */

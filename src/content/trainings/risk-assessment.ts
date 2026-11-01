@@ -102,13 +102,13 @@ export const riskAssessmentTraining: TrainingDetail = {
     kk: "Тәуекелді бағалау: кіріспе курс",
   },
   summary: {
-    uk: "Три модулі: ризикоорієнтоване мислення, матриця оцінювання ризиків та ієрархія заходів контролю. Після кожного відео — тест з 5 питань.",
-    en: "Three modules: risk-based thinking, the risk assessment matrix, and the hierarchy of controls. After each video — a 5-question quiz (Ukrainian, matching the video).",
-    de: "Drei Module: risikobasiertes Denken, Risikobewertungsmatrix und Hierarchie der Kontrollmaßnahmen. Nach jedem Video — ein Test mit 5 Fragen (Ukrainisch, passend zum Video).",
-    es: "Tres módulos: pensamiento basado en el riesgo, matriz de evaluación de riesgos y jerarquía de controles. Tras cada vídeo — un test de 5 preguntas (en ucraniano, como el vídeo).",
-    fr: "Trois modules : pensée fondée sur les risques, matrice d’évaluation des risques et hiérarchie des mesures de contrôle. Après chaque vidéo — un test de 5 questions (en ukrainien, comme la vidéo).",
-    az: "Üç modul: risk əsaslı düşüncə, risklərin qiymətləndirilməsi matrisi və nəzarət tədbirlərinin iyerarxiyası. Hər videodan sonra — 5 suallıq test (ukraynaca, video ilə eyni).",
-    kk: "Үш модуль: тәуекелге негізделген ойлау, тәуекелді бағалау матрицасы және бақылау шаралары иерархиясы. Әр бейнеден кейін — 5 сұрақты тест (украин тілінде, бейнемен бірдей).",
+    uk: "Три модулі: ризикоорієнтоване мислення, матриця оцінювання ризиків та ієрархія заходів контролю. Після кожного відео — тест з 5 питань. Сертифікат за успішної відповіді на 80% та більше питань.",
+    en: "Three modules: risk-based thinking, the risk assessment matrix, and the hierarchy of controls. After each video — a 5-question quiz (Ukrainian, matching the video). Certificate for successfully answering 80% or more of the questions.",
+    de: "Drei Module: risikobasiertes Denken, Risikobewertungsmatrix und Hierarchie der Kontrollmaßnahmen. Nach jedem Video — ein Test mit 5 Fragen (Ukrainisch, passend zum Video). Zertifikat bei erfolgreicher Beantwortung von mindestens 80 % der Fragen.",
+    es: "Tres módulos: pensamiento basado en el riesgo, matriz de evaluación de riesgos y jerarquía de controles. Tras cada vídeo — un test de 5 preguntas (en ucraniano, como el vídeo). Certificado por responder correctamente al 80 % o más de las preguntas.",
+    fr: "Trois modules : pensée fondée sur les risques, matrice d’évaluation des risques et hiérarchie des mesures de contrôle. Après chaque vidéo — un test de 5 questions (en ukrainien, comme la vidéo). Certificat pour au moins 80 % de bonnes réponses.",
+    az: "Üç modul: risk əsaslı düşüncə, risklərin qiymətləndirilməsi matrisi və nəzarət tədbirlərinin iyerarxiyası. Hər videodan sonra — 5 suallıq test (ukraynaca, video ilə eyni). Sualların 80%-i və daha çoxuna düzgün cavab verdikdə sertifikat.",
+    kk: "Үш модуль: тәуекелге негізделген ойлау, тәуекелді бағалау матрицасы және бақылау шаралары иерархиясы. Әр бейнеден кейін — 5 сұрақты тест (украин тілінде, бейнемен бірдей). Сұрақтардың 80%-ына және одан көпке дұрыс жауап бергенде сертификат.",
   },
   courseCode: "RA",
   duration: {
@@ -121,7 +121,7 @@ export const riskAssessmentTraining: TrainingDetail = {
   },
   /** Static PDF kept as legacy fallback reference; named generator is primary when courseCode is set. */
   certificateDocId: "trainings/risk-assessment-certificate",
-  passThresholdPercent: 75,
+  passThresholdPercent: 80,
   quizUi,
   modules: [
     {

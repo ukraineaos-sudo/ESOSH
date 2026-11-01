@@ -4,12 +4,14 @@ import type { TrainingListItem } from "./types";
  * RU: Каталожна картка інтерактивного практикуму «роботи на висоті» (статичний SPA у public/).
  * EN: Catalog card for the interactive height praktykum (static SPA under public/).
  * Not a video/quiz TrainingDetail — served as /praktykum/height/.
+ * Hidden from public until training logic is agreed (`published: false` + redirect).
  */
 export const heightPraktykumListItem: TrainingListItem = {
   slug: "height-praktykum",
   // Explicit index.html avoids Next trailing-slash 308 that drops directory index.
   href: "/praktykum/height/index.html",
   staticAsset: true,
+  published: false,
   tier: "basic",
   title: {
     uk: "Безпека робіт на висоті: інтерактивний практикум",
