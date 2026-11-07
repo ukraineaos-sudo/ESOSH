@@ -5,6 +5,8 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useMemo,
+  useRef,
   useState,
   type FormEvent,
   type ReactElement,
@@ -25,6 +27,31 @@ import { CODEX_QUESTIONS_PUBLIC } from "@/lib/enrollment/quiz";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { EnrollmentAttachmentsDropzone } from "@/components/EnrollmentAttachmentsDropzone";
 import { isAppLocale } from "@/lib/locale";
+import {
+  ENROLLMENT_MIN_AGE,
+  isBirthDateAtLeastAge,
+  maxBirthDateForMinAge,
+} from "@/lib/enrollment/age";
+import {
+  countryFlagUrl,
+  countryLabel,
+  defaultCountryForLocale,
+  filterEnrollmentCountries,
+  isEnrollmentCountryCode,
+  type EnrollmentCountryCode,
+} from "@/lib/enrollment/countries";
+import {
+  ENROLLMENT_INDUSTRY_IDS,
+  formatIndustryForStorage,
+  industryLabel,
+  isEnrollmentIndustryId,
+  type EnrollmentIndustryId,
+} from "@/lib/enrollment/industries";
+import {
+  countryDialPrefix,
+  isValidEnrollmentPhone,
+  withCountryDialPrefix,
+} from "@/lib/enrollment/phone";
 
 type FormIssue = {
   fieldId: string;
@@ -38,7 +65,7 @@ type Draft = {
   firstName: string;
   middleName: string;
   birthDate: string;
-  country: string;
+  country: EnrollmentCountryCode;
   city: string;
   phone: string;
   email: string;
@@ -46,7 +73,8 @@ type Draft = {
   profileUrl: string;
   jobTitle: string;
   organization: string;
-  industry: string;
+  industryIds: EnrollmentIndustryId[];
+  industryOther: string;
   companySize: CompanySize | "";
   oshFunctions: boolean | null;
   totalYears: string;
@@ -71,8 +99,9 @@ type Draft = {
   marketingConsent: boolean;
 };
 
-const STORAGE_KEY = "esosh-enrollment-draft-v2";
+const STORAGE_KEY = "esosh-enrollment-draft-v3";
 const STEPS = 7;
+const BIRTH_DATE_MIN = "1920-01-01";
 
 const COURSE_TYPES: CourseType[] = [
   "esosh_21",
@@ -105,7 +134,7 @@ const emptyCourse = (): EnrollmentCourseInput => ({
   certificateNo: "",
 });
 
-function initialDraft(defaultCountry: string): Draft {
+function initialDraft(defaultCountry: EnrollmentCountryCode): Draft {
   return {
     lastName: "",
     firstName: "",
@@ -113,13 +142,14 @@ function initialDraft(defaultCountry: string): Draft {
     birthDate: "",
     country: defaultCountry,
     city: "",
-    phone: "",
+    phone: countryDialPrefix(defaultCountry),
     email: "",
     secondaryEmail: "",
     profileUrl: "",
     jobTitle: "",
     organization: "",
-    industry: "",
+    industryIds: [],
+    industryOther: "",
     companySize: "",
     oshFunctions: null,
     totalYears: "",
@@ -145,20 +175,35 @@ function initialDraft(defaultCountry: string): Draft {
   };
 }
 
+function normalizeStoredIndustryIds(raw: unknown): EnrollmentIndustryId[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((id): id is EnrollmentIndustryId => typeof id === "string" && isEnrollmentIndustryId(id));
+}
+
 function newIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
   return `k-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function readStoredDraft(defaultCountry: string): { draft: Draft; step: number } {
+function readStoredDraft(defaultCountry: EnrollmentCountryCode): { draft: Draft; step: number } {
   if (typeof window === "undefined") return { draft: initialDraft(defaultCountry), step: 1 };
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return { draft: initialDraft(defaultCountry), step: 1 };
-    const parsed = JSON.parse(raw) as Partial<Draft> & { step?: number };
+    const parsed = JSON.parse(raw) as Partial<Draft> & {
+      step?: number;
+      industry?: string;
+    };
+    const country =
+      typeof parsed.country === "string" && isEnrollmentCountryCode(parsed.country)
+        ? parsed.country
+        : defaultCountry;
     const draft: Draft = {
       ...initialDraft(defaultCountry),
       ...parsed,
+      country,
+      industryIds: normalizeStoredIndustryIds(parsed.industryIds),
+      industryOther: typeof parsed.industryOther === "string" ? parsed.industryOther : "",
       attachments: [],
       courses: Array.isArray(parsed.courses)
         ? parsed.courses.map((c) => ({ ...emptyCourse(), ...c }))
@@ -184,7 +229,7 @@ function injectControlProps(
       "aria-invalid"?: boolean | "true" | "false";
     }>;
     const tag = typeof el.type === "string" ? el.type : null;
-    if (tag === "input" || tag === "select" || tag === "textarea") {
+    if (tag === "input" || tag === "select" || tag === "textarea" || tag === null) {
       return cloneElement(el, {
         id: el.props.id ?? props.id,
         "aria-invalid": props["aria-invalid"] ? true : el.props["aria-invalid"],
@@ -193,6 +238,99 @@ function injectControlProps(
     }
     return child;
   });
+}
+
+function graduationYearOptions(now = new Date()): number[] {
+  const max = now.getFullYear();
+  const min = 1950;
+  const years: number[] = [];
+  for (let y = max; y >= min; y -= 1) years.push(y);
+  return years;
+}
+
+function parseStepperNumber(value: string | number | null | undefined): number | null {
+  if (value === "" || value === null || value === undefined) return null;
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function stepDecimals(step: number): number {
+  const text = String(step);
+  const dot = text.indexOf(".");
+  return dot === -1 ? 0 : text.length - dot - 1;
+}
+
+function NumberStepper({
+  id,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  decreaseLabel,
+  increaseLabel,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
+}: {
+  id?: string;
+  value: string | number;
+  onChange: (next: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  decreaseLabel: string;
+  increaseLabel: string;
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
+}) {
+  const numeric = parseStepperNumber(value);
+  const atMin = min != null && numeric != null && numeric <= min;
+  const atMax = max != null && numeric != null && numeric >= max;
+
+  function bump(delta: number) {
+    const base = numeric ?? (delta > 0 ? (min ?? 0) : (max ?? 0));
+    let next = base + delta;
+    if (min != null) next = Math.max(min, next);
+    if (max != null) next = Math.min(max, next);
+    next = Number(next.toFixed(stepDecimals(step)));
+    onChange(String(next));
+  }
+
+  return (
+    <div className="enrollment-stepper">
+      <button
+        type="button"
+        className="enrollment-stepper__btn"
+        aria-label={decreaseLabel}
+        disabled={atMin}
+        onClick={() => bump(-step)}
+      >
+        −
+      </button>
+      <input
+        id={id}
+        className="form-input text-field w-input enrollment-stepper__input"
+        type="number"
+        inputMode="decimal"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
+      />
+      <button
+        type="button"
+        className="enrollment-stepper__btn"
+        aria-label={increaseLabel}
+        disabled={atMax}
+        onClick={() => bump(step)}
+      >
+        +
+      </button>
+    </div>
+  );
 }
 
 type EnrollmentFormProps = {
@@ -213,7 +351,8 @@ export function EnrollmentForm({
   const locale = isAppLocale(rawLocale) ? rawLocale : "uk";
   /** Codex quiz prompts exist only in uk/en — use en for other UI locales (explicit, not silent body swap). */
   const quizLocale = locale === "uk" ? "uk" : "en";
-  const defaultCountry = t("defaultCountry");
+  const defaultCountry = defaultCountryForLocale(locale);
+  const birthDateMax = useMemo(() => maxBirthDateForMinAge(ENROLLMENT_MIN_AGE), []);
   const stored = useState(() => readStoredDraft(defaultCountry))[0];
   const [step, setStep] = useState(stored.step);
   const [draft, setDraft] = useState<Draft>(stored.draft);
@@ -222,6 +361,45 @@ export function EnrollmentForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [localCaptchaToken, setLocalCaptchaToken] = useState<string | null>(turnstileToken);
   const [blockingIssues, setBlockingIssues] = useState<FormIssue[]>([]);
+  const [industryQuery, setIndustryQuery] = useState("");
+  const [industryOpen, setIndustryOpen] = useState(false);
+  const [countryQuery, setCountryQuery] = useState("");
+  const [countryOpen, setCountryOpen] = useState(false);
+  const countryBoxRef = useRef<HTMLDivElement | null>(null);
+  const industryBoxRef = useRef<HTMLDivElement | null>(null);
+  const countryOptions = useMemo(() => filterEnrollmentCountries(countryQuery), [countryQuery]);
+  const industryOptions = useMemo(() => {
+    const q = industryQuery.trim().toLowerCase();
+    if (!q) return [...ENROLLMENT_INDUSTRY_IDS];
+    return ENROLLMENT_INDUSTRY_IDS.filter((id) => industryLabel(id, locale).toLowerCase().includes(q));
+  }, [industryQuery, locale]);
+  const graduationYears = useMemo(() => graduationYearOptions(), []);
+
+  useEffect(() => {
+    if (!countryOpen && !industryOpen) return;
+    function onPointerDown(event: MouseEvent) {
+      if (!(event.target instanceof Node)) return;
+      if (countryOpen) {
+        const root = countryBoxRef.current;
+        if (root && !root.contains(event.target)) setCountryOpen(false);
+      }
+      if (industryOpen) {
+        const root = industryBoxRef.current;
+        if (root && !root.contains(event.target)) setIndustryOpen(false);
+      }
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      if (countryOpen) setCountryOpen(false);
+      if (industryOpen) setIndustryOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [countryOpen, industryOpen]);
   const [result, setResult] = useState<{
     kind: "ok" | "duplicate" | "honeypot";
     applicationPublicId?: string;
@@ -333,6 +511,46 @@ export function EnrollmentForm({
     setDraft((prev) => ({ ...prev, [key]: value }));
   }
 
+  function setFieldError(fieldId: string, message: string | null) {
+    setErrors((prev) => {
+      if (!message) {
+        if (!(fieldId in prev)) return prev;
+        const next = { ...prev };
+        delete next[fieldId];
+        return next;
+      }
+      if (prev[fieldId] === message) return prev;
+      return { ...prev, [fieldId]: message };
+    });
+  }
+
+  /** RU: Перевірка дати при втраті фокусу. EN: Validate birth date on blur. */
+  function validateBirthDateField(value: string = draft.birthDate) {
+    const birth = isBirthDateAtLeastAge(value, ENROLLMENT_MIN_AGE);
+    if (!birth.ok) {
+      setFieldError(
+        "birthDate",
+        birth.reason === "underage" ? t("errors.birthDateUnderage") : t("errors.birthDate"),
+      );
+      return false;
+    }
+    setFieldError("birthDate", null);
+    return true;
+  }
+
+  /** RU: Перевірка телефону при втраті фокусу. EN: Validate phone on blur. */
+  function validatePhoneField(
+    value: string = draft.phone,
+    country: EnrollmentCountryCode = draft.country,
+  ) {
+    if (!isValidEnrollmentPhone(value, country)) {
+      setFieldError("phone", t("errors.phone"));
+      return false;
+    }
+    setFieldError("phone", null);
+    return true;
+  }
+
   function collectStepIssues(current: number): FormIssue[] {
     const issues: FormIssue[] = [];
     const add = (fieldId: string, message: string, label: string) => {
@@ -341,14 +559,27 @@ export function EnrollmentForm({
     if (current === 1) {
       if (draft.lastName.trim().length < 2) add("lastName", t("errors.lastName"), t("fields.lastName"));
       if (draft.firstName.trim().length < 2) add("firstName", t("errors.firstName"), t("fields.firstName"));
-      if (!draft.country.trim()) add("country", t("errors.country"), t("fields.country"));
+      const birth = isBirthDateAtLeastAge(draft.birthDate, ENROLLMENT_MIN_AGE);
+      if (!birth.ok) {
+        add(
+          "birthDate",
+          birth.reason === "underage" ? t("errors.birthDateUnderage") : t("errors.birthDate"),
+          t("fields.birthDate"),
+        );
+      }
+      if (!isEnrollmentCountryCode(draft.country)) add("country", t("errors.country"), t("fields.country"));
       if (!draft.city.trim()) add("city", t("errors.city"), t("fields.city"));
-      if (!/^\+?[0-9()\-\s]{8,32}$/.test(draft.phone.trim())) add("phone", t("errors.phone"), t("fields.phone"));
+      if (!isValidEnrollmentPhone(draft.phone, draft.country)) {
+        add("phone", t("errors.phone"), t("fields.phone"));
+      }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) add("email", t("errors.email"), t("fields.email"));
     }
     if (current === 2) {
       if (!draft.jobTitle.trim()) add("jobTitle", t("errors.jobTitle"), t("fields.jobTitle"));
-      if (!draft.industry.trim()) add("industry", t("errors.industry"), t("fields.industry"));
+      if (draft.industryIds.length === 0) add("industry", t("errors.industry"), t("fields.industry"));
+      if (draft.industryIds.includes("other") && !draft.industryOther.trim()) {
+        add("industryOther", t("errors.industryOther"), t("fields.industryOther"));
+      }
       if (!draft.companySize) add("companySize", t("errors.companySize"), t("fields.companySize"));
       if (draft.oshFunctions === null) add("oshFunctions", t("errors.yesNo"), t("fields.oshFunctions"));
       if (draft.oshYears === "" || Number.isNaN(Number(draft.oshYears))) {
@@ -415,10 +646,6 @@ export function EnrollmentForm({
     return issues.length === 0;
   }
 
-  function validateStep(current: number): boolean {
-    return applyIssues(collectStepIssues(current));
-  }
-
   function validateAllSteps(): FormIssue[] {
     const all: FormIssue[] = [];
     for (let s = 1; s <= STEPS; s++) all.push(...collectStepIssues(s));
@@ -438,18 +665,56 @@ export function EnrollmentForm({
     }, 50);
   }
 
+  function scrollEnrollmentTop() {
+    window.setTimeout(() => {
+      document.getElementById("enrollment-scroll-anchor")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 50);
+  }
+
   function goNext() {
-    if (!validateStep(step)) return;
+    const issues = collectStepIssues(step);
+    if (!applyIssues(issues)) {
+      jumpToIssue(issues[0]);
+      return;
+    }
     setBlockingIssues([]);
+    setIndustryOpen(false);
+    setCountryOpen(false);
     setStep((s) => Math.min(STEPS, s + 1));
+    scrollEnrollmentTop();
   }
 
   function goBack() {
+    setIndustryOpen(false);
+    setCountryOpen(false);
     setStep((s) => Math.max(1, s - 1));
+    scrollEnrollmentTop();
+  }
+
+  function toggleIndustry(id: EnrollmentIndustryId) {
+    setDraft((prev) => {
+      const selected = prev.industryIds.includes(id);
+      const industryIds = selected
+        ? prev.industryIds.filter((x) => x !== id)
+        : [...prev.industryIds, id];
+      return {
+        ...prev,
+        industryIds,
+        industryOther: industryIds.includes("other") ? prev.industryOther : "",
+      };
+    });
   }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    await submitEnrollment();
+  }
+
+  /** RU: Подача лише з кроку 7 / кнопки «Подати»; не з «Далі». EN: Submit only from step 7 button. */
+  async function submitEnrollment() {
     if (submitting) return;
     const issues = validateAllSteps();
     if (issues.length > 0) {
@@ -477,7 +742,7 @@ export function EnrollmentForm({
         firstName: draft.firstName.trim(),
         middleName: draft.middleName.trim(),
         birthDate: draft.birthDate,
-        country: draft.country.trim(),
+        country: draft.country,
         city: draft.city.trim(),
         phone: draft.phone.trim(),
         email: draft.email.trim(),
@@ -485,7 +750,9 @@ export function EnrollmentForm({
         profileUrl: draft.profileUrl.trim(),
         jobTitle: draft.jobTitle.trim(),
         organization: draft.organization.trim(),
-        industry: draft.industry.trim(),
+        industryIds: draft.industryIds,
+        industryOther: draft.industryOther.trim(),
+        industry: formatIndustryForStorage(draft.industryIds, locale, draft.industryOther),
         companySize: draft.companySize,
         oshFunctions: draft.oshFunctions,
         totalYears: draft.totalYears === "" ? null : Number(draft.totalYears),
@@ -642,7 +909,7 @@ export function EnrollmentForm({
     : "";
 
   return (
-    <div className="enrollment-form-wrap">
+    <div className="enrollment-form-wrap" id="enrollment-scroll-anchor">
       <div className="enrollment-progress" aria-label={t("progressAria")}>
         {Array.from({ length: STEPS }, (_, i) => (
           <div
@@ -719,20 +986,118 @@ export function EnrollmentForm({
                 onChange={(e) => update("middleName", e.target.value)}
               />
             </Field>
-            <Field id="birthDate" label={t("fields.birthDate")}>
+            <Field
+              id="birthDate"
+              label={t("fields.birthDate")}
+              required
+              error={errors.birthDate}
+              hint={t("birthDateHint")}
+            >
               <input
                 className="form-input text-field w-input"
                 type="date"
+                min={BIRTH_DATE_MIN}
+                max={birthDateMax}
                 value={draft.birthDate}
-                onChange={(e) => update("birthDate", e.target.value)}
+                onChange={(e) => {
+                  update("birthDate", e.target.value);
+                  if (errors.birthDate) setFieldError("birthDate", null);
+                }}
+                onBlur={(e) => validateBirthDateField(e.target.value)}
+                required
               />
             </Field>
-            <Field id="country" label={t("fields.country")} required error={errors.country}>
-              <input
-                className="form-input text-field w-input"
-                value={draft.country}
-                onChange={(e) => update("country", e.target.value)}
-              />
+            <Field
+              id="country"
+              label={t("fields.country")}
+              required
+              error={errors.country}
+            >
+              <div className="enrollment-country" ref={countryBoxRef}>
+                <button
+                  type="button"
+                  className="enrollment-country__trigger form-input text-field"
+                  aria-expanded={countryOpen}
+                  aria-controls="enrollment-country-list"
+                  onClick={() => setCountryOpen((open) => !open)}
+                >
+                  <img
+                    className="enrollment-country__flag"
+                    src={countryFlagUrl(draft.country)}
+                    alt=""
+                    width={20}
+                    height={15}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span className="enrollment-country__name">{countryLabel(draft.country)}</span>
+                  <span className="enrollment-country__chevron" aria-hidden="true">
+                    ▾
+                  </span>
+                </button>
+                {countryOpen ? (
+                  <div className="enrollment-country__panel" id="enrollment-country-list">
+                    <input
+                      className="form-input text-field w-input enrollment-country__search"
+                      value={countryQuery}
+                      onChange={(e) => setCountryQuery(e.target.value)}
+                      placeholder={t("countrySearchPlaceholder")}
+                      autoComplete="off"
+                      autoFocus
+                      aria-label={t("countrySearchPlaceholder")}
+                    />
+                    <ul className="enrollment-country__list" role="listbox">
+                      {countryOptions.map((code) => (
+                        <li key={code}>
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={draft.country === code}
+                            className={
+                              draft.country === code
+                                ? "enrollment-country__option is-selected"
+                                : "enrollment-country__option"
+                            }
+                            onClick={() => {
+                              const nextPhone = withCountryDialPrefix(
+                                draft.phone,
+                                code,
+                                draft.country,
+                              );
+                              setDraft((prev) => ({
+                                ...prev,
+                                country: code,
+                                phone: nextPhone,
+                              }));
+                              setCountryQuery("");
+                              setCountryOpen(false);
+                              if (nextPhone !== countryDialPrefix(code)) {
+                                validatePhoneField(nextPhone, code);
+                              } else {
+                                setFieldError("phone", null);
+                              }
+                            }}
+                          >
+                            <img
+                              className="enrollment-country__flag"
+                              src={countryFlagUrl(code)}
+                              alt=""
+                              width={20}
+                              height={15}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                            <span className="enrollment-country__name">{countryLabel(code)}</span>
+                          </button>
+                        </li>
+                      ))}
+                      {countryOptions.length === 0 ? (
+                        <li className="enrollment-country__empty">{t("countryNoResults")}</li>
+                      ) : null}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
             </Field>
             <Field id="city" label={t("fields.city")} required error={errors.city}>
               <input
@@ -741,11 +1106,18 @@ export function EnrollmentForm({
                 onChange={(e) => update("city", e.target.value)}
               />
             </Field>
-            <Field id="phone" label={t("fields.phone")} required error={errors.phone} hint={t("phoneHint")}>
+            <Field id="phone" label={t("fields.phone")} required error={errors.phone}>
               <input
                 className="form-input text-field w-input"
                 value={draft.phone}
-                onChange={(e) => update("phone", e.target.value)}
+                onChange={(e) => {
+                  update("phone", e.target.value);
+                  if (errors.phone) setFieldError("phone", null);
+                }}
+                onBlur={(e) => validatePhoneField(e.target.value)}
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="+…"
               />
             </Field>
             <Field id="email" label={t("fields.email")} required error={errors.email}>
@@ -792,13 +1164,100 @@ export function EnrollmentForm({
                 onChange={(e) => update("organization", e.target.value)}
               />
             </Field>
-            <Field id="industry" label={t("fields.industry")} required error={errors.industry}>
-              <input
-                className="form-input text-field w-input"
-                value={draft.industry}
-                onChange={(e) => update("industry", e.target.value)}
-              />
+            <Field
+              id="industry"
+              label={t("fields.industry")}
+              required
+              error={errors.industry}
+              hint={t("industryHint")}
+            >
+              <div className="enrollment-industry">
+                <div className="enrollment-industry__combo" ref={industryBoxRef}>
+                  <button
+                    type="button"
+                    className="enrollment-industry__trigger form-input text-field"
+                    aria-expanded={industryOpen}
+                    aria-controls="enrollment-industry-list"
+                    onClick={() => setIndustryOpen((open) => !open)}
+                  >
+                    <span className="enrollment-industry__trigger-text">
+                      {draft.industryIds.length > 0
+                        ? t("industrySelected", { count: draft.industryIds.length })
+                        : t("industryPlaceholder")}
+                    </span>
+                    <span className="enrollment-industry__chevron" aria-hidden="true">
+                      ▾
+                    </span>
+                  </button>
+                  {industryOpen ? (
+                    <div className="enrollment-industry__panel" id="enrollment-industry-list">
+                      <input
+                        className="form-input text-field w-input enrollment-industry__search"
+                        value={industryQuery}
+                        onChange={(e) => setIndustryQuery(e.target.value)}
+                        placeholder={t("industrySearchPlaceholder")}
+                        autoComplete="off"
+                        autoFocus
+                        aria-label={t("industrySearchPlaceholder")}
+                      />
+                      <ul className="enrollment-industry__list" role="group" aria-label={t("fields.industry")}>
+                        {industryOptions.map((id) => {
+                          const checked = draft.industryIds.includes(id);
+                          const optionId = `enrollment-industry-option-${id}`;
+                          return (
+                            <li key={id}>
+                              <label className="enrollment-industry__option" htmlFor={optionId}>
+                                <input
+                                  id={optionId}
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggleIndustry(id)}
+                                />
+                                <span>{industryLabel(id, locale)}</span>
+                              </label>
+                            </li>
+                          );
+                        })}
+                        {industryOptions.length === 0 ? (
+                          <li className="enrollment-industry__empty">{t("industryNoResults")}</li>
+                        ) : null}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+                {draft.industryIds.length > 0 ? (
+                  <ul className="enrollment-industry__chips" aria-label={t("fields.industry")}>
+                    {draft.industryIds.map((id) => (
+                      <li key={id}>
+                        <button
+                          type="button"
+                          className="enrollment-industry__chip"
+                          aria-label={`${t("industryRemove")}: ${industryLabel(id, locale)}`}
+                          onClick={() => toggleIndustry(id)}
+                        >
+                          {industryLabel(id, locale)}
+                          <span aria-hidden="true"> ×</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
             </Field>
+            {draft.industryIds.includes("other") ? (
+              <Field
+                id="industryOther"
+                label={t("fields.industryOther")}
+                required
+                error={errors.industryOther}
+              >
+                <input
+                  className="form-input text-field w-input"
+                  value={draft.industryOther}
+                  onChange={(e) => update("industryOther", e.target.value)}
+                />
+              </Field>
+            ) : null}
             <Field id="companySize" label={t("fields.companySize")} required error={errors.companySize}>
               <select
                 className="form-input text-field w-select"
@@ -838,14 +1297,14 @@ export function EnrollmentForm({
               </label>
             </ChoiceGroup>
             <Field id="totalYears" label={t("fields.totalYears")}>
-              <input
-                className="form-input text-field w-input"
-                type="number"
+              <NumberStepper
+                value={draft.totalYears}
+                onChange={(next) => update("totalYears", next)}
                 min={0}
                 max={60}
                 step={0.5}
-                value={draft.totalYears}
-                onChange={(e) => update("totalYears", e.target.value)}
+                decreaseLabel={t("stepperDecrease")}
+                increaseLabel={t("stepperIncrease")}
               />
             </Field>
             <Field
@@ -855,14 +1314,14 @@ export function EnrollmentForm({
               required
               error={errors.oshYears}
             >
-              <input
-                className="form-input text-field w-input"
-                type="number"
+              <NumberStepper
+                value={draft.oshYears}
+                onChange={(next) => update("oshYears", next)}
                 min={0}
                 max={60}
                 step={0.5}
-                value={draft.oshYears}
-                onChange={(e) => update("oshYears", e.target.value)}
+                decreaseLabel={t("stepperDecrease")}
+                increaseLabel={t("stepperIncrease")}
               />
             </Field>
             <Field
@@ -958,14 +1417,18 @@ export function EnrollmentForm({
               required={Boolean(draft.educationLevel && draft.educationLevel !== "other")}
               error={errors.graduationYear}
             >
-              <input
-                className="form-input text-field w-input"
-                type="number"
-                min={1950}
-                max={new Date().getFullYear()}
+              <select
+                className="form-input text-field w-select"
                 value={draft.graduationYear}
                 onChange={(e) => update("graduationYear", e.target.value)}
-              />
+              >
+                <option value="">{t("choose")}</option>
+                {graduationYears.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </Field>
           </fieldset>
         ) : null}
@@ -1035,30 +1498,39 @@ export function EnrollmentForm({
                   />
                 </Field>
                 <Field id={`courseYear_${index}`} label={t("fields.courseYear")}>
-                  <input
-                    className="form-input text-field w-input"
-                    type="number"
-                    value={course.courseYear}
-                    onChange={(e) => {
-                      const courses = [...draft.courses];
-                      courses[index] = { ...course, courseYear: Number(e.target.value) };
-                      update("courses", courses);
-                    }}
-                  />
-                </Field>
-                <Field id={`hours_${index}`} label={t("fields.hours")}>
-                  <input
-                    className="form-input text-field w-input"
-                    type="number"
-                    value={course.hours ?? ""}
-                    onChange={(e) => {
+                  <NumberStepper
+                    value={course.courseYear || ""}
+                    onChange={(next) => {
                       const courses = [...draft.courses];
                       courses[index] = {
                         ...course,
-                        hours: e.target.value === "" ? null : Number(e.target.value),
+                        courseYear: next === "" ? 0 : Number(next),
                       };
                       update("courses", courses);
                     }}
+                    min={1950}
+                    max={new Date().getFullYear()}
+                    step={1}
+                    decreaseLabel={t("stepperDecrease")}
+                    increaseLabel={t("stepperIncrease")}
+                  />
+                </Field>
+                <Field id={`hours_${index}`} label={t("fields.hours")}>
+                  <NumberStepper
+                    value={course.hours ?? ""}
+                    onChange={(next) => {
+                      const courses = [...draft.courses];
+                      courses[index] = {
+                        ...course,
+                        hours: next === "" ? null : Number(next),
+                      };
+                      update("courses", courses);
+                    }}
+                    min={0}
+                    max={1000}
+                    step={1}
+                    decreaseLabel={t("stepperDecrease")}
+                    increaseLabel={t("stepperIncrease")}
                   />
                 </Field>
                 <Field id={`certificateNo_${index}`} label={t("fields.certificateNo")}>
@@ -1385,7 +1857,14 @@ export function EnrollmentForm({
               {t("next")}
             </button>
           ) : (
-            <button type="submit" className="btn is--primary w-button" disabled={submitting}>
+            <button
+              type="button"
+              className="btn is--primary w-button"
+              disabled={submitting}
+              onClick={() => {
+                void submitEnrollment();
+              }}
+            >
               {submitting ? t("submitting") : t("submit")}
             </button>
           )}

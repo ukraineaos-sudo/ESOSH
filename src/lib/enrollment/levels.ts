@@ -19,6 +19,14 @@ export const LEVEL_LABELS_UK: Record<LevelCode, string> = {
   community: "Учасник спільноти без підтвердженого професійного рівня",
 };
 
+export const LEVEL_LABELS_EN: Record<LevelCode, string> = {
+  diplomate: "Diplomate Expert",
+  certified: "Certified Expert",
+  accredited: "Accredited Specialist",
+  specialist: "Specialist",
+  community: "Community member without a confirmed professional level",
+};
+
 export const APPLICATION_STATUSES = [
   "new",
   "in_review",

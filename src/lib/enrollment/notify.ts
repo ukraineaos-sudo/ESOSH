@@ -1,6 +1,10 @@
 import { SITE } from "@/lib/site";
 import type { AppLocale } from "@/i18n/routing";
-import { deliverBrevoAdminNewApplication } from "./brevo";
+import {
+  deliverBrevoAdminNewApplication,
+  deliverBrevoCandidateApplicationReceived,
+  deliverBrevoCandidateStatusChanged,
+} from "./brevo";
 import { LEVEL_LABELS_UK, REVIEW_BUSINESS_DAYS, type LevelCode } from "./levels";
 
 export type EnrollmentNotifyEvent =
@@ -66,9 +70,8 @@ async function deliverEnrollmentWebhook(
 
 /**
  * RU: Доставляє подію форми вступу.
- * Адмін про нову заявку — Brevo (якщо налаштовано), інакше webhook.
- * Інші події — лише webhook (best-effort).
- * EN: Deliver enrollment notify; admin new application prefers Brevo.
+ * Адмін / кандидат — Brevo (якщо налаштовано), інакше webhook.
+ * EN: Deliver enrollment notify; Brevo first for admin/candidate, webhook fallback.
  */
 export async function deliverEnrollmentNotify(
   event: EnrollmentNotifyEvent,
@@ -81,6 +84,33 @@ export async function deliverEnrollmentNotify(
       autoLevelLabelUk: event.autoLevelLabelUk,
       applicationPublicId: event.applicationPublicId,
       adminUrl: event.adminUrl,
+    });
+    if (brevo !== "unavailable") return brevo;
+    return deliverEnrollmentWebhook(event);
+  }
+
+  if (event.type === "application_submitted" && event.to === "candidate") {
+    const brevo = await deliverBrevoCandidateApplicationReceived({
+      fullName: event.fullName,
+      email: event.email,
+      applicationPublicId: event.applicationPublicId,
+      autoLevel: event.autoLevel,
+      autoLevelLabelUk: event.autoLevelLabelUk,
+      locale: event.locale,
+    });
+    if (brevo !== "unavailable") return brevo;
+    return deliverEnrollmentWebhook(event);
+  }
+
+  if (event.type === "status_changed" && event.to === "candidate") {
+    const brevo = await deliverBrevoCandidateStatusChanged({
+      fullName: event.fullName,
+      email: event.email,
+      applicationPublicId: event.applicationPublicId,
+      status: event.status,
+      approvedLevel: event.approvedLevel,
+      message: event.message,
+      locale: event.locale,
     });
     if (brevo !== "unavailable") return brevo;
     return deliverEnrollmentWebhook(event);

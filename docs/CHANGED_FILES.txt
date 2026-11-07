@@ -489,14 +489,18 @@ src/lib/contact/brevo-contact.ts
 src/lib/contact/deliver-contact.ts
 src/lib/csv.ts
 src/lib/docs.ts
+src/lib/enrollment/age.ts
 src/lib/enrollment/brevo.ts
 src/lib/enrollment/classify.ts
+src/lib/enrollment/countries.ts
 src/lib/enrollment/files.ts
 src/lib/enrollment/ids.ts
+src/lib/enrollment/industries.ts
 src/lib/enrollment/levels.ts
 src/lib/enrollment/members.ts
 src/lib/enrollment/member-status.ts
 src/lib/enrollment/notify.ts
+src/lib/enrollment/phone.ts
 src/lib/enrollment/quiz.ts
 src/lib/enrollment/schema.ts
 src/lib/http/same-origin.ts
@@ -538,6 +542,7 @@ tests/enrollment-brevo.test.ts
 tests/enrollment-classify.test.mjs
 tests/enrollment-classify-lib.mjs
 tests/enrollment-files.test.mjs
+tests/enrollment-form-fields.test.mjs
 tests/enrollment-members.test.mjs
 tests/enrollment-member-status.test.mjs
 tests/members-excel.test.mjs
