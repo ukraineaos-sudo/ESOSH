@@ -20,11 +20,19 @@ const DEFAULT_OPTION_PREFIX: Record<QuizOptionId, string> = {
   E: "E",
 };
 
+export type TrainingQuizQuestionReview = {
+  questionId: number;
+  selected: QuizOptionId | null;
+  correct: QuizOptionId;
+  isCorrect: boolean;
+};
+
 export type TrainingQuizResult = {
   score: number;
   total: number;
   scorePercent: number;
   answers: Record<string, QuizOptionId>;
+  review?: TrainingQuizQuestionReview[];
   certificateToken?: string | null;
 } | null;
 
@@ -52,6 +60,40 @@ type Answers = Record<number, QuizOptionId | undefined>;
 
 function optionIdsForQuestion(q: PublicQuizQuestion): QuizOptionId[] {
   return QUIZ_OPTION_IDS.filter((id) => q.options[id] != null);
+}
+
+function isQuizOptionId(value: unknown): value is QuizOptionId {
+  return typeof value === "string" && (QUIZ_OPTION_IDS as readonly string[]).includes(value);
+}
+
+function parseReviewPayload(raw: unknown): TrainingQuizQuestionReview[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out: TrainingQuizQuestionReview[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") continue;
+    const row = entry as {
+      questionId?: unknown;
+      selected?: unknown;
+      correct?: unknown;
+      isCorrect?: unknown;
+    };
+    if (typeof row.questionId !== "number" || !Number.isFinite(row.questionId)) continue;
+    if (!isQuizOptionId(row.correct)) continue;
+    if (typeof row.isCorrect !== "boolean") continue;
+    const selected =
+      row.selected == null || row.selected === ""
+        ? null
+        : isQuizOptionId(row.selected)
+          ? row.selected
+          : null;
+    out.push({
+      questionId: row.questionId,
+      selected,
+      correct: row.correct,
+      isCorrect: row.isCorrect,
+    });
+  }
+  return out.length > 0 ? out : null;
 }
 
 /** RU: Квіз 3–5 варіантів; оцінка на сервері. EN: Quiz with server-side scoring. */
@@ -87,6 +129,7 @@ export function TrainingQuiz({
         }
       : null,
   );
+  const [review, setReview] = useState<TrainingQuizQuestionReview[] | null>(null);
   const optionPrefix = { ...DEFAULT_OPTION_PREFIX, ...ui.optionPrefix };
   const onResultChangeRef = useRef(onResultChange);
   onResultChangeRef.current = onResultChange;
@@ -191,6 +234,7 @@ export function TrainingQuiz({
         score?: number;
         total?: number;
         scorePercent?: number;
+        review?: unknown;
         certificateToken?: string | null;
         retryAfterSec?: number;
       } = {};
@@ -229,17 +273,20 @@ export function TrainingQuiz({
         startCooldown(ERROR_COOLDOWN_SEC);
         return;
       }
+      const nextReview = parseReviewPayload(data.review);
       setResults({
         score: data.score,
         total: data.total,
         scorePercent: typeof data.scorePercent === "number" ? data.scorePercent : 0,
       });
+      setReview(nextReview);
       setSubmitted(true);
       emitResult({
         score: data.score,
         total: data.total,
         scorePercent: typeof data.scorePercent === "number" ? data.scorePercent : 0,
         answers: payloadAnswers,
+        review: nextReview ?? undefined,
         certificateToken: data.certificateToken,
       });
     } catch {
@@ -264,6 +311,7 @@ export function TrainingQuiz({
       cooldownTimerRef.current = null;
     }
     setResults(null);
+    setReview(null);
     emitResult(null);
   }
 
@@ -326,8 +374,15 @@ export function TrainingQuiz({
           const selected = answers[q.id];
           const questionText = pickQuizText(q.question, locale);
           const optionIds = optionIdsForQuestion(q);
+          const itemReview = review?.find((row) => row.questionId === q.id) ?? null;
+          const itemClass = itemReview
+            ? `training-quiz__item${itemReview.isCorrect ? " is-correct" : " is-wrong"}`
+            : "training-quiz__item";
+          const feedbackLabel = itemReview
+            ? pickLocalized(itemReview.isCorrect ? ui.correctLabel : ui.wrongLabel, locale)
+            : null;
           return (
-            <li key={q.id} className="training-quiz__item">
+            <li key={q.id} className={itemClass}>
               <p className="training-quiz__question regular-m">{questionText}</p>
               <div className="training-quiz__options" role="radiogroup" aria-label={questionText}>
                 {optionIds.map((optionId) => {
@@ -335,18 +390,25 @@ export function TrainingQuiz({
                   if (!optionMap) return null;
                   const optionText = pickQuizText(optionMap, locale);
                   const id = `q${q.id}-${optionId}`;
+                  const optionClass = [
+                    "training-quiz__option",
+                    itemReview && optionId === itemReview.correct ? "is-key" : null,
+                    itemReview &&
+                    !itemReview.isCorrect &&
+                    optionId === itemReview.selected
+                      ? "is-picked-wrong"
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
                   return (
-                    <label
-                      key={optionId}
-                      className="training-quiz__option"
-                      htmlFor={id}
-                    >
+                    <label key={optionId} className={optionClass} htmlFor={id}>
                       <input
                         id={id}
                         type="radio"
                         name={`q-${moduleId}-${q.id}`}
                         value={optionId}
-                        checked={selected === optionId}
+                        checked={selected === optionId || itemReview?.selected === optionId}
                         disabled={locked || submitted || submitting}
                         onChange={() => onSelect(q.id, optionId)}
                       />
@@ -358,6 +420,14 @@ export function TrainingQuiz({
                   );
                 })}
               </div>
+              {feedbackLabel ? (
+                <p
+                  className={`training-quiz__feedback regular-s${itemReview?.isCorrect ? " is-correct" : " is-wrong"}`}
+                  role="status"
+                >
+                  {feedbackLabel}
+                </p>
+              ) : null}
             </li>
           );
         })}

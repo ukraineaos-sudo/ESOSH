@@ -548,6 +548,7 @@ tests/enrollment-member-status.test.mjs
 tests/members-excel.test.mjs
 tests/members-import.test.mjs
 tests/module-attempt-budget.test.mjs
+tests/training-score-review.test.mjs
 tests/rich-text-links.test.mjs
 tests/security-hygiene.test.mjs
 tests/seo-host.test.mjs

@@ -32,15 +32,24 @@ export function getTrainingBySlug(
   return training;
 }
 
+export type ModuleQuestionReview = {
+  questionId: number;
+  selected: string | null;
+  correct: string;
+  isCorrect: boolean;
+};
+
 export type ModuleScoreResult = {
   score: number;
   total: number;
   scorePercent: number;
+  /** Per-question review for post-submit feedback (correct keys only after scoring). */
+  review: ModuleQuestionReview[];
 };
 
 /**
- * RU: Оцінка модуля на сервері. Повертає лише агрегат (без відповідності питання→правильність).
- * EN: Score one module server-side. Aggregate only — no per-question correctness map.
+ * RU: Оцінка модуля на сервері + розбір помилок після здачі.
+ * EN: Score one module server-side and return per-question review after submit.
  */
 export function scoreTrainingModule(
   slug: string,
@@ -53,13 +62,22 @@ export function scoreTrainingModule(
   if (!key) return null;
 
   let score = 0;
+  const review: ModuleQuestionReview[] = [];
   for (const [id, correct] of key) {
-    const raw = answers[String(id)] ?? answers[id as unknown as string];
-    if (raw === correct) score += 1;
+    const raw = answers[String(id)] ?? answers[id as unknown as string] ?? null;
+    const selected = typeof raw === "string" && raw.length > 0 ? raw : null;
+    const isCorrect = selected === correct;
+    if (isCorrect) score += 1;
+    review.push({
+      questionId: id,
+      selected,
+      correct,
+      isCorrect,
+    });
   }
   const total = key.size;
   const scorePercent = total > 0 ? (score / total) * 100 : 0;
-  return { score, total, scorePercent };
+  return { score, total, scorePercent, review };
 }
 
 /** RU: Сумарний бал курсу. EN: Overall course score from module answers. */

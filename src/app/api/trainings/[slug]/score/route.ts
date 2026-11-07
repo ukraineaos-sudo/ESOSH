@@ -146,12 +146,13 @@ export async function POST(request: Request, ctx: Ctx) {
     attemptsRemaining,
   });
 
-  // Лише агрегат модуля: без мапи «питання → правильність» і без ключів відповідей.
+  // Агрегат + розбір після здачі (де помилки / правильний варіант).
   return NextResponse.json({
     ok: true,
     score: effective.score,
     total: effective.total,
     scorePercent: effective.scorePercent,
+    review: result.review,
     certificateToken,
     attemptsRemaining,
   });
